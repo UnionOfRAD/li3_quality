@@ -8,17 +8,16 @@
 
 namespace li3_quality\test\rules;
 
-class HasNoEOLatEOF extends \li3_quality\test\Rule {
+class EndsWithCloseTag extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
-		$message = "EOL at EOF";
+		$message = "File does not end with ?>";
 		$lines =& $testable->lines();
-		$lastLine = trim($lines[count($lines)-1]);
 		
-		if(empty($lastLine)) {
+		if($lines[count($lines)-1] != "?>") {
 			$this->addViolation(array(
 				'message' => $message,
-				'line' => count($lines)
+				'line' => 1
 			));
 		}
 	}
