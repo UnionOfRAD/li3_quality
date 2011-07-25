@@ -8,6 +8,9 @@
 
 namespace li3_quality\extensions\test\filter;
 
+use li3_quality\test\Rules;
+use li3_quality\test\Testable;
+
 /**
  * 
  */
@@ -17,7 +20,7 @@ class Syntax extends \lithium\test\Filter {
 	 *
 	 */
 	public static function apply($report, $tests, array $options = array()) {
-		return array();
+		
 	}
 
 }
