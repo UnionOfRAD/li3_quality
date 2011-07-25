@@ -7,7 +7,7 @@
  */
 namespace li3_quality\test;
 
-class Rule extends \lithium\core\Object {
+abstract class Rule extends \lithium\core\Object {
 
 	/**
 	 *
@@ -22,18 +22,12 @@ class Rule extends \lithium\core\Object {
 	/**
 	 *
 	 */
-	public function __construct($callable, $options = array()) {
-		$this->_callable = $callable;
-	}
+	public function __construct($options = array()) {}
 
 	/**
 	 *
 	 */
-	public function apply($testable) {
-		$callable = $this->_callable;
-		$result = $callable($this, $testable);
-		return $result;
-	}
+	abstract public function apply($testable);
 	
 	/**
 	 *

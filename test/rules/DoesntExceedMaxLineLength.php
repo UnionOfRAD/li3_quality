@@ -8,18 +8,20 @@
 
 namespace li3_quality\test\rules;
 
-class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
+class DoesntExceedMaxLineLength extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
-		$message = "Trailing whitespace found";
+		$message = "Maximum line lenth exceeded";
+		$maxLength = 100;
+		$tabWidth  = 3;
 		
 		foreach($testable->lines() as $i => $line) {
-			$lineLength = strlen($line);
-			if ($lineLength != strlen(rtrim($line))) {
+			$tabBounty = substr_count($line, "\t") * $tabWidth;
+			if(($length = $tabBounty + strlen($line)) > 100) {
 				$this->addViolation(array(
 					'message' => $message,
-					'line' => $i+1,
-					'position' => $lineLength
+					'line' => $i+1, 
+					'position' => $length
 				));
 			}
 		}

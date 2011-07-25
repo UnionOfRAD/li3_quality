@@ -5,21 +5,19 @@
  * @copyright     Copyright 2011, Union of RAD (http://union-of-rad.org)
  * @license       http://opensource.org/licenses/bsd-license.php The BSD License
  */
-
 namespace li3_quality\test\rules;
 
-class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
+class HasNoCarriageReturn extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
-		$message = "Trailing whitespace found";
+		$message = "Carriage Return character found";
 		
 		foreach($testable->lines() as $i => $line) {
-			$lineLength = strlen($line);
-			if ($lineLength != strlen(rtrim($line))) {
+			if(($pos = strpos($line, "\r")) !== false) {
 				$this->addViolation(array(
 					'message' => $message,
 					'line' => $i+1,
-					'position' => $lineLength
+					'position' => $pos
 				));
 			}
 		}

@@ -7,6 +7,7 @@
  */
 namespace li3_quality\test;
 
+use lithium\core\Libraries;
 use li3_quality\test\Rule;
 
 class Rules extends \lithium\core\StaticObject {
@@ -15,12 +16,23 @@ class Rules extends \lithium\core\StaticObject {
 	 *
 	 */
 	protected static $_rules = array();
+	
+	/**
+	 *
+	 */
+	public static function __init() {
+		$rulePaths = Libraries::locate('rules');
+		foreach($rulePaths as $rulePath) {
+			$rule = new $rulePath();
+			static::add($rule);
+		}
+	}
 
 	/**
 	 *
 	 */
-	public function add($closure, $options = array()) {
-		static::$_rules[] = new Rule($closure, $options);
+	public static function add($rule, $options = array()) {
+		static::$_rules[] = $rule;
 	}
 
 	/**
