@@ -15,7 +15,8 @@ class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 		'T_ENDFOREACH', 'T_ENDIF',
 		'T_ENDSWITCH', 'T_ENDWHILE',
 		'T_PRINT', 'T_GOTO', 
-		'T_EVAL', 'T_GLOBAL'
+		'T_EVAL', 'T_GLOBAL',
+		'T_VAR', 'T_AT'
 	);
 	
 	public function apply($testable) {
