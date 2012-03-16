@@ -17,7 +17,7 @@ class EndsWithCloseTag extends \li3_quality\test\Rule {
 		if($lines[count($lines)-1] != "?>") {
 			$this->addViolation(array(
 				'message' => $message,
-				'line' => 1
+				'line' => count($lines)-1
 			));
 		}
 	}
