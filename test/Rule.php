@@ -56,6 +56,13 @@ abstract class Rule extends \lithium\core\Object {
 	public function reset() {
 		$this->_violations = array();
 	}
+
+	/**
+	 *
+	 */
+	public function enabled() {
+		return true;
+	}
 	
 }
 
