@@ -11,7 +11,7 @@ namespace li3_quality\test\rules;
 class DoesntExceedMaxLineLength extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
-		$message = "Maximum line lenth exceeded";
+		$message = "Maximum line length exceeded";
 		$maxLength = 100;
 		$tabWidth  = 3;
 		
