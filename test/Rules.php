@@ -41,14 +41,16 @@ class Rules extends \lithium\core\StaticObject {
 	public static function apply($testable) {
 		$violations = array();
 		$success = true;
+
 		foreach(static::$_rules as $rule) {
 			$rule->apply($testable);
 			if(!$rule->success()) {
 				$success = false;
-				$violations += $rule->violations();
+				$violations = array_merge($violations, $rule->violations());
 			}
 			$rule->reset();
 		}
+
 		return compact('violations', 'success');
 	}
 
