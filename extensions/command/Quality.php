@@ -38,7 +38,7 @@ class Quality extends \lithium\console\Command {
 		}
 
 		$this->out("Performing ". count(Rules::get()) . 
-				   " checks on ". count($testables) . " classes.");
+				   " rules on ". count($testables) . " classes.");
 		
 		foreach($testables as $count => $path) {
 			$result = Rules::apply(new Testable(compact('path')));
