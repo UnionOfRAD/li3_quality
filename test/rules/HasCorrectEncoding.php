@@ -12,9 +12,9 @@ class HasCorrectEncoding extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
 		$message = "File is not encoded as UTF-8";
-		
+
 		if(mb_detect_encoding($testable->source(), 'UTF-8', true) != 'UTF-8') {
-			$this->addViolation(compact('message'));	
+			$this->addViolation(compact('message'));
 		}
 	}
 

@@ -12,7 +12,7 @@ use li3_quality\test\Rules;
 use li3_quality\test\Testable;
 
 /**
- * 
+ *
  */
 class Syntax extends \lithium\test\Filter {
 
@@ -20,16 +20,16 @@ class Syntax extends \lithium\test\Filter {
 	 *
 	 */
 	public static function apply($report, $tests, array $options = array()) {
-		
+
 		foreach ($tests->invoke('subject') as $class) {
 			$report->collect(__CLASS__, array(
 				$class => Rules::apply(new Testable(array('path' => $class)))
 			));
 		}
-		
+
 		return $tests;
 	}
-	
+
 	/**
 	 *
 	 */

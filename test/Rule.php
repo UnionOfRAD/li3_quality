@@ -18,7 +18,7 @@ abstract class Rule extends \lithium\core\Object {
 	 * Contains the current violations.
 	 */
 	protected $_violations = array();
-	
+
 	/**
 	 *
 	 */
@@ -28,7 +28,7 @@ abstract class Rule extends \lithium\core\Object {
 	 *
 	 */
 	abstract public function apply($testable);
-	
+
 	/**
 	 *
 	 */
@@ -63,7 +63,7 @@ abstract class Rule extends \lithium\core\Object {
 	public function enabled() {
 		return true;
 	}
-	
+
 }
 
 ?>

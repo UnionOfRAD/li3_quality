@@ -31,7 +31,8 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 	}
 
 	protected function _checkCamelBack($lookahead) {
-		if($lookahead['name'] == 'T_STRING' && !in_array($lookahead['content'], $this->_magicMethods)) {
+		$isMagic = in_array($lookahead['content'], $this->_magicMethods);
+		if($lookahead['name'] == 'T_STRING' && !$isMagic) {
 			$name = preg_replace('/^_+/', '', $lookahead['content']);
 			if($name != Inflector::camelize($name, false)) {
 				$this->addViolation(array(

@@ -22,7 +22,8 @@ class HasCorrectVariableNames extends \li3_quality\test\Rule {
 		$tokens = $testable->tokens();
 
 		foreach($tokens as $token)  {
-			if($token['name'] == 'T_VARIABLE' && !in_array($token['content'], $this->_superglobals)) {
+			$isSuperglobal = in_array($token['content'], $this->_superglobals);
+			if($token['name'] == 'T_VARIABLE' && !$isSuperglobal) {
 				$name = preg_replace('/(\$_?|_+$)/', '', $token['content']);
 				if($name != Inflector::camelize($name, false)) {
 					$this->addViolation(array(

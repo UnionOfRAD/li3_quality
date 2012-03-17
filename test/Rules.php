@@ -16,7 +16,7 @@ class Rules extends \lithium\core\StaticObject {
 	 *
 	 */
 	protected static $_rules = array();
-	
+
 	/**
 	 *
 	 */

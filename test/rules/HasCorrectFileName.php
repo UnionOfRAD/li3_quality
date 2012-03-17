@@ -14,7 +14,7 @@ class HasCorrectFileName extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
 		$message = "File is not in CamelCase style";
-		
+
 		$pathinfo = pathinfo($testable->config('path'));
 
 		if($pathinfo['extension'] != 'php') {

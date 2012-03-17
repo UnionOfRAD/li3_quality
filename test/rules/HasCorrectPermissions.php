@@ -13,7 +13,7 @@ class HasCorrectPermissions extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$message = "File is executable";
 		if(is_executable($testable->config('path'))) {
-				$this->addViolation(compact('message'));		
+				$this->addViolation(compact('message'));
 		}
 	}
 

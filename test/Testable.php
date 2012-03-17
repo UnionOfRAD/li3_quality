@@ -12,27 +12,27 @@ use lithium\core\Libraries;
 use lithium\analysis\Parser;
 
 class Testable extends \lithium\core\Object {
-	
+
 	/**
 	 * The source code of the testable class.
 	 */
 	protected $_source = null;
-	
+
 	/**
 	 * Contains the source code as an array for each line.
 	 */
 	protected $_lines = null;
-	
+
 	/**
 	 * Contains the class tokens.
 	 */
 	protected $_tokens = null;
-	
+
 	/**
 	 * Contains the config of the testable class.
 	 */
 	protected $_config = array();
-	
+
 	/**
 	 * Locates the file and reads its source code.
 	 */
@@ -42,7 +42,7 @@ class Testable extends \lithium\core\Object {
 		$this->_config['path'] = $path;
 		$this->_source = file_get_contents($path);
 	}
-	
+
 	/**
 	 * Config accessor method.
 	 */
@@ -62,7 +62,7 @@ class Testable extends \lithium\core\Object {
 
 	/**
 	 * Accessor method for the tokens.
-	 * 
+	 *
 	 * It only tokenizes the file when the tokens are actually needed,
 	 * which increases performance in cases where you only need to
 	 * apply regex checks on the file. The result is cached afterwards.
@@ -80,10 +80,10 @@ class Testable extends \lithium\core\Object {
 		}
 		return $this->_tokens;
 	}
-	
+
 	/**
 	 * Accessor method for source lines.
-	 * 
+	 *
 	 * It returns each line of the source file in an array.
 	 */
 	public function lines($line = null) {
@@ -95,7 +95,7 @@ class Testable extends \lithium\core\Object {
 		}
 		return $this->_lines;
 	}
-	
+
 }
 
 ?>

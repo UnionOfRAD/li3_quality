@@ -12,7 +12,7 @@ class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
 		$message = "Trailing whitespace found";
-		
+
 		foreach($testable->lines() as $i => $line) {
 			$lineLength = strlen($line);
 			if ($lineLength != strlen(rtrim($line))) {

@@ -20,7 +20,7 @@ class Quality extends \lithium\console\Command {
 	 * The namespace to run the quality checks on.
 	 */
 	public $namespace = "app";
-	
+
 	/**
 	 * If `--silent` is used, only failures are shown.
 	 */
@@ -37,9 +37,9 @@ class Quality extends \lithium\console\Command {
 			$this->stop(0, "Could not find any tests in \"$this->namespace\"");
 		}
 
-		$this->out("Performing ". count(Rules::get()) . 
+		$this->out("Performing ". count(Rules::get()) .
 				   " rules on ". count($testables) . " classes.");
-		
+
 		foreach($testables as $count => $path) {
 			$result = Rules::apply(new Testable(compact('path')));
 			if($result['success'] && !$this->silent) {
@@ -53,8 +53,8 @@ class Quality extends \lithium\console\Command {
 				);
 				foreach($result['violations'] as $violation) {
 					$defaults = array(
-						'line' => '-', 
-						'position' => '-', 
+						'line' => '-',
+						'position' => '-',
 						'message' => 'Unnamed Violation'
 					);
 					$params = $violation + $defaults;
@@ -65,7 +65,7 @@ class Quality extends \lithium\console\Command {
 			}
 		}
 	}
-	
+
 }
 
 ?>

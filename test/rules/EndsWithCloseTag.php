@@ -13,7 +13,7 @@ class EndsWithCloseTag extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$message = "File does not end with ?>";
 		$lines =& $testable->lines();
-		
+
 		if($lines[count($lines)-1] != "?>") {
 			$this->addViolation(array(
 				'message' => $message,
