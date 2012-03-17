@@ -23,7 +23,6 @@ class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 		$tokens = $testable->tokens();
 		foreach($tokens as $token) {
 			if(in_array($token['name'], $this->_forbidden)) {
-				var_dump($tokens);
 				$token = strtolower(substr($token['name'], 2));
 				$this->addViolation(array(
 					'message' => 'Forbidden "' . $token . '" statement found',

@@ -25,20 +25,22 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 
 		foreach($tokens as $key => $token)  {
 			if($token['name'] == 'T_FUNCTION') {
-				$lookahead = $tokens[$key+2];
-				if($lookahead['name'] == 'T_STRING' && !in_array($lookahead['content'], $this->_magicMethods)) {
-					$name = preg_replace('/^_+/', '', $lookahead['content']);
-					if($name != Inflector::camelize($name, false)) {
-						$this->addViolation(array(
-							'message' =>  'Function "' . $name . '" is not in camelBack style',
-							'line' => $lookahead['line']
-						));
-					}
-				}
+				$this->_checkCamelBack($tokens[$key+2]);
 			}
 		}
 	}
 
+	protected function _checkCamelBack($lookahead) {
+		if($lookahead['name'] == 'T_STRING' && !in_array($lookahead['content'], $this->_magicMethods)) {
+			$name = preg_replace('/^_+/', '', $lookahead['content']);
+			if($name != Inflector::camelize($name, false)) {
+				$this->addViolation(array(
+					'message' =>  'Function "' . $name . '" is not in camelBack style',
+					'line' => $lookahead['line']
+				));
+			}
+		}
+	}
 }
 
 ?>

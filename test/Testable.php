@@ -7,6 +7,7 @@
  */
 namespace li3_quality\test;
 
+use SplFixedArray;
 use lithium\core\Libraries;
 use lithium\analysis\Parser;
 
@@ -62,13 +63,20 @@ class Testable extends \lithium\core\Object {
 	/**
 	 * Accessor method for the tokens.
 	 * 
-	 * It only tokenizes the file when the tokens are actually needed, 
-	 * which increases performance in cases where you only need to 
+	 * It only tokenizes the file when the tokens are actually needed,
+	 * which increases performance in cases where you only need to
 	 * apply regex checks on the file. The result is cached afterwards.
+	 *
+	 * The PHP version check is in there, because on 5.3.6 (and maybe until 5.3.9),
+	 * when using an SplFixed array (which is faster), the app segfaults.
 	 */
 	public function tokens() {
 		if($this->_tokens === null) {
-			$this->_tokens = Parser::tokenize($this->source());
+			if (version_compare(PHP_VERSION, '5.3.10') >= 0) {
+				$this->_tokens = SplFixedArray::fromArray(Parser::tokenize($this->source()));
+			} else {
+				$this->_tokens = Parser::tokenize($this->source());
+			}
 		}
 		return $this->_tokens;
 	}
@@ -78,9 +86,12 @@ class Testable extends \lithium\core\Object {
 	 * 
 	 * It returns each line of the source file in an array.
 	 */
-	public function lines() {
+	public function lines($line = null) {
 		if($this->_lines === null) {
 			$this->_lines = explode(PHP_EOL, $this->source());
+		}
+		if($line) {
+			return $this->_lines[++$line];
 		}
 		return $this->_lines;
 	}
