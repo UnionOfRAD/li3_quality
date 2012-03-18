@@ -11,12 +11,10 @@ namespace li3_quality\test\rules;
 class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 
 	protected $_forbidden = array(
-		'T_ENDDECLARE', 'T_ENDFOR',
-		'T_ENDFOREACH', 'T_ENDIF',
-		'T_ENDSWITCH', 'T_ENDWHILE',
-		'T_PRINT', 'T_GOTO',
-		'T_EVAL', 'T_GLOBAL',
-		'T_VAR', 'T_AT'
+		'T_ENDDECLARE', 'T_ENDFOR', 'T_ENDFOREACH',
+		'T_ENDIF', 'T_ENDSWITCH', 'T_ENDWHILE',
+		'T_PRINT', 'T_GOTO', 'T_EVAL',
+		'T_GLOBAL', 'T_VAR', 'T_AT'
 	);
 
 	public function apply($testable) {
