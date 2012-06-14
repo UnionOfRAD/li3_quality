@@ -7,10 +7,10 @@ Installation
 Clone the repository in your libraries path and then add this line to the `config/bootstrap/libraries.php` file:
 
 ```php
-	/**
-	 * Add some plugins:
-	 */
-	Libraries::add('li3_quality');
+/**
+ * Add some plugins:
+ */
+Libraries::add('li3_quality');
 ```
 
 Usage
@@ -18,75 +18,75 @@ Usage
 In your application directory, you now have the commands available on the console:
 
 ```bash
-	$ li3 quality
-	Lithium console started in the development environment. Use the --env=environmet key to alter this.
-	USAGE
-		li3 quality syntax
-	DESCRIPTION
-		The Quality command helps you to run static code analysis on your codebase.
-	OPTIONS
-		syntax
-			Checks the syntax of your class files through static code analysis.
-		--namespace=<>
-			The namespace to run the quality checks on.
-		--silent=<>
-			If `--silent` is used, only failures are shown.
+$ li3 quality
+Lithium console started in the development environment. Use the --env=environmet key to alter this.
+USAGE
+	li3 quality syntax
+DESCRIPTION
+	The Quality command helps you to run static code analysis on your codebase.
+OPTIONS
+	syntax
+		Checks the syntax of your class files through static code analysis.
+	--namespace=<>
+		The namespace to run the quality checks on.
+	--silent=<>
+		If `--silent` is used, only failures are shown.
 ```
 
 If you don't supply any further parameter, it checks the syntax of your `app` directory against the Lithium ruleset:
 
 ```bash
-	$ li3 quality syntax
-	--------------------
-	Lithium Syntax Check
-	--------------------
-	Performing 16 rules on 6 classes.
-	[FAIL] app\models\Authors
-	Line    Position        Violation
-	----    --------        ---------
-	7       1               Trailing whitespace found
-	[OK] app\models\Groups
-	[OK] app\models\Posts
-	[FAIL] app\controllers\HelloWorldController
-	Line    Position        Violation
-	----    --------        ---------
-	17      -               Function "to_string" is not in camelBack style
-	21      -               Function "to_json" is not in camelBack style
-	24      1               Trailing whitespace found
-	[FAIL] app\controllers\PagesController
-	Line    Position        Violation
-	----    --------        ---------
-	32      1               Trailing whitespace found
-	34      1               Trailing whitespace found
-	28      -               Protected Method "view" does not start with "_"
-	33      -               Protected Method "foobar" does not start with "_"
+$ li3 quality syntax
+--------------------
+Lithium Syntax Check
+--------------------
+Performing 16 rules on 6 classes.
+[FAIL] app\models\Authors
+Line    Position        Violation
+----    --------        ---------
+7       1               Trailing whitespace found
+[OK] app\models\Groups
+[OK] app\models\Posts
+[FAIL] app\controllers\HelloWorldController
+Line    Position        Violation
+----    --------        ---------
+17      -               Function "to_string" is not in camelBack style
+21      -               Function "to_json" is not in camelBack style
+24      1               Trailing whitespace found
+[FAIL] app\controllers\PagesController
+Line    Position        Violation
+----    --------        ---------
+32      1               Trailing whitespace found
+34      1               Trailing whitespace found
+28      -               Protected Method "view" does not start with "_"
+33      -               Protected Method "foobar" does not start with "_"
 ```
 
 If you have lots of fils to check (for example if you test against the lithium core), you can pass the `--silent` option to only show errors:
 
 ```bash
-	$ li3 quality syntax --silent --namespace=lithium
-	--------------------
-	Lithium Syntax Check
-	--------------------
-	Performing 16 rules on 375 classes.
-	[FAIL] lithium\tests\cases\net\http\RouteTest
-	Line    Position        Violation
-	----    --------        ---------
-	383     103             Maximum line length exceeded
-	[FAIL] lithium\tests\cases\console\command\LibraryTest
-	Line    Position        Violation
-	----    --------        ---------
-	241     101             Maximum line length exceeded
-	[FAIL] lithium\test\Unit
-	Line    Position        Violation
-	----    --------        ---------
-	1017    102             Maximum line length exceeded
-	[FAIL] lithium\data\Entity
-	Line    Position        Violation
-	----    --------        ---------
-	379     111             Maximum line length exceeded
-	381     110             Maximum line length exceeded
+$ li3 quality syntax --silent --namespace=lithium
+--------------------
+Lithium Syntax Check
+--------------------
+Performing 16 rules on 375 classes.
+[FAIL] lithium\tests\cases\net\http\RouteTest
+Line    Position        Violation
+----    --------        ---------
+383     103             Maximum line length exceeded
+[FAIL] lithium\tests\cases\console\command\LibraryTest
+Line    Position        Violation
+----    --------        ---------
+241     101             Maximum line length exceeded
+[FAIL] lithium\test\Unit
+Line    Position        Violation
+----    --------        ---------
+1017    102             Maximum line length exceeded
+[FAIL] lithium\data\Entity
+Line    Position        Violation
+----    --------        ---------
+379     111             Maximum line length exceeded
+381     110             Maximum line length exceeded
 ```
 
 If you open the test dashboard (under `/test` in your browser), you can should have an additional `Syntax` button to check the files directly in your browser.
