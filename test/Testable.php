@@ -96,7 +96,7 @@ class Testable extends \lithium\core\Object {
 				return "\n";
 			}
 		};
-		
+
 		if($this->_lines === null) {
 			$this->_lines = explode($lineEnding($this->source()), $this->source());
 		}
