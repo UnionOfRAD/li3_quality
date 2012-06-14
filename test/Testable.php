@@ -87,8 +87,18 @@ class Testable extends \lithium\core\Object {
 	 * It returns each line of the source file in an array.
 	 */
 	public function lines($line = null) {
+		$lineEnding = function($source) {
+			if(strpos($source, "\r\n") !== false) {
+				return "\r\n";
+			} elseif(strpos($source, "\r") !== false) {
+				return "\r";
+			} else {
+				return "\n";
+			}
+		};
+		
 		if($this->_lines === null) {
-			$this->_lines = explode(PHP_EOL, $this->source());
+			$this->_lines = explode($lineEnding($this->source()), $this->source());
 		}
 		if($line) {
 			return $this->_lines[++$line];
