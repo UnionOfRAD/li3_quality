@@ -70,13 +70,13 @@ class Quality extends \lithium\console\Command {
 	 */
 	public function documented() {
 		$this->header('Lithium Documentation Check');
-		
+
 		$testables = $this->_testables();
-		
+
 		$this->out("Checking documentation on " . count($testables) . " classes.");
-		
+
 		foreach($testables as $count => $path) {
-			// 
+			//
 		}
 	}
 
@@ -87,14 +87,14 @@ class Quality extends \lithium\console\Command {
 		$this->header('Lithium Code Coverage');
 
 		$testables = $this->_testables();
-		
+
 		$this->out("Checking coverage on " . count($testables) . " classes.");
-		
+
 		foreach($testables as $count => $path) {
-			// 
+			//
 		}
 	}
-	
+
 	/**
 	 * Returns a list of testable classes according to the given namespace.
 	 */
