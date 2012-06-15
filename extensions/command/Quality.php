@@ -2,12 +2,15 @@
 /**
  * Lithium: the most rad php framework
  *
- * @copyright     Copyright 2011, Union of RAD (http://union-of-rad.org)
+ * @copyright     Copyright 2012, Union of RAD (http://union-of-rad.org)
  * @license       http://opensource.org/licenses/bsd-license.php The BSD License
  */
+
 namespace li3_quality\extensions\command;
 
 use lithium\core\Libraries;
+use lithium\analysis\Inspector;
+
 use li3_quality\test\Rules;
 use li3_quality\test\Testable;
 
@@ -32,11 +35,7 @@ class Quality extends \lithium\console\Command {
 	public function syntax() {
 		$this->header('Lithium Syntax Check');
 
-		$testables = Libraries::find($this->namespace, array('recursive' => true));
-		if(!$testables) {
-			$this->stop(0, "Could not find any tests in \"$this->namespace\"");
-		}
-
+		$testables = $this->_testables();
 		$this->out("Performing ". count(Rules::get()) .
 				   " rules on ". count($testables) . " classes.");
 
@@ -63,6 +62,33 @@ class Quality extends \lithium\console\Command {
 				}
 				$this->columns($output, array('style' => 'red'));
 			}
+		}
+	}
+
+	/**
+	 * Checks for undocumented classes or methods inside the namespace.
+	 */
+	public function documented() {
+		$this->header('Lithium Documentation Check');
+		
+		$testables = $this->_testables();
+		
+		$this->out("Checking documentation on " . count($testables) . " classes.");
+		
+		foreach($testables as $count => $path) {
+			// 
+		}
+	}
+	
+	/**
+	 * Returns a list of testable classes according to the given namespace.
+	 */
+	protected function _testables() {
+		$testables = Libraries::find($this->namespace, array('recursive' => true));
+		if(!$testables) {
+			$this->stop(0, "Could not find any tests in \"$this->namespace\"");
+		} else {
+			return $testables;
 		}
 	}
 

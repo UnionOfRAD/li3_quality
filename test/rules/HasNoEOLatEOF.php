@@ -12,7 +12,7 @@ class HasNoEOLatEOF extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
 		$message = "EOL at EOF";
-		$lines =& $testable->lines();
+		$lines = $testable->lines();
 		$lastLine = trim($lines[count($lines)-1]);
 
 		if(empty($lastLine)) {

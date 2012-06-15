@@ -12,7 +12,7 @@ class HasTabsAsIndentation extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
 		$message = "Uses spaces instead of tabs";
-		$lines =& $testable->lines();
+		$lines = $testable->lines();
 
 		foreach($lines as $number => $line) {
 			if(preg_match('/^ +[^*]/', $line)) {
