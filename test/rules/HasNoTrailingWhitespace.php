@@ -8,18 +8,22 @@
 
 namespace li3_quality\test\rules;
 
+use lithium\g11n\Multibyte;
+
 class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
 		$message = "Trailing whitespace found";
 
 		foreach($testable->lines() as $i => $line) {
-			$lineLength = strlen($line);
-			if ($lineLength != strlen(rtrim($line))) {
+			$name = 'li3_quality';
+			$length = Multibyte::strlen($line, compact('name'));
+			$lengthTrimmed = Multibyte::strlen(rtrim($line), compact('name'));
+			if ($length != $lengthTrimmed) {
 				$this->addViolation(array(
 					'message' => $message,
 					'line' => $i+1,
-					'position' => $lineLength
+					'position' => $length
 				));
 			}
 		}
