@@ -8,6 +8,8 @@
 
 namespace li3_quality\test\rules;
 
+use lithium\g11n\Multibyte;
+
 class DoesntExceedMaxLineLength extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
@@ -15,14 +17,10 @@ class DoesntExceedMaxLineLength extends \li3_quality\test\Rule {
 		$tabWidth  = 3;
 		$message = "Maximum line length " . $maxLength . " exceeded";
 
-		$strlenFunction = 'strlen';
-		if(function_exists('mb_strlen')) {
-			$strlenFunction = 'mb_strlen';
-		}
-
 		foreach($testable->lines() as $i => $line) {
 			$tabBounty = substr_count($line, "\t") * $tabWidth;
-			if(($length = $tabBounty + $strlenFunction($line)) > $maxLength) {
+			$strlen = Multibyte::strlen($line, array('name' => 'li3_quality'));
+			if(($length = $tabBounty + $strlen($line)) > $maxLength) {
 				$this->addViolation(array(
 					'message' => $message,
 					'line' => $i+1,
