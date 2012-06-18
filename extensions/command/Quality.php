@@ -10,6 +10,8 @@ namespace li3_quality\extensions\command;
 
 use lithium\core\Libraries;
 use lithium\analysis\Inspector;
+use lithium\test\Dispatcher;
+use lithium\test\Group;
 
 use li3_quality\test\Rules;
 use li3_quality\test\Testable;
@@ -28,6 +30,16 @@ class Quality extends \lithium\console\Command {
 	 * If `--silent` is used, only failures are shown.
 	 */
 	public $silent = false;
+
+	/**
+	 * If `--slient NUM` is used, only classes below this coverage are shown.
+	 */
+	public $threshold = 100;
+
+	/**
+	 * This is the minimum threshold for core tests to be green.
+	 */
+	protected $_greenThreshold = 85;
 
 	/**
 	 * Checks the syntax of your class files through static code analysis.
@@ -86,20 +98,57 @@ class Quality extends \lithium\console\Command {
 	public function coverage() {
 		$this->header('Lithium Code Coverage');
 
-		$testables = $this->_testables();
+		$testables = $this->_testables(array(
+			'exclude' => '/tests|resources|webroot|index$|^app\\\\config|^app\\\\views|Exception$/'
+		));
 
 		$this->out("Checking coverage on " . count($testables) . " classes.");
 
-		foreach($testables as $count => $path) {
-			//
+		$tests = array();
+		foreach (Group::all() as $test) {
+			$class = preg_replace('/(tests\\\[a-z]+\\\|Test$)/', null, $test);
+			$tests[$class] = $test;
 		}
+
+		foreach($testables as $count => $path) {
+			$coverage = null;
+
+			if($hasTest = isset($tests[$path])) {
+				$report = Dispatcher::run($tests[$path], array(
+					'format' => 'txt',
+					'filters' => array('Coverage')
+				));
+				$coverage = $report->results['filters']['lithium\test\filter\Coverage'];
+				$coverage = isset($coverage[$path]) ? $coverage[$path]['percentage'] : null;
+			}
+
+			if ($coverage >= $this->_greenThreshold) {
+				$color = 'green';
+			} elseif ($coverage === null || $coverage === 0) {
+				$color = 'red';
+			} else {
+				$color = 'yellow';
+			}
+
+			if($coverage == null || $coverage <= $this->threshold) {
+				$this->out(sprintf('%10s | %7s | %s',
+					$hasTest ? 'has test' : 'no test',
+					is_numeric($coverage) ? sprintf('%.2f%%', $coverage) : 'n/a',
+					$path
+				), $color);
+			}
+		}
+
 	}
 
 	/**
 	 * Returns a list of testable classes according to the given namespace.
 	 */
-	protected function _testables() {
-		$testables = Libraries::find($this->namespace, array('recursive' => true));
+	protected function _testables($options = array()) {
+		$defaults = array('recursive' => true);
+		$config = $options + $defaults;
+
+		$testables = Libraries::find($this->namespace, $config);
 		if(!$testables) {
 			$this->stop(0, "Could not find any tests in \"$this->namespace\"");
 		} else {
