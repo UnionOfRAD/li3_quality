@@ -1,6 +1,16 @@
-li3_quality: Enforcing quality in your Lithium applications since 2011
-======================================================================
-This project is intended to be a pure-lithium based replacement for the [li3_qa](https://github.com/UnionOfRAD/li3_qa) library, which depends on [phpca](https://github.com/UnionOfRAD/phpca). It runs on windows by default, has color-highlighting enabled and integrates into the web-based test dashboard.
+li3_quality: Improve the code quality of your Lithium applications
+==================================================================
+This project is a 100% Lithium based replacement for the [li3_qa](https://github.com/UnionOfRAD/li3_qa) library, which in turn depends on [phpca](https://github.com/UnionOfRAD/phpca). 
+
+Here are some of the key features:
+
+- Detect coding-standard violations.
+- Find weak- or untested classes/methods.
+- No external dependencies.
+- Color-Highlighting.
+- Integrates into the Lithium test dashboard.
+- Runs on Windows without hassle.
+- Cool shortcuts to ease your workflow.
 
 Installation
 ------------
@@ -13,27 +23,39 @@ Clone the repository in your libraries path and then add this line to the `confi
 Libraries::add('li3_quality');
 ```
 
+Composer support is planned for the near future.
+
 Usage
 -----
-In your application directory, you now have the commands available on the console:
+If you run the `li3` command from your console, you'll now find the `syntax` command with its various params:
 
 ```bash
 $ li3 quality
-Lithium console started in the development environment. Use the --env=environmet key to alter this.
+Lithium console started in the development environment. Use the --env=environment key to alter this.
 USAGE
-	li3 quality syntax
+    li3 quality syntax
+    li3 quality documented
+    li3 quality coverage
 DESCRIPTION
-	The Quality command helps you to run static code analysis on your codebase.
+    The Quality command helps you to run static code analysis on your codebase.
 OPTIONS
-	syntax
-		Checks the syntax of your class files through static code analysis.
-	--namespace=<>
-		The namespace to run the quality checks on.
-	--silent=<>
-		If `--silent` is used, only failures are shown.
+    syntax
+        Checks the syntax of your class files through static code analysis.
+    documented
+        Checks for undocumented classes or methods inside the namespace.
+    coverage
+        Lists code coverage for a given threshold (100 by default).
+    --namespace=<>
+        The namespace to run the quality checks on.
+    --silent=<>
+        If `--silent` is used, only failures are shown.
+    --threshold=<>
+        If `--slient NUM` is used, only classes below this coverage are shown.
 ```
 
-If you don't supply any further parameter, it checks the syntax of your `app` directory against the Lithium ruleset:
+The "syntax" command
+--------------------
+If you just run it with `li3 quality syntax`, it will run all rules against your `app` library.
 
 ```bash
 $ li3 quality syntax
@@ -62,7 +84,7 @@ Line    Position        Violation
 33      -               Protected Method "foobar" does not start with "_"
 ```
 
-If you have lots of fils to check (for example if you test against the lithium core), you can pass the `--silent` option to only show errors:
+If you have lots of fils to check (for example if you test against the lithium core), you can pass the `--silent` option to only show errors. The `--namespace` param allows you to run the checks against a different library:
 
 ```bash
 $ li3 quality syntax --silent --namespace=lithium
@@ -91,6 +113,30 @@ Line    Position        Violation
 
 If you open the test dashboard (under `/test` in your browser), you can should have an additional `Syntax` button to check the files directly in your browser.
 
+The "coverage" command
+----------------------
+With `li3 quality coverage` you can get a summary of how well your classes are covered with tests. This makes use of some `xdebug` functions, so make sure to have it installed.
+
+```bash
+$ li3 quality coverage
+---------------------
+Lithium Code Coverage
+---------------------
+Checking coverage on 6 classes.
+   no test |     n/a | app\models\Authors
+   no test |     n/a | app\models\Groups
+   no test |     n/a | app\models\Posts
+   no test |     n/a | app\controllers\HelloWorldController
+   no test |     n/a | app\controllers\PagesController
+   no test |     n/a | app\controllers\PostsController
+```
+
+You can also reuse the `--namespace` argument as well. In addition, this command provides an optional `--threshold` argument that only displays coverage below the given amount. This defaults to 100, so all classes will be shown. If you have coloring on your shell (likely not on windows), then the classes are colored to reflect the coverage policy of the Lithium framework (0% or no test is red, 85% or higher is green and the rest is yellow).
+
+The "documented" command
+------------------------
+This command needs to be implemented.
+
 Planned
 -------
-This library only implements a subset of all rules defined by the coding standard. You can find a list of implemented rules [here](). I'm planning to implement this list as complete as possible, so any help would be greatly appreciated! I also plan to implement functionality for covered classes, documentation blocks and so on. Composer support will follow!
+See the issue tracker for all tickets that are currently marked as "enhancement".
