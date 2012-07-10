@@ -26,16 +26,6 @@ class Quality extends \lithium\console\command\Test {
 	public $library = true;
 
 	/**
-	 * If `--silent` is used, only failures are shown.
-	 */
-	public $silent = false;
-
-	/**
-	 * Color the output.
-	 */
-	public $colorize = false;
-
-	/**
 	 * If `--slient NUM` is used, only classes below this coverage are shown.
 	 */
 	public $threshold = 100;
@@ -45,15 +35,10 @@ class Quality extends \lithium\console\command\Test {
 	 */
 	protected $_greenThreshold = 85;
 
-
-	protected function _init() {
-		parent::_init();
-
-		if (!$this->colorize) {
-			$this->response->styles(false);
-		}
-	}
-
+	/**
+	 * Show help on run.
+	 *
+	 */
 	public function run($path = null) {
 		return $this->_help();
 	}
