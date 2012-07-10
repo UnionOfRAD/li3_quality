@@ -1,6 +1,6 @@
 Improve the code quality of your Lithium applications
 =====================================================
-This project is a 100% Lithium based replacement for the [li3_qa](https://github.com/UnionOfRAD/li3_qa) library, which in turn depends on [phpca](https://github.com/UnionOfRAD/phpca). 
+This project is a 100% Lithium based replacement for the [li3_qa](https://github.com/UnionOfRAD/li3_qa) library, which in turn depends on [phpca](https://github.com/UnionOfRAD/phpca).
 
 Here are some of the key features:
 
@@ -22,8 +22,7 @@ Clone the repository in your libraries path and then add this line to the `confi
  */
 Libraries::add('li3_quality');
 ```
-
-Composer support is planned for the near future.
+If you open the test dashboard (under `/test` in your browser), you can should have an additional `Syntax` button to check the files directly in your browser.
 
 Usage
 -----
@@ -111,7 +110,46 @@ Line    Position        Violation
 381     110             Maximum line length exceeded
 ```
 
-If you open the test dashboard (under `/test` in your browser), you can should have an additional `Syntax` button to check the files directly in your browser.
+GIT Pre Commit Hook
+--------------------
+
+This pre commit hook is based upon the example found in `.git/hooks/pre-commit.sample`. Copy the sample script to `/path/to/project/.git/hooks/pre-commit` and make it executable. Then, replace the code in the script with the code shown below and adjust the paths to Lithium QA and the li3 command.
+
+```
+cd /path/to/project
+cp .git/hooks/pre-commit.sample .git/hooks/pre-commit
+chmod a+x .git/hooks/pre-commit
+```
+
+Now add the following code to .git/hooks/pre-commit and adjust the `LITHIUM_QA` and `LI3` values.
+
+```bash
+#!/bin/sh
+
+APP=/path/to/li3_quality_enabled/app/
+LI3=/path/to/lithium/libraries/lithium/console/li3
+
+if git-rev-parse --verify HEAD >/dev/null 2>&1
+then
+    AGAINST=HEAD
+else
+    # Initial commit: diff against an empty tree object
+    AGAINST=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+EXIT_STATUS=0
+PROJECT=`pwd`
+
+for FILE in `git diff-index --cached --name-only --diff-filter=AM ${AGAINST}`
+do
+    cd ${APP} && ${LI3} quality syntax ${PROJECT}/${FILE}
+    test $? != 0 && EXIT_STATUS=1
+done
+
+exit ${EXIT_STATUS}
+```
+
+Now when committing each file the syntax is checked. The commit is aborted if a check failed. If you don't want to have the hook run on commit pass the `--no-verify` option to git commit.
 
 The "coverage" command
 ----------------------
