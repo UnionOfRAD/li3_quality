@@ -121,7 +121,7 @@ cp .git/hooks/pre-commit.sample .git/hooks/pre-commit
 chmod a+x .git/hooks/pre-commit
 ```
 
-Now add the following code to .git/hooks/pre-commit and adjust the `LITHIUM_QA` and `LI3` values.
+Now add the following code to .git/hooks/pre-commit and adjust the `APP` and `LI3` values.
 
 ```bash
 #!/bin/sh
