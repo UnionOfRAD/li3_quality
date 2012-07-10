@@ -41,11 +41,11 @@ OPTIONS
     syntax
         Checks the syntax of your class files through static code analysis.
     documented
-        Checks for undocumented classes or methods inside the namespace.
+        Checks for undocumented classes or methods inside the library.
     coverage
         Lists code coverage for a given threshold (100 by default).
-    --namespace=<>
-        The namespace to run the quality checks on.
+    --library=<>
+        The library to run the quality checks on.
     --silent=<>
         If `--silent` is used, only failures are shown.
     --threshold=<>
@@ -83,10 +83,10 @@ Line    Position        Violation
 33      -               Protected Method "foobar" does not start with "_"
 ```
 
-If you have lots of fils to check (for example if you test against the lithium core), you can pass the `--silent` option to only show errors. The `--namespace` param allows you to run the checks against a different library:
+If you have lots of fils to check (for example if you test against the lithium core), you can pass the `--silent` option to only show errors. The `--library` param allows you to run the checks against a different library:
 
 ```bash
-$ li3 quality syntax --silent --namespace=lithium
+$ li3 quality syntax --silent --library=lithium
 --------------------
 Lithium Syntax Check
 --------------------
@@ -169,7 +169,7 @@ Checking coverage on 6 classes.
    no test |     n/a | app\controllers\PostsController
 ```
 
-You can also reuse the `--namespace` argument as well. In addition, this command provides an optional `--threshold` argument that only displays coverage below the given amount. This defaults to 100, so all classes will be shown. If you have coloring on your shell (likely not on windows), then the classes are colored to reflect the coverage policy of the Lithium framework (0% or no test is red, 85% or higher is green and the rest is yellow).
+You can also reuse the `--library` argument as well. In addition, this command provides an optional `--threshold` argument that only displays coverage below the given amount. This defaults to 100, so all classes will be shown. If you have coloring on your shell (likely not on windows), then the classes are colored to reflect the coverage policy of the Lithium framework (0% or no test is red, 85% or higher is green and the rest is yellow).
 
 The "documented" command
 ------------------------

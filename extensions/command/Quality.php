@@ -23,7 +23,7 @@ class Quality extends \lithium\console\command\Test {
 	/**
 	 * The library to run the quality checks on.
 	 */
-	public $library = "app";
+	public $library = true;
 
 	/**
 	 * If `--silent` is used, only failures are shown.
