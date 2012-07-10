@@ -16,7 +16,7 @@ class ProtectedMethodStartsWithUnderscore extends \li3_quality\test\Rule {
 
 		foreach($tokens as $position => $token)  {
 			if($token['name'] == 'T_PROTECTED') {
-				$lookaheadTokens = array_slice($tokens->toArray(), $position+1, 10, true);
+				$lookaheadTokens = array_slice($tokens, $position+1, 10, true);
 				$result = $this->_lookahead($lookaheadTokens);
 				if($result['found'] === true && $result['match'] === false) {
 					$this->addViolation(array(

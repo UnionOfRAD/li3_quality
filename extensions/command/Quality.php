@@ -12,24 +12,28 @@ use lithium\core\Libraries;
 use lithium\analysis\Inspector;
 use lithium\test\Dispatcher;
 use lithium\test\Group;
-
 use li3_quality\test\Rules;
 use li3_quality\test\Testable;
 
 /**
  * The Quality command helps you to run static code analysis on your codebase.
  */
-class Quality extends \lithium\console\Command {
+class Quality extends \lithium\console\command\Test {
 
 	/**
-	 * The namespace to run the quality checks on.
+	 * The library to run the quality checks on.
 	 */
-	public $namespace = "app";
+	public $library = "app";
 
 	/**
 	 * If `--silent` is used, only failures are shown.
 	 */
 	public $silent = false;
+
+	/**
+	 * Color the output.
+	 */
+	public $colorize = false;
 
 	/**
 	 * If `--slient NUM` is used, only classes below this coverage are shown.
@@ -41,23 +45,44 @@ class Quality extends \lithium\console\Command {
 	 */
 	protected $_greenThreshold = 85;
 
+
+	protected function _init() {
+		parent::_init();
+
+		if (!$this->colorize) {
+			$this->response->styles(false);
+		}
+	}
+
+	public function run($path = null) {
+		return $this->_help();
+	}
+
 	/**
 	 * Checks the syntax of your class files through static code analysis.
+	 * if GIT_DIR env variable is set, then use plain and silent.
 	 */
-	public function syntax() {
+	public function syntax($path = null) {
+		if ($this->request->env('GIT_DIR')) {
+			$this->plain = true;
+			$this->silent = true;
+		}
+		$pass = true;
+		$testables = $this->_testables(compact('path'));
 		$this->header('Lithium Syntax Check');
-
-		$testables = $this->_testables();
-		$this->out("Performing ". count(Rules::get()) .
-				   " rules on ". count($testables) . " classes.");
+		$this->out(
+			"Performing ". count(Rules::get()) . " rules"
+			. "on ". count($testables) . " classes."
+		);
 
 		foreach($testables as $count => $path) {
 			$result = Rules::apply(new Testable(compact('path')));
-			if($result['success'] && !$this->silent) {
+			if($result['success']) {
 				$this->out("[OK] $path", "green");
 			}
 			if(!$result['success']) {
-				$this->out("[FAIL] $path", "red");
+				$pass = false;
+				$this->error("[FAIL] $path", "red");
 				$output = array(
 					array("Line", "Position", "Violation"),
 					array("----", "--------", "---------")
@@ -72,13 +97,14 @@ class Quality extends \lithium\console\Command {
 					extract($params);
 					$output[] = array($line, $position, $message);
 				}
-				$this->columns($output, array('style' => 'red'));
+				$this->columns($output, array('style' => 'red', 'error' => true));
 			}
 		}
+		return (boolean) !$pass;
 	}
 
 	/**
-	 * Checks for undocumented classes or methods inside the namespace.
+	 * Checks for undocumented classes or methods inside the library.
 	 */
 	public function documented() {
 		$this->header('Lithium Documentation Check');
@@ -142,20 +168,28 @@ class Quality extends \lithium\console\Command {
 	}
 
 	/**
-	 * Returns a list of testable classes according to the given namespace.
+	 * Returns a list of testable classes according to the given library.
 	 */
 	protected function _testables($options = array()) {
-		$defaults = array('recursive' => true);
-		$config = $options + $defaults;
+		$defaults = array('recursive' => true, 'path' => null);
+		$options += $defaults;
 
-		$testables = Libraries::find($this->namespace, $config);
-		if(!$testables) {
-			$this->stop(0, "Could not find any tests in \"$this->namespace\"");
-		} else {
-			return $testables;
+		if ($path = $this->_path($options['path'])) {
+			if (pathinfo($options['path'], PATHINFO_EXTENSION) == 'php') {
+				return array($path);
+			}
+			$parts = explode('\\', $path) + array($this->library);
+			$this->library = array_shift($parts);
+			$options['path'] = '/' . join('/', $parts);
 		}
-	}
+		$testables = Libraries::find($this->library, $options);
 
+		if(!$testables) {
+			$library = $path ? $path : $this->library;
+			$this->stop(0, "Could not find any files in {$library}.");
+		}
+		return $testables;
+	}
 }
 
 ?>
