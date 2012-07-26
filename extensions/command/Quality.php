@@ -56,7 +56,7 @@ class Quality extends \lithium\console\command\Test {
 		$testables = $this->_testables(compact('path'));
 		$this->header('Lithium Syntax Check');
 		$this->out(
-			"Performing ". count(Rules::get()) . " rules"
+			"Performing ". count(Rules::get()) . " rules "
 			. "on ". count($testables) . " classes."
 		);
 
