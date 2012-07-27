@@ -22,11 +22,24 @@ class IncludeAndRequireWithoutBrackets extends \li3_quality\test\Rule {
 
 		foreach ($tokens as $key => $token) {
 			if (in_array($token['name'], array_keys($this->_inspectableTokens))) {
-				if ($tokens[$key+1]['content'] == '(') {
-					$this->addViolation(array(
-						'message' => $this->_inspectableTokens[$token['name']],
-						'line' => $token['line']
-					));
+
+				// Check next two tokens for brackets
+				for ($i = 1; $i <= 2; $i++) {
+
+					// Skip whitespace
+					$hasWhitespace = $tokens[$key+$i]['name'] == 'T_WHITESPACE';
+					if ($hasWhitespace) {
+						continue;
+					}
+
+					// Check for brackets
+					$usesBrackets = $tokens[$key+$i]['content'] == '(';
+					if ($usesBrackets) {
+						$this->addViolation(array(
+							'message' => $this->_inspectableTokens[$token['name']],
+							'line' => $token['line']
+						));
+					}
 				}
 			}
 		}
