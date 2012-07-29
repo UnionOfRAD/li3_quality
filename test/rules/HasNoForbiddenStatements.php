@@ -11,17 +11,24 @@ namespace li3_quality\test\rules;
 class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 
 	protected $_forbidden = array(
-		'T_ENDDECLARE', 'T_ENDFOR', 'T_ENDFOREACH',
-		'T_ENDIF', 'T_ENDSWITCH', 'T_ENDWHILE',
-		'T_PRINT', 'T_GOTO', 'T_EVAL',
-		'T_GLOBAL', 'T_VAR', 'T_AT'
+		'T_ENDDECLARE' => 'enddeclare',
+		'T_ENDFOR' => 'endfor',
+		'T_ENDFOREACH' => 'endforeach',
+		'T_ENDIF' => 'endif',
+		'T_ENDSWITCH' => 'endswitch',
+		'T_ENDWHILE' => 'endwhile',
+		'T_PRINT' => 'print',
+		'T_GOTO' => 'goto',
+		'T_EVAL' => 'eval',
+		'T_GLOBAL' => 'global',
+		'T_VAR' => 'var'
 	);
 
 	public function apply($testable) {
 		$tokens = $testable->tokens();
 		foreach($tokens as $token) {
-			if(in_array($token['name'], $this->_forbidden)) {
-				$tokenName = strtolower(substr($token['name'], 2));
+			if(isset($_forbidden[$token['name']])) {
+				$tokenName = $this->_forbidden[$token['name']];
 				$this->addViolation(array(
 					'message' => 'Forbidden "' . $tokenName . '" statement found',
 					'line' => $token['line']
