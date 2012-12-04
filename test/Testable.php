@@ -71,7 +71,7 @@ class Testable extends \lithium\core\Object {
 	 * when using an SplFixed array (which is faster), the app segfaults.
 	 */
 	public function tokens() {
-		if($this->_tokens === null) {
+		if ($this->_tokens === null) {
 			$this->_tokens = Parser::tokenize($this->source());
 		}
 		return $this->_tokens;
@@ -84,19 +84,19 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function lines($line = null) {
 		$lineEnding = function($source) {
-			if(strpos($source, "\r\n") !== false) {
+			if (strpos($source, "\r\n") !== false) {
 				return "\r\n";
-			} elseif(strpos($source, "\r") !== false) {
+			} elseif (strpos($source, "\r") !== false) {
 				return "\r";
 			} else {
 				return "\n";
 			}
 		};
 
-		if($this->_lines === null) {
+		if ($this->_lines === null) {
 			$this->_lines = explode($lineEnding($this->source()), $this->source());
 		}
-		if($line) {
+		if ($line) {
 			return $this->_lines[++$line];
 		}
 		return $this->_lines;

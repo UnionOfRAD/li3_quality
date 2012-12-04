@@ -22,9 +22,9 @@ class Rules extends \lithium\core\StaticObject {
 	 */
 	public static function __init() {
 		$rulePaths = Libraries::locate('rules');
-		foreach($rulePaths as $rulePath) {
+		foreach ($rulePaths as $rulePath) {
 			$rule = new $rulePath();
-			if($rule->enabled()) {
+			if ($rule->enabled()) {
 				static::add($rule);
 			}
 		}
@@ -44,9 +44,9 @@ class Rules extends \lithium\core\StaticObject {
 		$violations = array();
 		$success = true;
 
-		foreach(static::$_rules as $rule) {
+		foreach (static::$_rules as $rule) {
 			$rule->apply($testable);
-			if(!$rule->success()) {
+			if (!$rule->success()) {
 				$success = false;
 				$violations = array_merge($violations, $rule->violations());
 			}

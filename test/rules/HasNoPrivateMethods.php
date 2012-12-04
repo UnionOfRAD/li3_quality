@@ -13,8 +13,8 @@ class HasNoPrivateMethods extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$tokens = $testable->tokens();
 
-		foreach($tokens as $key => $token)  {
-			if($token['name'] == 'T_PRIVATE') {
+		foreach ($tokens as $key => $token) {
+			if ($token['name'] == 'T_PRIVATE') {
 				$this->addViolation(array(
 					'message' =>  'Private method found',
 					'line' => $token['line']

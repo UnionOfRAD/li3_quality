@@ -12,8 +12,8 @@ class HasNoCarriageReturn extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$message = "Carriage Return character found";
 
-		foreach($testable->lines() as $i => $line) {
-			if(($pos = strpos($line, "\r")) !== false) {
+		foreach ($testable->lines() as $i => $line) {
+			if (($pos = strpos($line, "\r")) !== false) {
 				$this->addViolation(array(
 					'message' => $message,
 					'line' => $i+1,

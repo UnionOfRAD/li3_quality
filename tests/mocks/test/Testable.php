@@ -15,3 +15,5 @@ class Testable extends \li3_quality\test\Testable {
 		$this->_source = $config['source'];
 	}
 }
+
+?>
