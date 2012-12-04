@@ -52,6 +52,33 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testCorrectIfWithFirstExpressionSpace() {
+		$code = <<<EOD
+if ( true) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectIfWithLastExpressionSpace() {
+		$code = <<<EOD
+if (true ) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectIfWithFullExpressionSpace() {
+		$code = <<<EOD
+if ( true ) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
 	public function testCorrectWhile() {
 		$code = <<<EOD
 while (true) {
@@ -92,6 +119,33 @@ EOD;
 	public function testIncorrectWhileWithNoBeginningSpace() {
 		$code = <<<EOD
 while(true) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectWhileWithFirstExpressionSpace() {
+		$code = <<<EOD
+while ( true) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectWhileWithLastExpressionSpace() {
+		$code = <<<EOD
+while (true ) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectWhileWithFullExpressionSpace() {
+		$code = <<<EOD
+while ( true ) {
 	return false;
 }
 EOD;
@@ -144,6 +198,33 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testCorrectForWithFirstExpressionSpace() {
+		$code = <<<EOD
+for ( true) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectForWithLastExpressionSpace() {
+		$code = <<<EOD
+for (true ) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectForWithFullExpressionSpace() {
+		$code = <<<EOD
+for ( true ) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
 	public function testCorrectForeach() {
 		$code = <<<EOD
 foreach (true) {
@@ -184,6 +265,33 @@ EOD;
 	public function testIncorrectForeachWithNoBeginningSpace() {
 		$code = <<<EOD
 foreach(true) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectForeachWithFirstExpressionSpace() {
+		$code = <<<EOD
+foreach ( true) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectForeachWithLastExpressionSpace() {
+		$code = <<<EOD
+foreach (true ) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectForeachWithFullExpressionSpace() {
+		$code = <<<EOD
+foreach ( true ) {
 	return false;
 }
 EOD;
@@ -313,4 +421,112 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testCorrectElseIfWithFirstExpressionSpace() {
+		$code = <<<EOD
+if (true) {
+	return false;
+} elseif ( true) {
+	return true;
 }
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectElseIfWithLastExpressionSpace() {
+		$code = <<<EOD
+if (true) {
+	return false;
+} elseif (true ) {
+	return true;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectElseIfWithFullExpressionSpace() {
+		$code = <<<EOD
+if (true) {
+	return false;
+} elseif ( true ) {
+	return true;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectDoWhile() {
+		$code = <<<EOD
+do {
+	return true;
+} while (true);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIncorrectDoWhileWithNoSpacesOnFirstLine() {
+		$code = <<<EOD
+do{
+	return true;
+} while (true);
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testIncorrectDoWhileWithNoSpacesOnLastLine() {
+		$code = <<<EOD
+do {
+	return true;
+}while(true);
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testIncorrectDoWhileWithNoFirstSpaceOnWhile() {
+		$code = <<<EOD
+do {
+	return true;
+}while (true);
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+
+	public function testIncorrectDoWhileWithNoLastSpaceOnWhile() {
+		$code = <<<EOD
+do {
+	return true;
+} while(true);
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectDoWhileWithFirstExpressionSpace() {
+		$code = <<<EOD
+do {
+	return true;
+} while( true);
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectDoWhileWithLastExpressionSpace() {
+		$code = <<<EOD
+do {
+	return true;
+} while(true );
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectDoWhileWithFullExpressionSpace() {
+		$code = <<<EOD
+do {
+	return true;
+} while( true );
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+}
+
+?>
