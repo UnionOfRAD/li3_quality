@@ -35,7 +35,10 @@ class Unit extends \lithium\test\Unit  {
 	 * @return bool
 	 */
 	public function assertRulePass($source, $rule, $message = '{:message}') {
-		return $this->assert($this->_mockRule($rule, $source), $message);
+		return $this->assert($this->_mockRule($rule, $source), $message, array(
+			'expected' => 'pass',
+			'result' => $this->rule->violations(),
+		));
 	}
 
 	/**
@@ -47,7 +50,10 @@ class Unit extends \lithium\test\Unit  {
 	 * @return bool
 	 */
 	public function assertRuleFail($source, $rule, $message = '{:message}') {
-		return $this->assert(!$this->_mockRule($rule, $source), $message);
+		return $this->assert(!$this->_mockRule($rule, $source), $message, array(
+			'expected' => 'fail',
+			'result' => $this->rule->violations(),
+		));
 	}
 
 	/**
