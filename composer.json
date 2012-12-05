@@ -1,0 +1,30 @@
+{
+	"name": "UnionOfRAD/li3_quality",
+	"type": "li3-libraries",
+	"description": "This plugin adds code quality assurance to your Lithium toolbelt.",
+	"keywords": ["code", "quality", "lithium", "li3", "syntax", "documented", "coverage"],
+	"homepage": "https://github.com/UnionOfRAD/li3_quality",
+	"license": "MIT License",
+	"authors": [
+		{
+			"name": "Michael Nitschinger",
+			"homepage": "http://www.nitschinger.at"
+		},
+		{
+			"name": "gwoo",
+			"homepage": "https://github.com/gwoo"
+		},
+		{
+			"name": "Daniel McOrmond",
+			"homepage": "http://danielmcormond.com"
+		},
+		{
+			"name": "Blaine Schmeisser",
+			"email": "BlaineSch@gmail.com",
+			"homepage": "https://github.com/BlaineSch"
+		}
+	],
+	"require": {
+		"php": ">=5.3"
+	}
+}
