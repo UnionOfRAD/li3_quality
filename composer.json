@@ -1,5 +1,5 @@
 {
-	"name": "UnionOfRAD/li3_quality",
+	"name": "unionofrad/li3_quality",
 	"type": "li3-libraries",
 	"description": "This plugin adds code quality assurance to your Lithium toolbelt.",
 	"keywords": ["code", "quality", "lithium", "li3", "syntax", "documented", "coverage"],
