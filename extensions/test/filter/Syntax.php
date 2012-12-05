@@ -36,8 +36,8 @@ class Syntax extends \lithium\test\Filter {
 	public static function analyze($report, array $options = array()) {
 		$results = $report->results['filters'][__CLASS__];
 		$metrics = array();
-		foreach($results as $result) {
-			foreach($result as $class => $metric) {
+		foreach ($results as $result) {
+			foreach ($result as $class => $metric) {
 				$metrics[$class] = $metric['violations'];
 			}
 		}

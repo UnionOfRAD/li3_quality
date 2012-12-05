@@ -17,10 +17,10 @@ class DoesntExceedMaxLineLength extends \li3_quality\test\Rule {
 		$tabWidth  = 3;
 		$message = "Maximum line length of \"" . $maxLength . "\" exceeded";
 
-		foreach($testable->lines() as $i => $line) {
+		foreach ($testable->lines() as $i => $line) {
 			$tabBounty = substr_count($line, "\t") * $tabWidth;
 			$strlen = Multibyte::strlen($line, array('name' => 'li3_quality'));
-			if(($length = $tabBounty + $strlen) > $maxLength) {
+			if (($length = $tabBounty + $strlen) > $maxLength) {
 				$this->addViolation(array(
 					'message' => $message,
 					'line' => $i+1,

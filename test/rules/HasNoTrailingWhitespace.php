@@ -15,7 +15,7 @@ class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$message = "Trailing whitespace found";
 
-		foreach($testable->lines() as $i => $line) {
+		foreach ($testable->lines() as $i => $line) {
 			$name = 'li3_quality';
 			$length = Multibyte::strlen($line, compact('name'));
 			$lengthTrimmed = Multibyte::strlen(rtrim($line), compact('name'));

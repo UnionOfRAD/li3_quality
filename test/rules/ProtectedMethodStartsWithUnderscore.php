@@ -14,11 +14,11 @@ class ProtectedMethodStartsWithUnderscore extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$tokens = $testable->tokens();
 
-		foreach($tokens as $position => $token)  {
-			if($token['name'] == 'T_PROTECTED') {
+		foreach ($tokens as $position => $token) {
+			if ($token['name'] == 'T_PROTECTED') {
 				$lookaheadTokens = array_slice($tokens, $position+1, 10, true);
 				$result = $this->_lookahead($lookaheadTokens);
-				if($result['found'] === true && $result['match'] === false) {
+				if ($result['found'] === true && $result['match'] === false) {
 					$this->addViolation(array(
 						'message' =>  'Protected Method "' . $result['name'] . '" does not ' .
 									  'start with "_"',
@@ -31,21 +31,21 @@ class ProtectedMethodStartsWithUnderscore extends \li3_quality\test\Rule {
 
 	protected function _lookahead($tokenSlice) {
 		$hasFunctionToken = false;
-		foreach($tokenSlice as $token) {
-			if($token['name'] == 'T_VARIABLE') {
+		foreach ($tokenSlice as $token) {
+			if ($token['name'] == 'T_VARIABLE') {
 				break;
 			}
-			if($token['name'] == 'T_WHITESPACE' || $token['name'] == 'T_STATIC') {
+			if ($token['name'] == 'T_WHITESPACE' || $token['name'] == 'T_STATIC') {
 				continue;
 			}
 
-			if($token['name'] == 'T_FUNCTION') {
+			if ($token['name'] == 'T_FUNCTION') {
 				$hasFunctionToken = true;
 				continue;
 			}
 
-			if($token['name'] == 'T_STRING' && $hasFunctionToken) {
-				if(strpos($token['content'], '_') === false) {
+			if ($token['name'] == 'T_STRING' && $hasFunctionToken) {
+				if (strpos($token['content'], '_') === false) {
 					return array('found' => true, 'match' => false, 'name' => $token['content']);
 				} else {
 					return array('found' => true, 'match' => true, 'name' => $token['content']);

@@ -67,3 +67,5 @@ class Unit extends \lithium\test\Unit  {
 	}
 
 }
+
+?>
