@@ -53,15 +53,18 @@ class Unit extends \lithium\test\Unit  {
 	/**
 	 * Will generate a new rule and call apply on it.
 	 *
-	 * @param  string $rule    The nonspaced class of the rule
-	 * @param  string $source  The source to test against
+	 * @param  string       $rule    The nonspaced class of the rule
+	 * @param  string|array $source  Source code, or arary of config options
 	 * @return bool
 	 */
-	protected function _mockRule($rule, $source) {
+	protected function _mockRule($rule, $options = array()) {
+		if (is_string($options)) {
+			$options = array(
+				'source' => $options,
+			);
+		}
 		$this->rule = new $rule();
-		$this->testable = new Testable(array(
-			'source' => $source,
-		));
+		$this->testable = new Testable($options);
 		$this->rule->apply($this->testable);
 		return $this->rule->success();
 	}
