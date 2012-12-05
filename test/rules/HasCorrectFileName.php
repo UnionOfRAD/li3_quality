@@ -21,7 +21,14 @@ class HasCorrectFileName extends \li3_quality\test\Rule {
 			return;
 		}
 
-		if ($pathinfo['filename'] != Inflector::camelize($pathinfo['filename'])) {
+		$hasClass = false;
+		foreach ($testable->tokens() as $token) {
+			if ($token['id'] === T_CLASS) {
+				$hasClass = true;
+				break;
+			}
+		}
+		if ($hasClass && $pathinfo['filename'] != Inflector::camelize($pathinfo['filename'])) {
 			$this->addViolation(array('message' => $message));
 		}
 	}
