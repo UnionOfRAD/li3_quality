@@ -21,7 +21,7 @@ class IncludeAndRequireWithoutBrackets extends \li3_quality\test\Rule {
 		$tokens = $testable->tokens();
 
 		foreach ($tokens as $key => $token) {
-			if(isset($this->_inspectableTokens[$token['name']])) {
+			if (isset($this->_inspectableTokens[$token['name']])) {
 				for ($i = 1; $i <= 2; $i++) {
 					if ($tokens[$key+$i]['name'] == 'T_WHITESPACE') {
 						continue;

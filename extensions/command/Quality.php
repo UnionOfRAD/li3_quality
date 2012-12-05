@@ -60,19 +60,19 @@ class Quality extends \lithium\console\command\Test {
 			. "on ". count($testables) . " classes."
 		);
 
-		foreach($testables as $count => $path) {
+		foreach ($testables as $count => $path) {
 			$result = Rules::apply(new Testable(compact('path')));
-			if($result['success']) {
+			if ($result['success']) {
 				$this->out("[OK] $path", "green");
 			}
-			if(!$result['success']) {
+			if (!$result['success']) {
 				$pass = false;
 				$this->error("[FAIL] $path", "red");
 				$output = array(
 					array("Line", "Position", "Violation"),
 					array("----", "--------", "---------")
 				);
-				foreach($result['violations'] as $violation) {
+				foreach ($result['violations'] as $violation) {
 					$defaults = array(
 						'line' => '-',
 						'position' => '-',
@@ -85,7 +85,7 @@ class Quality extends \lithium\console\command\Test {
 				$this->columns($output, array('style' => 'red', 'error' => true));
 			}
 		}
-		return (boolean) !$pass;
+		return (boolean) $pass;
 	}
 
 	/**
@@ -98,7 +98,7 @@ class Quality extends \lithium\console\command\Test {
 
 		$this->out("Checking documentation on " . count($testables) . " classes.");
 
-		foreach($testables as $count => $path) {
+		foreach ($testables as $count => $path) {
 			//
 		}
 	}
@@ -121,10 +121,10 @@ class Quality extends \lithium\console\command\Test {
 			$tests[$class] = $test;
 		}
 
-		foreach($testables as $count => $path) {
+		foreach ($testables as $count => $path) {
 			$coverage = null;
 
-			if($hasTest = isset($tests[$path])) {
+			if ($hasTest = isset($tests[$path])) {
 				$report = Dispatcher::run($tests[$path], array(
 					'format' => 'txt',
 					'filters' => array('Coverage')
@@ -141,7 +141,7 @@ class Quality extends \lithium\console\command\Test {
 				$color = 'yellow';
 			}
 
-			if($coverage == null || $coverage <= $this->threshold) {
+			if ($coverage == null || $coverage <= $this->threshold) {
 				$this->out(sprintf('%10s | %7s | %s',
 					$hasTest ? 'has test' : 'no test',
 					is_numeric($coverage) ? sprintf('%.2f%%', $coverage) : 'n/a',
@@ -169,7 +169,7 @@ class Quality extends \lithium\console\command\Test {
 		}
 		$testables = Libraries::find($this->library, $options);
 
-		if(!$testables) {
+		if (!$testables) {
 			$library = $path ? $path : $this->library;
 			$this->stop(0, "Could not find any files in {$library}.");
 		}

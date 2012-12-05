@@ -17,11 +17,11 @@ class HasCorrectFileName extends \li3_quality\test\Rule {
 
 		$pathinfo = pathinfo($testable->config('path'));
 
-		if($pathinfo['extension'] != 'php') {
+		if ($pathinfo['extension'] != 'php') {
 			return;
 		}
 
-		if($pathinfo['filename'] != Inflector::camelize($pathinfo['filename'])) {
+		if ($pathinfo['filename'] != Inflector::camelize($pathinfo['filename'])) {
 			$this->addViolation(array('message' => $message));
 		}
 	}

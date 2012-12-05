@@ -15,7 +15,7 @@ class HasNoEOLatEOF extends \li3_quality\test\Rule {
 		$lines = $testable->lines();
 		$lastLine = trim($lines[count($lines)-1]);
 
-		if(empty($lastLine)) {
+		if (empty($lastLine)) {
 			$this->addViolation(array(
 				'message' => $message,
 				'line' => count($lines)

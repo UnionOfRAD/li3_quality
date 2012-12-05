@@ -26,8 +26,8 @@ class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
 		$tokens = $testable->tokens();
-		foreach($tokens as $token) {
-			if(isset($_forbidden[$token['name']])) {
+		foreach ($tokens as $token) {
+			if (isset($_forbidden[$token['name']])) {
 				$tokenName = $this->_forbidden[$token['name']];
 				$this->addViolation(array(
 					'message' => 'Forbidden "' . $tokenName . '" statement found',
@@ -35,7 +35,7 @@ class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 				));
 			}
 
-			if($token['name'] === 'T_STRING' && $token['content'] === 'var_dump') {
+			if ($token['name'] === 'T_STRING' && $token['content'] === 'var_dump') {
 				$this->addViolation(array(
 					'message' => 'Forbidden "var_dump" statement found',
 					'line' => $token['line']

@@ -23,8 +23,8 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$tokens = $testable->tokens();
 
-		foreach($tokens as $key => $token)  {
-			if($token['name'] == 'T_FUNCTION') {
+		foreach ($tokens as $key => $token) {
+			if ($token['name'] == 'T_FUNCTION') {
 				$this->_checkCamelBack($tokens[$key+2]);
 			}
 		}
@@ -32,9 +32,9 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 
 	protected function _checkCamelBack($lookahead) {
 		$isMagic = in_array($lookahead['content'], $this->_magicMethods);
-		if($lookahead['name'] == 'T_STRING' && !$isMagic) {
+		if ($lookahead['name'] == 'T_STRING' && !$isMagic) {
 			$name = preg_replace('/^_+/', '', $lookahead['content']);
-			if($name != Inflector::camelize($name, false)) {
+			if ($name != Inflector::camelize($name, false)) {
 				$this->addViolation(array(
 					'message' =>  'Function "' . $name . '" is not in camelBack style',
 					'line' => $lookahead['line']

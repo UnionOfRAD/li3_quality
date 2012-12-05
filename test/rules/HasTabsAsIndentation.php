@@ -14,8 +14,8 @@ class HasTabsAsIndentation extends \li3_quality\test\Rule {
 		$message = "Uses spaces instead of tabs";
 		$lines = $testable->lines();
 
-		foreach($lines as $number => $line) {
-			if(preg_match('/^ +[^*]/', $line)) {
+		foreach ($lines as $number => $line) {
+			if (preg_match('/^ +[^*]/', $line)) {
 				$this->addViolation(array(
 					'message' => $message,
 					'line' => $number+1

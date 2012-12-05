@@ -27,10 +27,10 @@ class HasCorrectVariableNames extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$tokens = $testable->tokens();
 
-		foreach($tokens as $token) {
-			if($token['name'] == 'T_VARIABLE' && !isset($this->_superglobals[$token['content']])) {
+		foreach ($tokens as $token) {
+			if ($token['name'] == 'T_VARIABLE' && !isset($this->_superglobals[$token['content']])) {
 				$name = preg_replace('/(\$_?|_+$)/', '', $token['content']);
-				if($name != Inflector::camelize($name, false)) {
+				if ($name != Inflector::camelize($name, false)) {
 					$this->addViolation(array(
 						'message' =>  'Variable "' . $name . '" is not in camelBack style',
 						'line' => $token['line']
