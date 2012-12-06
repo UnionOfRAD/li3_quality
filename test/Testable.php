@@ -72,7 +72,7 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function tokens() {
 		if ($this->_tokens === null) {
-			$this->_tokens = Parser::tokenize($this->source());
+			$this->_tokens = Parser::tokenize($this->source(), $this->_config);
 		}
 		return $this->_tokens;
 	}
