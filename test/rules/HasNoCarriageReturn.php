@@ -16,7 +16,7 @@ class HasNoCarriageReturn extends \li3_quality\test\Rule {
 			if (($pos = strpos($line, "\r")) !== false) {
 				$this->addViolation(array(
 					'message' => $message,
-					'line' => $i+1,
+					'line' => $i + 1,
 					'position' => $pos
 				));
 			}

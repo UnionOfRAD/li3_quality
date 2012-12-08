@@ -108,7 +108,7 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 		foreach ($tokens as $token) {
 			if (isset($this->_tokenMap[$token['id']])) {
 				$tokenMap = $this->_tokenMap[$token['id']];
-				$line = $lines[$token['line']-1];
+				$line = $lines[$token['line'] - 1];
 				$patterns = $tokenMap['patterns'];
 				$lineNumber = $token['line'];
 				if ($this->_matchPattern($lines, $lineNumber, $patterns, $token['id']) === false) {
@@ -130,7 +130,7 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 	 * @return bool
 	 */
 	protected function _matchPattern(array $lines, $lineNumber, $patterns, $token) {
-		$line = $lines[$lineNumber-1];
+		$line = $lines[$lineNumber - 1];
 		foreach ($patterns as $pattern) {
 			if (preg_match(String::insert($pattern, $this->_regexMap), $line) === 1) {
 				return true;

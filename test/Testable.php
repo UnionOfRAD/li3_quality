@@ -37,7 +37,9 @@ class Testable extends \lithium\core\Object {
 	 * Locates the file and reads its source code.
 	 */
 	public function __construct($config = array()) {
-		$this->_config = $config;
+		$this->_config = $config + array(
+			'wrap' => false,
+		);
 		$path = Libraries::path($config['path']);
 		$this->_config['path'] = $path;
 		$this->_source = file_get_contents($path);

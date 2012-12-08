@@ -18,7 +18,7 @@ class HasTabsAsIndentation extends \li3_quality\test\Rule {
 			if (preg_match('/^ +[^*]/', $line)) {
 				$this->addViolation(array(
 					'message' => $message,
-					'line' => $number+1
+					'line' => $number + 1
 				));
 			}
 		}
