@@ -20,8 +20,8 @@ class ProtectedMethodStartsWithUnderscore extends \li3_quality\test\Rule {
 				$result = $this->_lookahead($lookaheadTokens);
 				if ($result['found'] === true && $result['match'] === false) {
 					$this->addViolation(array(
-						'message' =>  'Protected Method "' . $result['name'] . '" does not ' .
-									  'start with "_"',
+						'message' => 'Protected Method "' . $result['name'] . '" does not ' .
+							'start with "_"',
 						'line' => $token['line']
 					));
 				}
