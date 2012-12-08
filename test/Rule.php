@@ -64,6 +64,23 @@ abstract class Rule extends \lithium\core\Object {
 		return true;
 	}
 
+	/**
+	 * A helper method which helps finding tokens. If there are no tokens
+	 * on this line, we go backwards assuming a multiline token.
+	 *
+	 * @param  int    $line   The line you are on
+	 * @param  array  $tokens The tokens to iterate
+	 * @return int            The token id if found, -1 if not
+	 */
+	protected function _findTokenByLine($line, $tokens) {
+		foreach ($tokens as $id => $token) {
+			if ($token['line'] === $line) {
+				return $id;
+			}
+		}
+		return $line === 0 ? -1 : $this->_findTokenByLine($line - 1, $tokens);
+	}
+
 }
 
 ?>

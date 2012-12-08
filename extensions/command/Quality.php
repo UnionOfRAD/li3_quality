@@ -142,7 +142,8 @@ class Quality extends \lithium\console\command\Test {
 			}
 
 			if ($coverage == null || $coverage <= $this->threshold) {
-				$this->out(sprintf('%10s | %7s | %s',
+				$this->out(sprintf(
+					'%10s | %7s | %s',
 					$hasTest ? 'has test' : 'no test',
 					is_numeric($coverage) ? sprintf('%.2f%%', $coverage) : 'n/a',
 					$path
