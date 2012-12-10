@@ -22,7 +22,7 @@ class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 			if ($length != $lengthTrimmed) {
 				$this->addViolation(array(
 					'message' => $message,
-					'line' => $i+1,
+					'line' => $i + 1,
 					'position' => $length
 				));
 			}

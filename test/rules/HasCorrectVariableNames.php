@@ -32,7 +32,7 @@ class HasCorrectVariableNames extends \li3_quality\test\Rule {
 				$name = preg_replace('/(\$_?|_+$)/', '', $token['content']);
 				if ($name != Inflector::camelize($name, false)) {
 					$this->addViolation(array(
-						'message' =>  'Variable "' . $name . '" is not in camelBack style',
+						'message' => 'Variable "' . $name . '" is not in camelBack style',
 						'line' => $token['line']
 					));
 				}
