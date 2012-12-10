@@ -55,7 +55,7 @@ class HasCorrectInlineHTML extends \li3_quality\test\Rule {
 				foreach ($matches as $match) {
 					if (isset($match[0]) && preg_match($this->matchPattern, $match[0]) === 0) {
 						$this->addViolation(array(
-							'message' =>  $message,
+							'message' => $message,
 							'line' => $lineNumber,
 						));
 					}
