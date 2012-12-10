@@ -104,6 +104,77 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testFileWithMultipleClasses() {
+		$code = <<<EOD
+class foobar {
+	public function lines(\$line = null) {
+		\$lineEnding = function(\$source) {
+			if (strpos(\$source, "\\r\\n") !== false) {
+				return "\\r\\n";
+			} elseif (strpos(\$source, "\\r") !== false) {
+				return "\\r";
+			} else {
+				return "\\n";
+			}
+		};
+
+		if (\$this->_lines === null) {
+			\$this->_lines = explode(\$lineEnding(\$this->source()), \$this->source());
+		}
+		if (\$line) {
+			return \$this->_lines[++\$line];
+		}
+		return \$this->_lines;
+	}
+}
+\$var = 'foo';
+class barfoo {
+	public \$cow = 'moo';
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testNoSpacingFailureVariable() {
+		$code = "class foobar {\$foo = 'bar';}";
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testNoSpacingPassVariable() {
+		$code = "class foobar {public \$foo = 'bar';}";
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testNoSpacingFailureMethod() {
+		$code = "class foobar {public \$foo = 'bar'; function foo() { return 'bar'; }}";
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testNoSpacingPassMethod() {
+		$code = "class foobar {public \$foo = 'bar'; public function foo() { return 'bar'; }}";
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testVariableWithStaticProperty() {
+		$code = <<<EOD
+class foobar {
+	protected static \$_rules = array();
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testVariableWithStaticMethod() {
+		$code = <<<EOD
+class foobar {
+	protected static function foo() {
+		return 'bar';
+	}
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>
