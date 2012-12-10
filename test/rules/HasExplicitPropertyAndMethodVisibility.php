@@ -12,11 +12,19 @@ use lithium\util\String;
 
 class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 
+	/**
+	 * Tokens that require visibility
+	 * @var array
+	 */
 	public $inspectableTokens = array(
 		T_FUNCTION,
 		T_VARIABLE,
 	);
 
+	/**
+	 * Visibility tokens
+	 * @var array
+	 */
 	public $findTokens = array(
 		T_PUBLIC,
 		T_PROTECTED,
@@ -26,8 +34,8 @@ class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 	/**
 	 * Will iterate all the tokens looking for tokens in inspectableTokens
 	 * The token needs an access modifier if it is a T_FUNCTION or T_VARIABLE
-	 * and only contains a single tab. This prevents functions and variables
-	 * inside methods to register violations.
+	 * and is in the first level of T_CLASS. This prevents functions and variables
+	 * inside methods and outside classes to register violations.
 	 *
 	 * @param  Testable $testable The testable object
 	 * @return void
@@ -35,65 +43,82 @@ class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$message = '{:name} has no declared visibility.';
 		$tokens = $testable->tokens();
-		$lines = $testable->lines();
-		if ($this->hasClass($tokens)) {
-			foreach ($tokens as $token) {
-				$lineNumber = $token['line'];
-				$isInspectable = in_array($token['id'], $this->inspectableTokens);
-				$needsScope = $this->tokenNeedsScope($lines, $token);
-				$lineHasVisibility = $this->lineHasVisibility($tokens, $lineNumber);
-				if ($isInspectable && $needsScope && !$lineHasVisibility) {
+		$openBrackets = 0;
+		$insideClass = false;
+		$foundFirstClassBracket = false;
+		$foundClassOnBracket = -1;
+		foreach ($tokens as $tokenId => $token) {
+			$openBrackets += substr_count($token['content'], '{');
+			$openBrackets -= substr_count($token['content'], '}');
+			if ($token['id'] === T_CLASS) {
+				$foundClassOnBracket = $openBrackets;
+				$insideClass = true;
+			} elseif ($insideClass) {
+				$isInspectableToken = $this->isInspectableToken($token, $tokens);
+				$isInspectableLine = $openBrackets === $foundClassOnBracket + 1;
+				$tokenHasVisibility = false;
+				if ($isInspectableLine && $isInspectableToken) {
+					$tokenHasVisibility = $this->tokenHasVisibility($tokenId, $tokens);
+				}
+				if (!$foundFirstClassBracket && $openBrackets >= $foundClassOnBracket + 1) {
+					$foundFirstClassBracket = true;
+				}
+				if ($isInspectableLine && $isInspectableToken && !$tokenHasVisibility) {
 					$this->addViolation(array(
 						'message' => String::insert($message, $token),
 						'line' => $token['line'],
 					));
+				} elseif ($foundFirstClassBracket && $openBrackets <= 0) {
+					$insideClass = $foundFirstClassBracket = false;
 				}
 			}
 		}
 	}
 
 	/**
-	 * Will determine if the line has visibility
+	 * Will determine if the token has visibility
 	 *
+	 * @param  int     $tokenId
 	 * @param  array   $tokens
-	 * @param  int     $line
 	 * @return boolean
 	 */
-	public function lineHasVisibility($tokens, $line) {
-		foreach ($tokens as $token) {
-			if ($token['line'] === $line && in_array($token['id'], $this->findTokens)) {
+	public function tokenHasVisibility($tokenId, $tokens) {
+		$tokenStart = $tokenId - 5;
+		$tokenStart = ($tokenStart < 0) ? 0 : $tokenStart;
+		$length = $tokenId - $tokenStart;
+		$searchableTokens = array_reverse(array_slice($tokens, $tokenStart, $length));
+		foreach ($searchableTokens as $token) {
+			if (in_array($token['id'], $this->findTokens)) {
 				return true;
+			} elseif (in_array($token['id'], $this->inspectableTokens)) {
+				return false;
 			}
 		}
 		return false;
 	}
 
 	/**
-	 * Will determine if the $token needs a scope token.
+	 * Will detect if the current tokens is something we should inspect.
 	 *
-	 * @return boolean
-	 */
-	public function tokenNeedsScope($lines, $token) {
-		$lineId = $token['line'] - 1;
-		$content = $lines[$lineId];
-		return preg_match('/^\t{2,}/', $content) === 0;
-	}
-
-	/**
-	 * Will let you know if the current array of tokens has a T_CLASS
-	 *
+	 * @param  array   $token
 	 * @param  array   $tokens
 	 * @return boolean
 	 */
-	public function hasClass($tokens) {
-		$hasClass = false;
-		foreach ($tokens as $token) {
-			if ($token['id'] === T_CLASS) {
-				return true;
+	public function isInspectableToken($token, $tokens) {
+		if (!in_array($token['id'], $this->inspectableTokens)) {
+			return false;
+		}
+		if ($token['id'] === T_VARIABLE) {
+			$lineTokens = array();
+			foreach ($tokens as $t) {
+				if ($t['line'] === $token['line'] && $t['id'] === T_FUNCTION) {
+					return false;
+				}
 			}
 		}
-		return false;
+		return true;
 	}
+
 }
 
 ?>
