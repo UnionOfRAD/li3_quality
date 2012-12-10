@@ -25,7 +25,7 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 
 		foreach ($tokens as $key => $token) {
 			if ($token['name'] == 'T_FUNCTION') {
-				$this->_checkCamelBack($tokens[$key+2]);
+				$this->_checkCamelBack($tokens[$key + 2]);
 			}
 		}
 	}
@@ -36,7 +36,7 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 			$name = preg_replace('/^_+/', '', $lookahead['content']);
 			if ($name != Inflector::camelize($name, false)) {
 				$this->addViolation(array(
-					'message' =>  'Function "' . $name . '" is not in camelBack style',
+					'message' => 'Function "' . $name . '" is not in camelBack style',
 					'line' => $lookahead['line']
 				));
 			}

@@ -69,6 +69,10 @@ class Unit extends \lithium\test\Unit  {
 				'source' => $options,
 			);
 		}
+		$options += array(
+			'wrap' => true,
+		);
+
 		$this->rule = new $rule();
 		$this->testable = new Testable($options);
 		$this->rule->apply($this->testable);
