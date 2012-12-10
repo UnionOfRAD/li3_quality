@@ -2,6 +2,8 @@ Improve the code quality of your Lithium applications
 =====================================================
 This project is a 100% Lithium based replacement for the [li3_qa](https://github.com/UnionOfRAD/li3_qa) library, which in turn depends on [phpca](https://github.com/UnionOfRAD/phpca).
 
+[![Build Status](https://secure.travis-ci.org/UnionOfRAD/li3_quality.png?branch=master)](http://travis-ci.org/UnionOfRAD/li3_quality)
+
 Here are some of the key features:
 
 - Detect coding-standard violations.
