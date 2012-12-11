@@ -289,6 +289,46 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testCorrectTabSpacing() {
+		// This should be covered in a different rule, not this one
+		$code = <<<EOD
+array(
+	'foobar' => 'bar',
+	'foo'	 => 'bar',
+);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testCorrectBasicClassWithBlankSpacing() {
+		$code = <<<EOD
+class foo {
+	\$baz = array(
+		20,
+		24,
+		26,
+	);
+
+	public function bar() {
+		\$i = 10;
+
+		\$arr = array(32);
+		\$arr = array(
+			'jim',
+			'joe',
+			'bob',
+		);
+
+		\$arr = foo::bar(array(
+			'joe', 'bob', 'jim',
+		));
+		return \$i;
+	}
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>
