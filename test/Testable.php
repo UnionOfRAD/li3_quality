@@ -46,6 +46,7 @@ class Testable extends \lithium\core\Object {
 
 	/**
 	 * Config accessor method.
+	 *
 	 * @param   string $param The configuration key
 	 * @return  mixed
 	 */
@@ -58,6 +59,7 @@ class Testable extends \lithium\core\Object {
 
 	/**
 	 * Accessor method for the source code.
+	 *
 	 * @return  string
 	 */
 	public function source() {

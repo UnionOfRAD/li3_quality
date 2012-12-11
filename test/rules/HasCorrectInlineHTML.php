@@ -16,12 +16,14 @@ class HasCorrectInlineHTML extends \li3_quality\test\Rule {
 
 	/**
 	 * The pattern to match correctly formatted short tags
+	 *
 	 * @var string
 	 */
 	public $matchPattern = '/^\<\?=[^;\s]+\; \?\>$/';
 
 	/**
 	 * The pattern to match all short tags
+	 *
 	 * @var string
 	 */
 	public $findPattern = '/\<\?=.+?\?\>/';
@@ -29,6 +31,7 @@ class HasCorrectInlineHTML extends \li3_quality\test\Rule {
 	/**
 	 * We must match one of these tokens order to scan the line
 	 * The token T_OPEN_TAG_WITH_ECHO will NOT appear when short_open_tags are disabled
+	 *
 	 * @var array
 	 */
 	public $requiredTokens = array(
