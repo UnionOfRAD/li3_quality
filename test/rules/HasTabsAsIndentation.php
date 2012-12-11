@@ -10,12 +10,29 @@ namespace li3_quality\test\rules;
 
 class HasTabsAsIndentation extends \li3_quality\test\Rule {
 
+	/**
+	 * Tokens to ignore
+	 *
+	 * @var array
+	 */
+	public $ignoreableTokens = array(
+		T_ENCAPSED_AND_WHITESPACE,
+	);
+
 	public function apply($testable) {
 		$message = "Uses spaces instead of tabs";
 		$lines = $testable->lines();
+		$tokens = $testable->tokens();
 
 		foreach ($lines as $number => $line) {
-			if (preg_match('/^ +[^*]/', $line)) {
+			$lineNumber = $number + 1;
+			$ignore = false;
+			$key = $this->_findTokenByLine($lineNumber, $tokens);
+			if (isset($tokens[$key])) {
+				$token = $tokens[$key];
+				$ignore = in_array($token['id'], $this->ignoreableTokens);
+			}
+			if (!$ignore && preg_match('/^ +[^*]/', $line)) {
 				$this->addViolation(array(
 					'message' => $message,
 					'line' => $number + 1

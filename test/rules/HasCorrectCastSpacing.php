@@ -37,7 +37,7 @@ class HasCorrectCastSpacing extends \li3_quality\test\Rule {
 	);
 
 	/**
-	 * Will iterate tokens looking for cast tokens then apply a regex over them
+	 * Iterates tokens looking for cast tokens then testing against a regex
 	 *
 	 * @param  Testable $testable The testable object
 	 * @return void
