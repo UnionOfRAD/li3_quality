@@ -15,18 +15,6 @@ use li3_quality\tests\mocks\test\Testable;
 class Unit extends \lithium\test\Unit  {
 
 	/**
-	 * Where the testable object will be stored
-	 * @var object
-	 */
-	public $testable;
-
-	/**
-	 * Where the rule object will be stored
-	 * @var object
-	 */
-	public $rule;
-
-	/**
 	 * Will return true if the rule passed based on the provided source
 	 *
 	 * @param  string $source  The source to test against
@@ -35,7 +23,7 @@ class Unit extends \lithium\test\Unit  {
 	 * @return bool
 	 */
 	public function assertRulePass($source, $rule, $message = '{:message}') {
-		return $this->assert($this->_mockRule($rule, $source), $message, array(
+		return $this->assert($this->_mockRuleSuccess($rule, $source), $message, array(
 			'expected' => 'pass',
 			'result' => $this->rule->violations(),
 		));
@@ -50,7 +38,7 @@ class Unit extends \lithium\test\Unit  {
 	 * @return bool
 	 */
 	public function assertRuleFail($source, $rule, $message = '{:message}') {
-		return $this->assert(!$this->_mockRule($rule, $source), $message, array(
+		return $this->assert(!$this->_mockRuleSuccess($rule, $source), $message, array(
 			'expected' => 'fail',
 			'result' => $this->rule->violations(),
 		));
@@ -60,10 +48,35 @@ class Unit extends \lithium\test\Unit  {
 	 * Will generate a new rule and call apply on it.
 	 *
 	 * @param  string       $rule    The nonspaced class of the rule
-	 * @param  string|array $source  Source code, or arary of config options
-	 * @return bool
+	 * @param  string|array $options Source code, or arary of config options
+	 * @return object
 	 */
-	protected function _mockRule($rule, $options = array()) {
+	protected function _mockRuleSuccess($rule, $options = array()) {
+		$rule = $this->_rule($rule);
+		$testable = $this->_testable($options);
+		$rule->apply($testable);
+		return $rule->success();
+	}
+
+	/**
+	 * Will generate a new rule and call apply on it.
+	 *
+	 * @param  string       $rule    The nonspaced class of the rule
+	 * @param  string|array $options Source code, or arary of config options
+	 * @return object
+	 */
+	protected function _rule($rule) {
+		$this->rule = new $rule();
+		return $this->rule;
+	}
+
+	/**
+	 * Will generate a new Testable object
+	 *
+	 * @param  string|array $options Source code, or arary of config options
+	 * @return li3_quality\tests\mocks\test\Testable
+	 */
+	protected function _testable($options) {
 		if (is_string($options)) {
 			$options = array(
 				'source' => $options,
@@ -72,11 +85,7 @@ class Unit extends \lithium\test\Unit  {
 		$options += array(
 			'wrap' => true,
 		);
-
-		$this->rule = new $rule();
-		$this->testable = new Testable($options);
-		$this->rule->apply($this->testable);
-		return $this->rule->success();
+		return new Testable($options);;
 	}
 
 }

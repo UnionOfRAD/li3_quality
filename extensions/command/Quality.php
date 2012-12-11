@@ -99,7 +99,6 @@ class Quality extends \lithium\console\command\Test {
 		$this->out("Checking documentation on " . count($testables) . " classes.");
 
 		foreach ($testables as $count => $path) {
-			//
 		}
 	}
 
