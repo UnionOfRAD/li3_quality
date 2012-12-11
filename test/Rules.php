@@ -14,6 +14,7 @@ class Rules extends \lithium\core\StaticObject {
 
 	/**
 	 * A list of all the rules that will be applied to the test
+	 *
 	 * @var array
 	 */
 	protected static $_rules = array();
@@ -35,6 +36,7 @@ class Rules extends \lithium\core\StaticObject {
 
 	/**
 	 * Will add a single rule to the list of rules to be applied to the tests
+	 *
 	 * @param  object $rule     The rule to add
 	 * @param  array  $options  Rule options
 	 * @return void

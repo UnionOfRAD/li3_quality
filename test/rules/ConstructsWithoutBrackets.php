@@ -14,6 +14,7 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 
 	/**
 	 * Language construct tokens to look for
+	 *
 	 * @var array
 	 */
 	public $inspectableTokens = array(
@@ -31,6 +32,7 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 
 	/**
 	 * Tokens to skip after finding $inspectableTokens
+	 *
 	 * @var array
 	 */
 	public $pattern = "/^(\s+)?([a-z_]+)((\s+)([^(]|\([^)]+\)[^;])|;)/";

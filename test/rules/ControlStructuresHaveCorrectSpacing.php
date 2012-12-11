@@ -86,6 +86,7 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 
 	/**
 	 * Reusable expressions to make code easier to read and reusable
+	 *
 	 * @var array
 	 */
 	protected $_regexMap = array(

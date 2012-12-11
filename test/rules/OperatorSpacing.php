@@ -14,6 +14,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 
 	/**
 	 * The current spacing rules in place
+	 *
 	 * @var array
 	 */
 	public $inspector = array(

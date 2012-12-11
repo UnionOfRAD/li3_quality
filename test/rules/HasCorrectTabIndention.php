@@ -15,6 +15,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	/**
 	 * The forceOneMoreLine applies to the next line
 	 * The forceOneLessLine applies to the current line
+	 *
 	 * @var array
 	 */
 	public $patterns = array(
@@ -31,12 +32,14 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 
 	/**
 	 * The error message when they have too many tabs.
+	 *
 	 * @var string
 	 */
 	public $positiveMessage = 'This line has an extra {:extraCount} tabs.';
 
 	/**
 	 * The error message when they don't have enough tabs.
+	 *
 	 * @var string
 	 */
 	public $negativeMessage = 'This line has {:extraCount} too many tabs.';
