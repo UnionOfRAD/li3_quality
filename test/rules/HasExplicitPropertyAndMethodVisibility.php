@@ -14,6 +14,7 @@ class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 
 	/**
 	 * Tokens that require visibility
+	 *
 	 * @var array
 	 */
 	public $inspectableTokens = array(
@@ -23,6 +24,7 @@ class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 
 	/**
 	 * Visibility tokens
+	 *
 	 * @var array
 	 */
 	public $findTokens = array(

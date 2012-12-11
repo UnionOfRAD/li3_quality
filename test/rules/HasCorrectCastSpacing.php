@@ -16,12 +16,14 @@ class HasCorrectCastSpacing extends \li3_quality\test\Rule {
 
 	/**
 	 * The pattern to match correctly formatted casts
+	 *
 	 * @var string
 	 */
 	public $pattern = '/^\([a-z]+\) [^ ]/';
 
 	/**
 	 * A list of the cast tokens
+	 *
 	 * @var array
 	 */
 	public $tokens = array(
@@ -35,6 +37,7 @@ class HasCorrectCastSpacing extends \li3_quality\test\Rule {
 	);
 
 	/**
+	 * Will iterate tokens looking for cast tokens then apply a regex over them
 	 *
 	 * @param  Testable $testable The testable object
 	 * @return void

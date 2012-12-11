@@ -166,5 +166,48 @@ EOD;
 		$code = '// foobar';
 		$this->assertRuleFail($code, $this->rule);
 	}
+
+	public function testDocBlockCorrectTagPlacement() {
+		$code = <<<EOD
+/**
+ * Here is some info about class Foo
+ *
+ * Oh and something else...
+ *
+ * @package FooPackage
+ */
+class Foo {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testDocBlockIncorrectTagPlacement() {
+		$code = <<<EOD
+/**
+ * Here is some info about class Foo
+ *
+ * Oh and something else...
+ * @package FooPackage
+ */
+class Foo {
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testDocBlockMustBeLast() {
+		$code = <<<EOD
+/**
+ * Here is some info about class Foo
+ *
+ * @package FooPackage
+ * Oh and something else...
+ */
+class Foo {
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
 }
 ?>
