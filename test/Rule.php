@@ -81,6 +81,64 @@ abstract class Rule extends \lithium\core\Object {
 		return $line === 0 ? -1 : $this->_findTokenByLine($line - 1, $tokens);
 	}
 
+	/**
+	 * Will find the next token
+	 *
+	 * @param  array           $tokens The array of tokens
+	 * @param  array           $types  The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
+	 * @param  integer         $start  Where you want to start
+	 * @return integer|boolean         The index of the next $type or false if nothing is found
+	 */
+	public function findNext($tokens, array $types, $start = 0) {
+		$total = count($tokens);
+		for ($id = $start; $id < $total;$id++) {
+			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
+				return $id;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Will find the previous token
+	 *
+	 * @param  array           $tokens The array of tokens
+	 * @param  array           $types  The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
+	 * @param  integer         $start  Where you want to start
+	 * @return integer|boolean         The index of the next $type or false if nothing is found
+	 */
+	public function findPrev($tokens, array $types, $start = 0) {
+		for ($id = $start; $id >= 0;$id--) {
+			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
+				return $id;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Will detect if the given token is inside of a specific token
+	 *
+	 * @param  array  $tokens    The array of tokens
+	 * @param  array  $findToken The tokens you are looking for
+	 * @param  int    $start     The token index that could be inside $findToken
+	 * @return bool
+	 */
+	public function tokenIn($tokens, $findToken, $start) {
+		$openBrackets = 0;
+		$prevToken = $this->findPrev($tokens, $findToken, $start);
+		if ($prevToken !== false) {
+			for ($id = $prevToken; $id < $start;$id++) {
+				if ($tokens[$id]['content'] === '{') {
+					$openBrackets++;
+				} elseif ($tokens[$id]['content'] === '}') {
+					$openBrackets--;
+				}
+			}
+		}
+		return $openBrackets >= 1;
+	}
+
 }
 
 ?>
