@@ -98,7 +98,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @return int
 	 */
 	protected function _beginningTabCount($line) {
-		preg_match_all('/^(\t+)[^\t]+$/', $line, $matches);
+		preg_match_all('/^(\t+)[^\t]/', $line, $matches);
 		if (isset($matches[1][0])) {
 			return strlen($matches[1][0]);
 		}
