@@ -45,7 +45,6 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 			}
 			if (!$ignore && preg_match($this->pattern, $line) == 0) {
 				$token = $tokens[$this->_findTokenByLine($lineNumber, $tokens)];
-				echo token_name($token['id']) . PHP_EOL;
 				$this->addViolation(array(
 					'message' => 'Tabs can only appear at the beginning of the line',
 					'line' => $lineNumber,
