@@ -8,7 +8,6 @@
 
 namespace li3_quality\test\rules;
 
-
 class ProtectedMethodStartsWithUnderscore extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
