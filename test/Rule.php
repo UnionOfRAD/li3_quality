@@ -10,55 +10,57 @@ namespace li3_quality\test;
 abstract class Rule extends \lithium\core\Object {
 
 	/**
-	 *
-	 */
-	protected $_callable = null;
-
-	/**
 	 * Contains the current violations.
 	 */
 	protected $_violations = array();
 
 	/**
+	 * This method will need to addViolations if one is found
 	 *
-	 */
-	public function __construct($options = array()) {}
-
-	/**
-	 *
+	 * @param   object $testable The testable object
+	 * @return  void
 	 */
 	abstract public function apply($testable);
 
 	/**
+	 * Will determine if `apply()` had any violations
 	 *
+	 * @return  boolean
 	 */
 	public function success() {
 		return empty($this->_violations);
 	}
 
 	/**
+	 * Will add violations in the correct way
 	 *
+	 * @param   array $violation The violation should include message and line keys
+	 * @return  void
 	 */
 	public function addViolation($violation = array()) {
 		$this->_violations[] = $violation;
 	}
 
 	/**
+	 * Will return a list of current violations
 	 *
+	 * @return  array
 	 */
 	public function violations() {
 		return $this->_violations;
 	}
 
 	/**
+	 * Will reset the current list of violations
 	 *
+	 * @return  void
 	 */
 	public function reset() {
 		$this->_violations = array();
 	}
 
 	/**
-	 *
+	 * A switch to check if this rule should be applied to the current tests or not
 	 */
 	public function enabled() {
 		return true;

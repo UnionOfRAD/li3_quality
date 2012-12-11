@@ -7,7 +7,6 @@
  */
 namespace li3_quality\test;
 
-use SplFixedArray;
 use lithium\core\Libraries;
 use lithium\analysis\Parser;
 
@@ -47,6 +46,8 @@ class Testable extends \lithium\core\Object {
 
 	/**
 	 * Config accessor method.
+	 * @param   string $param The configuration key
+	 * @return  mixed
 	 */
 	public function config($param = null) {
 		if ($param === null) {
@@ -57,6 +58,7 @@ class Testable extends \lithium\core\Object {
 
 	/**
 	 * Accessor method for the source code.
+	 * @return  string
 	 */
 	public function source() {
 		return $this->_source;
@@ -71,6 +73,8 @@ class Testable extends \lithium\core\Object {
 	 *
 	 * The PHP version check is in there, because on 5.3.6 (and maybe until 5.3.9),
 	 * when using an SplFixed array (which is faster), the app segfaults.
+	 *
+	 * @return  array
 	 */
 	public function tokens() {
 		if ($this->_tokens === null) {
@@ -83,6 +87,8 @@ class Testable extends \lithium\core\Object {
 	 * Accessor method for source lines.
 	 *
 	 * It returns each line of the source file in an array.
+	 *
+	 * @return  array
 	 */
 	public function lines($line = null) {
 		if ($this->_lines === null) {
