@@ -209,5 +209,25 @@ class Foo {
 EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
+
+	public function testMultiLineParam() {
+		$code = <<<EOD
+/**
+ * Splits the provided `\$code` into PHP language tokens.
+ *
+ * @param string \$code Source code to be tokenized.
+ * @param array \$options Options consists of:
+ *        -'wrap': Boolean indicating whether or not to wrap the supplied
+ *          code in PHP tags.
+ *        -'ignore': An array containing PHP language tokens to ignore.
+ *        -'include': If supplied, an array of the only language tokens
+ *         to include in the output.
+ * @return array An array of tokens in the supplied source code.
+ */
+class Foo {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 ?>
