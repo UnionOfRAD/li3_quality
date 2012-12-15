@@ -225,6 +225,11 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testNegativeNumberInsideParentheses() {
+		$code = 'return max(-1, 1);';
+		$this->assertRulePass($code, $this->rule);
+	}
+
 	public function testTermVariableEqualsStrings() {
 		$code = '$hasTest ? \'has test\' : \'no test\'';
 		$this->assertRulePass($code, $this->rule);

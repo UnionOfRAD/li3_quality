@@ -74,10 +74,10 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 		),
 		'negativeNumber' => array(
 			'relativeTokens' => array(
-				'before' => 1,
-				'length' => 3,
+				'before' => 2,
+				'length' => 5,
 			),
-			'regex' => '/^ {:content}( |\d+)?$/',
+			'regex' => '/(( {:content} )|([^\d]{:content}\d+))/',
 			'tokens' => array(),
 			'message' => 'Operator {:content} must have 1 leading and an optional trailing space.',
 			'content' => array(
