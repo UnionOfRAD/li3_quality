@@ -14,8 +14,9 @@ class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
 		$message = "Trailing whitespace found";
+		$lines = $testable->lines();
 
-		foreach ($testable->lines() as $i => $line) {
+		foreach ($lines as $i => $line) {
 			$name = 'li3_quality';
 			$length = Multibyte::strlen($line, compact('name'));
 			$lengthTrimmed = Multibyte::strlen(rtrim($line), compact('name'));
@@ -30,8 +31,7 @@ class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 		if (empty($line)) {
 			$this->addViolation(array(
 				'message' => $message,
-				'line' => $i + 1,
-				'position' => $length
+				'line' => count($lines)
 			));
 		}
 	}
