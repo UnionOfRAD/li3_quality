@@ -130,29 +130,27 @@ class Parser extends \lithium\analysis\Parser {
 	 * @return bool          If this token is a parent or not
 	 */
 	protected static function _isParent(&$token, &$tokens) {
-		if (isset(self::$_parentTokens[$token['id']])) {
-			$requiredParents = self::$_parentTokens[$token['id']]['parents'];
-			$parentId = $token['parent'];
-			$isDecoy = false;
-			$hasRequiredParents = empty($requiredParents);
-			if (isset($tokens[$parentId])) {
-				$parentToken = $tokens[$parentId]['id'];
-				if (!$hasRequiredParents) {
-					$hasRequiredParents = in_array($parentToken, $requiredParents);
-				}
-				if ($token['id'] === T_IF) {
-					$tokenId = array_search($token, $tokens);
-					$correctParent = $parentToken === T_ELSE;
-					$correctSpacing = $tokenId - $parentId === 2;
-					$correctWhitespace = $tokens[$tokenId - 1]['id'] === T_WHITESPACE;
-					$isDecoy = $correctParent && $correctSpacing && $correctWhitespace;
-				}
+		if (!isset(self::$_parentTokens[$token['id']])) {
+			return false;
+		}
+		$requiredParents = self::$_parentTokens[$token['id']]['parents'];
+		$parentId = $token['parent'];
+		$isDecoy = false;
+		$hasRequiredParents = empty($requiredParents);
+		if (isset($tokens[$parentId])) {
+			$parentToken = $tokens[$parentId]['id'];
+			if (!$hasRequiredParents) {
+				$hasRequiredParents = in_array($parentToken, $requiredParents);
 			}
-			if ($hasRequiredParents && !$isDecoy) {
-				return true;
+			if ($token['id'] === T_IF) {
+				$tokenId = array_search($token, $tokens);
+				$correctParent = $parentToken === T_ELSE;
+				$correctSpacing = $tokenId - $parentId === 2;
+				$correctWhitespace = $tokens[$tokenId - 1]['id'] === T_WHITESPACE;
+				$isDecoy = $correctParent && $correctSpacing && $correctWhitespace;
 			}
 		}
-		return false;
+		return $hasRequiredParents && !$isDecoy;
 	}
 
 	/**
