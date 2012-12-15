@@ -8,7 +8,7 @@
 namespace li3_quality\test;
 
 use lithium\core\Libraries;
-use lithium\analysis\Parser;
+use li3_quality\analysis\Parser;
 
 class Testable extends \lithium\core\Object {
 
@@ -83,6 +83,95 @@ class Testable extends \lithium\core\Object {
 			$this->_tokens = Parser::tokenize($this->source(), $this->_config);
 		}
 		return $this->_tokens;
+	}
+
+	/**
+	 * Will find the next content
+	 *
+	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
+	 * @param  integer         $start Where you want to start
+	 * @return integer|boolean        The index of the next $type or false if nothing is found
+	 */
+	public function findNextContent(array $types, $start = 0) {
+		$tokens = $this->tokens();
+		$total = count($tokens);
+		for ($id = $start; $id < $total;$id++) {
+			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
+				return $id;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Will find the previous content
+	 *
+	 * @param  array           $types An array of items to search for
+	 * @param  integer         $start Where you want to start
+	 * @return integer|boolean        The index of the next $type or false if nothing is found
+	 */
+	public function findPrevContent(array $types, $start = 0) {
+		$tokens = $this->tokens();
+		for ($id = $start; $id >= 0;$id--) {
+			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
+				return $id;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Will find the next token
+	 *
+	 * @param  array           $types An array of items to search for
+	 * @param  integer         $start Where you want to start
+	 * @return integer|boolean        The index of the next $type or false if nothing is found
+	 */
+	public function findNext(array $types, $start = 0) {
+		$tokens = $this->tokens();
+		$total = count($tokens);
+		for ($id = $start; $id < $total;$id++) {
+			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
+				return $id;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Will find the previous token
+	 *
+	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
+	 * @param  integer         $start Where you want to start
+	 * @return integer|boolean        The index of the next $type or false if nothing is found
+	 */
+	public function findPrev(array $types, $start = 0) {
+		$tokens = $this->tokens();
+		for ($id = $start; $id >= 0;$id--) {
+			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
+				return $id;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Will determine if the $needle has a parent of $haystack types
+	 *
+	 * @param  array $haystack Array of tokens
+	 * @param  int   $needle   The index of token to analyze
+	 * @return bool
+	 */
+	public function tokenIn(array $haystack, $needle) {
+		$tokens = $this->tokens();
+		$self = $tokens[$needle];
+		while (isset($tokens[$self['parent']])) {
+			if (in_array($tokens[$self['parent']]['id'], $haystack)) {
+				return true;
+			}
+			$self = $tokens[$self['parent']];
+		}
+		return false;
 	}
 
 	/**

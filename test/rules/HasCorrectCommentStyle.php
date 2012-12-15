@@ -38,7 +38,8 @@ class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 			'{:begin}\t?\/\*\*',
 			'(({:wlinet} \*( [^@].*)?)+)',
 			'{:wlinet} \*',
-			'(({:wlinet} \* @(.*))+)',
+			'(({:wlinet} \* @(.*)))',
+			'(({:wlinet} \* (@|[ ]{5})(.*))+)?',
 			'{:wlinet} \*\/',
 			'/',
 		),
@@ -66,12 +67,12 @@ class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 		$tokens = $testable->tokens();
 		foreach ($tokens as $tokenId => $token) {
 			if (in_array($token['id'], $this->inspectableTokens)) {
-				$inClass = $this->tokenIn($tokens, array(T_CLASS), $tokenId);
-				$inFunction = $this->tokenIn($tokens, array(T_FUNCTION), $tokenId);
+				$inClass = $testable->tokenIn(array(T_CLASS), $tokenId);
+				$inFunction = $testable->tokenIn(array(T_FUNCTION), $tokenId);
 				$content = null;
 				if ($inClass && $inFunction) {
-					$function = $this->findPrev($tokens, array(T_FUNCTION), $tokenId);
-					$functionNameId = $this->findNext($tokens, array(T_STRING), $function);
+					$function = $testable->findPrev(array(T_FUNCTION), $tokenId);
+					$functionNameId = $testable->findNext(array(T_STRING), $function);
 					$pattern = $this->compilePattern('TEST_FUNCTION');
 					if (preg_match($pattern, $tokens[$functionNameId]['content']) === 0) {
 						$this->addViolation(array(
