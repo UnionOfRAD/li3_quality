@@ -27,6 +27,13 @@ class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 				));
 			}
 		}
+		if (empty($line)) {
+			$this->addViolation(array(
+				'message' => $message,
+				'line' => $i + 1,
+				'position' => $length
+			));
+		}
 	}
 
 }
