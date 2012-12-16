@@ -155,7 +155,7 @@ class Testable extends \lithium\core\Object {
 	 * Will find the previous token
 	 *
 	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
-	 * @param  integer|array   $start Where you want to start, or an array of items to search
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
 	 * @return integer|boolean        The index of the next $type or false if nothing is found
 	 */
 	public function findPrev(array $types, $range = 0) {

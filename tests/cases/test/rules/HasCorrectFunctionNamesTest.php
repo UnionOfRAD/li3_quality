@@ -37,10 +37,19 @@ EOD;
 	public function testCorrectProtectedMethod() {
 		$code = <<<EOD
 class FooBar {
-	public function _fooBarBaz() {}
+	protected function _fooBarBaz() {}
 }
 EOD;
 		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testInCorrectPublicMethod() {
+		$code = <<<EOD
+class FooBar {
+	public function _fooBarBaz() {}
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
 	}
 
 }
