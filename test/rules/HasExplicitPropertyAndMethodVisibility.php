@@ -45,80 +45,22 @@ class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$message = '{:name} has no declared visibility.';
 		$tokens = $testable->tokens();
-		$openBrackets = 0;
-		$insideClass = false;
-		$foundFirstClassBracket = false;
-		$foundClassOnBracket = -1;
-		foreach ($tokens as $tokenId => $token) {
-			$openBrackets += substr_count($token['content'], '{');
-			$openBrackets -= substr_count($token['content'], '}');
-			if ($token['id'] === T_CLASS) {
-				$foundClassOnBracket = $openBrackets;
-				$insideClass = true;
-			} elseif ($insideClass) {
-				$isInspectableToken = $this->isInspectableToken($token, $tokens);
-				$isInspectableLine = $openBrackets === $foundClassOnBracket + 1;
-				$tokenHasVisibility = false;
-				if ($isInspectableLine && $isInspectableToken) {
-					$tokenHasVisibility = $this->tokenHasVisibility($tokenId, $tokens);
-				}
-				if (!$foundFirstClassBracket && $openBrackets >= $foundClassOnBracket + 1) {
-					$foundFirstClassBracket = true;
-				}
-				if ($isInspectableLine && $isInspectableToken && !$tokenHasVisibility) {
+		$classes = $testable->findAll(array(T_CLASS));
+		foreach ($classes as $classId) {
+			$children = $tokens[$classId]['children'];
+			$members = $testable->findAll($this->inspectableTokens, $children);
+			foreach ($members as $member) {
+				$token = $tokens[$member];
+				$tokenChildren = $token['children'];
+				$visibility = $testable->findNext($this->findTokens, $tokenChildren);
+				if ($visibility === false) {
 					$this->addViolation(array(
 						'message' => String::insert($message, $token),
 						'line' => $token['line'],
 					));
-				} elseif ($foundFirstClassBracket && $openBrackets <= 0) {
-					$insideClass = $foundFirstClassBracket = false;
 				}
 			}
 		}
-	}
-
-	/**
-	 * Will determine if the token has visibility
-	 *
-	 * @param  int     $tokenId
-	 * @param  array   $tokens
-	 * @return boolean
-	 */
-	public function tokenHasVisibility($tokenId, $tokens) {
-		$tokenStart = $tokenId - 5;
-		$tokenStart = ($tokenStart < 0) ? 0 : $tokenStart;
-		$length = $tokenId - $tokenStart;
-		$searchableTokens = array_reverse(array_slice($tokens, $tokenStart, $length));
-		foreach ($searchableTokens as $token) {
-			if (in_array($token['id'], $this->findTokens)) {
-				return true;
-			} elseif (in_array($token['id'], $this->inspectableTokens)) {
-				return false;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Will detect if the current tokens is something we should inspect.
-	 *
-	 * @param  array   $token
-	 * @param  array   $tokens
-	 * @return boolean
-	 */
-	public function isInspectableToken($token, $tokens) {
-		if (!in_array($token['id'], $this->inspectableTokens)) {
-			return false;
-		}
-		if ($token['id'] === T_VARIABLE) {
-			$lineTokens = array();
-			foreach ($tokens as $t) {
-				if ($t['line'] === $token['line'] && $t['id'] === T_FUNCTION) {
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 }
