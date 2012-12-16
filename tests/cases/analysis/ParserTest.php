@@ -18,26 +18,6 @@ EOD;
 		$this->assertIdentical(26, count($tokens));
 	}
 
-	public function testDocBlockHasClassParent() {
-		$code = <<<EOD
-class Foobar {
-
-	/**
-	 * This is a docblock
-	 */
-	public static function bar() {
-		return false;
-	}
-}
-EOD;
-		$tokens = Parser::tokenize($code);
-		$docblock = $tokens[6];
-		$this->assertIdentical(T_DOC_COMMENT, $docblock['id']);
-
-		$parent = $tokens[$docblock['parent']];
-		$this->assertIdentical(T_CLASS, $parent['id']);
-	}
-
 	public function testParentAfterAbstractMethod() {
 		$code = <<<EOD
 class Foobar {
@@ -363,6 +343,81 @@ EOD;
 		$this->assertIdentical(39, count($tokens));
 	}
 
+	public function testDocBlockWithClassParent() {
+		$code = <<<EOD
+/**
+ * Do I have a parent?
+ */
+class Rules {}
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$this->assertIdentical(T_DOC_COMMENT, $tokens[0]['id']);
+		$this->assertIdentical(T_CLASS, $tokens[2]['id']);
+
+		$expected = 2;
+		$result = $tokens[0]['parent'];
+		$this->assertIdentical($expected, $result);
+	}
+
+	public function testDocBlockTooFarHasNoParent() {
+		$code = <<<EOD
+/**
+ * Do I have a parent?
+ */
+
+class Rules {}
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$this->assertIdentical(T_DOC_COMMENT, $tokens[0]['id']);
+		$this->assertIdentical(T_CLASS, $tokens[2]['id']);
+
+		$expected = -1;
+		$result = $tokens[0]['parent'];
+		$this->assertIdentical($expected, $result);
+	}
+
+	public function testDocBlockHasMethodParent() {
+		$code = <<<EOD
+class Foobar {
+
+	/**
+	 * This is a docblock
+	 */
+	public static function bar() {
+		return false;
+	}
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+		$docblock = $tokens[6];
+		$this->assertIdentical(T_DOC_COMMENT, $docblock['id']);
+
+		$parent = $tokens[$docblock['parent']];
+		$this->assertIdentical(T_FUNCTION, $parent['id']);
+	}
+
+	public function testDocBlockHasClassParent() {
+		$code = <<<EOD
+class Foobar {
+
+	/**
+	 * This is a docblock
+	 */
+
+	public static function bar() {
+		return false;
+	}
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+		$docblock = $tokens[6];
+		$this->assertIdentical(T_DOC_COMMENT, $docblock['id']);
+
+		$parent = $tokens[$docblock['parent']];
+		$this->assertIdentical(T_CLASS, $parent['id']);
+	}
 
 }
 

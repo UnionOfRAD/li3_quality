@@ -105,6 +105,7 @@ class Parser extends \lithium\analysis\Parser {
 		T_PRIVATE,
 		T_PROTECTED,
 		T_STATIC,
+		T_DOC_COMMENT,
 	);
 
 	/**
@@ -248,6 +249,20 @@ class Parser extends \lithium\analysis\Parser {
 				return true;
 			}
 			return false;
+		} elseif ($token['id'] === T_DOC_COMMENT) {
+			$tokenId = array_search($token, $tokens);
+			$height = count(preg_split('/\r\n|\r|\n/', $token['content']));
+			$parentLine = $token['line'] + $height;
+			$nextParent = false;
+			foreach (range($tokenId, count($tokens)) as $id) {
+				$possibleParent = $tokens[$id];
+				if ($possibleParent['line'] > $parentLine) {
+					return false;
+				} elseif (in_array($possibleParent['id'], array(T_CLASS, T_FUNCTION))) {
+					return true;
+				}
+			}
+			return false;
 		}
 		return in_array($token['id'], self::$_beforeParents);
 	}
@@ -267,8 +282,8 @@ class Parser extends \lithium\analysis\Parser {
 	 */
 	public static function tokenize($code, array $options = array()) {
 		$tokens = parent::tokenize($code, $options);
-		$level = $queue = 0;
-		$currentParent = $mustInclude = -1;
+		$level = 0;
+		$queue = $currentParent = $mustInclude = -1;
 		$total = count($tokens);
 		$maxLevel = 0;
 		$curlyOpen = false;
@@ -320,21 +335,21 @@ class Parser extends \lithium\analysis\Parser {
 				$currentParent = $tokenId;
 				$mustInclude = self::_mustInclude($token, $tokens);
 				$token['mustInclude'] = $mustInclude;
-				if ($queue !== 0) {
+				if ($queue !== -1) {
 					foreach (range($queue, $tokenId - 1) as $key) {
 						$tokens[$key]['parent'] = $currentParent;
 						$tokens[$key]['level'] = $level;
 						$token['children'][] = $key;
 					}
 				}
-				$queue = 0;
-			} elseif ($queue === 0 && self::_canQueue($token, $tokens)) {
+				$queue = -1;
+			} elseif ($queue === -1 && self::_canQueue($token, $tokens)) {
 				$queue = $tokenId;
 			} elseif ($token['id'] === T_CURLY_OPEN) {
 				$curlyOpen = true;
 			}
 		}
-		if ($queue !== 0 || $level !== 0) {
+		if ($queue !== -1 || $level !== 0) {
 			$smallTokens = array_slice($tokens, 0, 20);
 			$data = print_r(compact('queue', 'level', 'tokens'), true);
 			throw new \LogicException('A parse error has been encountered.' . $data);
