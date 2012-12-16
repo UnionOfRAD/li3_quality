@@ -15,6 +15,11 @@ use li3_quality\tests\mocks\test\MockTestable as Testable;
 class Unit extends \lithium\test\Unit  {
 
 	/**
+	 * The rule that is being tested against.
+	 */
+	public $rule = null;
+
+	/**
 	 * Will return true if the rule passed based on the provided source
 	 *
 	 * @param  string $source  The source to test against
