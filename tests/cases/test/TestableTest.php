@@ -225,6 +225,36 @@ EOD;
 		$this->assertIdentical('function', $tokens[$foundId]['content']);
 	}
 
+	public function testFindAll() {
+		$code = <<<EOD
+class foo {
+	public function bar() {}
+	private function bar() {}
+}
+EOD;
+		$testable = $this->_testable($code);
+
+		$ids = $testable->findAll(array(T_FUNCTION), 0);
+		$this->assertIdentical(2, count($ids));
+	}
+
+	public function testFindAllWithArray() {
+		$code = <<<EOD
+class foo {
+	public \$foo = 'baz';
+	protected function bar() {}
+	private function bar() {}
+}
+EOD;
+		$testable = $this->_testable($code);
+		$tokens = $testable->tokens();
+		$classId = $testable->findNext(array(T_CLASS), 0);
+		$children = $tokens[$classId]['children'];
+
+		$ids = $testable->findAllContent(array('function', '$foo'), $children);
+		$this->assertIdentical(3, count($ids));
+	}
+
 }
 
 ?>

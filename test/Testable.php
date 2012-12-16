@@ -174,6 +174,50 @@ class Testable extends \lithium\core\Object {
 	}
 
 	/**
+	 * Will find all matching tokens
+	 *
+	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
+	 * @return array           An array of found item ids, or an empty array when nothing is found
+	 */
+	public function findAll(array $types, $range = 0) {
+		$found = array();
+		$tokens = $this->tokens();
+		$total = count($tokens);
+		if (!is_array($range)) {
+			$range = range($range, $total);
+		}
+		foreach ($range as $id) {
+			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
+				$found[] = $id;
+			}
+		}
+		return $found;
+	}
+
+	/**
+	 * Will find all matching content
+	 *
+	 * @param  array           $types The types you wish to find ('$foo', '{', ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
+	 * @return array           An array of found item ids, or an empty array when nothing is found
+	 */
+	public function findAllContent(array $types, $range = 0) {
+		$found = array();
+		$tokens = $this->tokens();
+		$total = count($tokens);
+		if (!is_array($range)) {
+			$range = range($range, $total);
+		}
+		foreach ($range as $id) {
+			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
+				$found[] = $id;
+			}
+		}
+		return $found;
+	}
+
+	/**
 	 * Will determine if the $needle has a parent of $haystack types
 	 *
 	 * @param  array $haystack Array of tokens
