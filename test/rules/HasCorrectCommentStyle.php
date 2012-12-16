@@ -71,10 +71,9 @@ class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 				$inFunction = $testable->tokenIn(array(T_FUNCTION), $tokenId);
 				$content = null;
 				if ($inClass && $inFunction) {
-					$function = $testable->findPrev(array(T_FUNCTION), $tokenId);
-					$functionNameId = $testable->findNext(array(T_STRING), $function);
+					$parentLabel = $tokens[$token['parent']]['label'];
 					$pattern = $this->compilePattern('TEST_FUNCTION');
-					if (preg_match($pattern, $tokens[$functionNameId]['content']) === 0) {
+					if (preg_match($pattern, $parentLabel) === 0) {
 						$this->addViolation(array(
 							'message' => 'Comments should not appear in methods.',
 							'line' => $token['line'],
