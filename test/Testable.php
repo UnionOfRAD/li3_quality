@@ -35,7 +35,7 @@ class Testable extends \lithium\core\Object {
 	/**
 	 * Locates the file and reads its source code.
 	 */
-	public function __construct($config = array()) {
+	public function __construct(array $config = array()) {
 		$this->_config = $config + array(
 			'wrap' => false,
 		);

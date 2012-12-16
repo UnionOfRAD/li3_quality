@@ -3,6 +3,7 @@
 namespace li3_quality\tests\cases\test;
 
 use li3_quality\tests\mocks\test\MockTestable as Testable;
+use li3_quality\test\Testable as RealTestable;
 
 class TestableTest extends \li3_quality\test\Unit {
 
@@ -253,6 +254,59 @@ EOD;
 
 		$ids = $testable->findAllContent(array('function', '$foo'), $children);
 		$this->assertIdentical(3, count($ids));
+	}
+
+	public function testSource() {
+		$code = <<<EOD
+class foo {
+	public \$foo = 'baz';
+	protected function bar() {}
+	private function bar() {}
+}
+EOD;
+		$testable = new Testable(array(
+			'source' => $code,
+		));
+		$source = $testable->source();
+
+		$this->assertIdentical($code, $source);
+	}
+
+	public function testConfigBasic() {
+		$testable = new Testable(array(
+			'source' => '<?php echo "foobar"; ?>',
+		));
+
+		$expected = array(
+			'source' => '<?php echo "foobar"; ?>',
+		);
+		$result = $testable->config();
+
+		$this->assertIdentical($expected, $result);
+	}
+
+	public function testConfigSpecificKey() {
+		$config = array(
+			'source' => 'echo "foobar";',
+		);
+		$testable = new Testable($config);
+
+		$expected = $config['source'];
+		$config = $testable->config('source');
+
+		$this->assertIdentical($expected, $config);
+	}
+
+	public function testConstructorAutosetWrap() {
+		$config = array(
+			'path' => 'li3_quality\tests\cases\test\TestableTest',
+		);
+		$testable = new RealTestable($config);
+
+		$expected = false;
+		$result = $testable->config('wrap');
+
+		$this->assertIdentical($expected, $result);
 	}
 
 }
