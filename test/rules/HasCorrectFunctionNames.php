@@ -23,7 +23,7 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 		'__callStatic', '__get', '__set',
 		'__isset', ' __unset', '__sleep',
 		'__wakeup', '__toString', '__invoke',
-		'__set_state', '__clone'
+		'__set_state', '__clone', '__init',
 	);
 
 	/**
