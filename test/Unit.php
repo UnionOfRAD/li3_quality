@@ -7,7 +7,7 @@
  */
 namespace li3_quality\test;
 
-use li3_quality\tests\mocks\test\Testable;
+use li3_quality\tests\mocks\test\MockTestable as Testable;
 
 /**
  * Internal Class for testing rules

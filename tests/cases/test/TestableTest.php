@@ -2,7 +2,7 @@
 
 namespace li3_quality\tests\cases\test;
 
-use li3_quality\tests\mocks\test\Testable;
+use li3_quality\tests\mocks\test\MockTestable as Testable;
 
 class TestableTest extends \li3_quality\test\Unit {
 
