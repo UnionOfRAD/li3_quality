@@ -88,14 +88,17 @@ class Testable extends \lithium\core\Object {
 	/**
 	 * Will find the next content
 	 *
-	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
-	 * @param  integer         $start Where you want to start
+	 * @param  array           $types The types you wish to find ('$foo', '{', ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
 	 * @return integer|boolean        The index of the next $type or false if nothing is found
 	 */
-	public function findNextContent(array $types, $start = 0) {
+	public function findNextContent(array $types, $range = 0) {
 		$tokens = $this->tokens();
 		$total = count($tokens);
-		for ($id = $start; $id < $total;$id++) {
+		if (!is_array($range)) {
+			$range = range($range, $total);
+		}
+		foreach ($range as $id) {
 			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
 				return $id;
 			}
@@ -106,13 +109,18 @@ class Testable extends \lithium\core\Object {
 	/**
 	 * Will find the previous content
 	 *
-	 * @param  array           $types An array of items to search for
-	 * @param  integer         $start Where you want to start
+	 * @param  array           $types The types you wish to find ('$foo', '{', ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
 	 * @return integer|boolean        The index of the next $type or false if nothing is found
 	 */
-	public function findPrevContent(array $types, $start = 0) {
+	public function findPrevContent(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		for ($id = $start; $id >= 0;$id--) {
+		if (!is_array($range)) {
+			$range = range($range, 0);
+		} else {
+			$range = array_reverse($range);
+		}
+		foreach ($range as $id) {
 			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
 				return $id;
 			}
@@ -123,14 +131,19 @@ class Testable extends \lithium\core\Object {
 	/**
 	 * Will find the next token
 	 *
-	 * @param  array           $types An array of items to search for
-	 * @param  integer         $start Where you want to start
+	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
 	 * @return integer|boolean        The index of the next $type or false if nothing is found
 	 */
-	public function findNext(array $types, $start = 0) {
+	public function findNext(array $types, $range = 0) {
 		$tokens = $this->tokens();
 		$total = count($tokens);
-		for ($id = $start; $id < $total;$id++) {
+		if (!is_array($range)) {
+			$range = range($range, $total);
+		} else {
+			$range = array_reverse($range);
+		}
+		foreach ($range as $id) {
 			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
 				return $id;
 			}
@@ -142,12 +155,17 @@ class Testable extends \lithium\core\Object {
 	 * Will find the previous token
 	 *
 	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
-	 * @param  integer         $start Where you want to start
+	 * @param  integer|array   $start Where you want to start, or an array of items to search
 	 * @return integer|boolean        The index of the next $type or false if nothing is found
 	 */
-	public function findPrev(array $types, $start = 0) {
+	public function findPrev(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		for ($id = $start; $id >= 0;$id--) {
+		if (!is_array($range)) {
+			$range = range($range, 0);
+		} else {
+			$range = array_reverse($range);
+		}
+		foreach ($range as $id) {
 			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
 				return $id;
 			}

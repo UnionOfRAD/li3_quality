@@ -40,7 +40,6 @@ class TestableTest extends \li3_quality\test\Unit {
 		$this->assert(empty($lines[3]));
 	}
 
-
 	public function testFindNext() {
 		$code = <<<EOD
 class foo {
@@ -154,6 +153,76 @@ EOD;
 
 		$inClass = $testable->tokenIn(array(T_WHILE), $id);
 		$this->assertIdentical(false, $inClass);
+	}
+
+	public function testFindNextWithArray() {
+		$code = <<<EOD
+class foo {
+	private function bar() {
+	}
+}
+EOD;
+		$testable = $this->_testable($code);
+		$tokens = $testable->tokens();
+		$visibilityTokens = array(T_PUBLIC, T_PROTECTED, T_PRIVATE);
+		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
+		$children = $tokens[$id]['children'];
+
+		$visibility = $testable->findNext($visibilityTokens, $children);
+		$this->assertIdentical(T_PRIVATE, $tokens[$visibility]['id']);
+	}
+
+	public function testFindNextContentWithArray() {
+		$code = <<<EOD
+class foo {
+	private function bar() {
+	}
+}
+EOD;
+		$testable = $this->_testable($code);
+		$tokens = $testable->tokens();
+		$contentToFind = array('public', 'protected', 'private');
+		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
+		$children = $tokens[$id]['children'];
+
+		$visibility = $testable->findNextContent($contentToFind, $children);
+		$this->assertIdentical('private', $tokens[$visibility]['content']);
+	}
+
+	public function testFindPrevWithArray() {
+		$code = <<<EOD
+class foo {
+	protected \$var = array();
+	private function bar() {
+	}
+}
+EOD;
+		$testable = $this->_testable($code);
+		$tokens = $testable->tokens();
+		$tokensToFind = array(T_FUNCTION, T_VARIABLE);
+		$id = $testable->findNext(array(T_CLASS), 0); // class foo
+		$children = $tokens[$id]['children'];
+
+		$visibility = $testable->findPrev($tokensToFind, $children);
+		$this->assertIdentical(T_FUNCTION, $tokens[$visibility]['id']);
+	}
+
+	public function testFindPrevContentWithArray() {
+		$code = <<<EOD
+class foo {
+	protected \$var = array();
+	private function bar() {
+	}
+}
+EOD;
+		$testable = $this->_testable($code);
+		$tokens = $testable->tokens();
+		$contentToFind = array('$var', 'function');
+		$id = $testable->findNext(array(T_CLASS), 0); // class foo
+		$children = $tokens[$id]['children'];
+
+		$foundId = $testable->findPrevContent($contentToFind, $children);
+		$this->assertIdentical('function', $tokens[$foundId]['content']);
 	}
 
 }
