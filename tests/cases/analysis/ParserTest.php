@@ -221,7 +221,7 @@ EOD;
 			if ($token['parent'] !== -1) {
 				$parent = $tokens[$token['parent']];
 				if (!in_array($tokenId, $parent['children'])) {
-					$this->assert(false, 'Token ' . $tokenId . ' not found in parent');
+					$this->assert(false, "Token {$tokenId} not in parent");
 					$failure = true;
 				}
 			}

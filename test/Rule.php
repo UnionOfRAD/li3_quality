@@ -39,7 +39,7 @@ abstract class Rule extends \lithium\core\Object {
 	/**
 	 * Will add violations in the correct way
 	 *
-	 * @param   array $violation The violation should include message and line keys
+	 * @param   array $violation Violation can have message, line, and position
 	 * @return  void
 	 */
 	public function addViolation($violation = array()) {
@@ -49,7 +49,7 @@ abstract class Rule extends \lithium\core\Object {
 	/**
 	 * Will add violations in the correct way
 	 *
-	 * @param   array $violation The violation should include message and line keys
+	 * @param   array $warning Warning can have message, line, and position
 	 * @return  void
 	 */
 	public function addWarning($warning = array()) {
@@ -91,7 +91,8 @@ abstract class Rule extends \lithium\core\Object {
 	}
 
 	/**
-	 * A switch to check if this rule should be applied to the current tests or not
+	 * A switch to check if this rule should be applied to the current
+	 * tests or not
 	 */
 	public function enabled() {
 		return true;

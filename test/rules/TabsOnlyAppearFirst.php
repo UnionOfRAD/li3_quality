@@ -11,7 +11,8 @@ namespace li3_quality\test\rules;
 class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 
 	/**
-	 * Pattern will match tabs, then any non-tab character until the end of the line
+	 * Pattern will match tabs, then any non-tab character until the end of
+	 * the line
 	 *
 	 * @var string
 	 */
@@ -33,6 +34,7 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 	 * @return void
 	 */
 	public function apply($testable) {
+		$message = 'Tabs can only appear at the beginning of the line';
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
 		foreach ($lines as $lineId => $line) {
@@ -46,7 +48,7 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 			if (!$ignore && preg_match($this->pattern, $line) === 0) {
 				$token = $tokens[$this->_findTokenByLine($lineNumber, $tokens)];
 				$this->addViolation(array(
-					'message' => 'Tabs can only appear at the beginning of the line',
+					'message' => $message,
 					'line' => $lineNumber,
 				));
 			}

@@ -32,13 +32,13 @@ class DoesntExceedMaxLineLengthTest extends \li3_quality\test\Unit {
 	}
 
 	public function testHasWarnings() {
-		$code = str_repeat(' ', 80);
+		$code = str_repeat(' ', 81);
 		$this->assertRuleWarning($code, $this->rule);
 		$this->assertRulePass($code, $this->rule);
 	}
 
 	public function testHasNoWarnings() {
-		$code = str_repeat(' ', 79);
+		$code = str_repeat(' ', 80);
 		$this->assertRuleNoWarning($code, $this->rule);
 		$this->assertRulePass($code, $this->rule);
 	}

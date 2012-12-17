@@ -46,12 +46,14 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 	 * @return void
 	 */
 	public function apply($testable) {
-		$message = 'Construct {:name} should not contain parentheses and be on its own line.';
+		$message = 'Construct {:name} should not contain parentheses and be ' .
+			'on its own line.';
 		$tokens = $testable->tokens();
 		$lines = $testable->lines();
 		foreach ($tokens as $key => $token) {
 			$lineIndex = $token['line'] - 1;
-			if (in_array($token['id'], $this->inspectableTokens) && isset($lines[$lineIndex])) {
+			$isInspectable = in_array($token['id'], $this->inspectableTokens);
+			if ($isInspectable && isset($lines[$lineIndex])) {
 				$line = $lines[$lineIndex];
 				$next = $key + 1;
 				if (preg_match($this->pattern, $line) === 0) {
