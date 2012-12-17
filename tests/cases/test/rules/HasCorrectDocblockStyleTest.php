@@ -35,6 +35,7 @@ EOD;
 
 	public function testClassAndMethodComments() {
 		$code = <<<EOD
+
 /**
  * This is a comment
  */
@@ -71,6 +72,7 @@ EOD;
 
 	public function testAbstractClassComments() {
 		$code = <<<EOD
+
 /**
  * This is a comment
  */
@@ -82,6 +84,7 @@ EOD;
 
 	public function testClassCommentsWithoutSpacing() {
 		$code = <<<EOD
+
 /**
 * This is a comment
 */
@@ -93,6 +96,7 @@ EOD;
 
 	public function testClassCommentsWithAdditionalSpacing() {
 		$code = <<<EOD
+
 	/**
 	 * This is a comment
 	 */
@@ -134,6 +138,7 @@ EOD;
 
 	public function testDocBlockCorrectTagPlacement() {
 		$code = <<<EOD
+
 /**
  * Here is some info about class Foo
  *
@@ -149,6 +154,7 @@ EOD;
 
 	public function testDocBlockIncorrectTagPlacement() {
 		$code = <<<EOD
+
 /**
  * Here is some info about class Foo
  *
@@ -164,6 +170,7 @@ EOD;
 
 	public function testDocBlockMustBeLast() {
 		$code = <<<EOD
+
 /**
  * Here is some info about class Foo
  *
@@ -178,6 +185,7 @@ EOD;
 
 	public function testMultiLineParam() {
 		$code = <<<EOD
+
 /**
  * Splits the provided `\$code` into PHP language tokens.
  *
@@ -194,6 +202,18 @@ class Foo {
 }
 EOD;
 		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testRandomDocblockBelowClass() {
+		$code = <<<EOD
+
+class Foo {
+}
+/**
+ * Splits the provided `\$code` into PHP language tokens.
+ */
+EOD;
+		$this->assertRuleFail($code, $this->rule);
 	}
 
 }
