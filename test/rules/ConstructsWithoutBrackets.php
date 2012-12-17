@@ -35,7 +35,7 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 	 *
 	 * @var array
 	 */
-	public $pattern = "/^(\s+)?([a-z_]+)((\s+)([^(]|\([^)]+\)[^;])|;)/";
+	public $pattern = "/^[a-z_]+((\s([^(]|\([^)]+\))[^;]+(;|$))|;)$/";
 
 	/**
 	 * Will iterate the tokens for $inspectableTokens, once found it'll find
@@ -46,10 +46,11 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 	 * @return void
 	 */
 	public function apply($testable) {
-		$message = 'Construct {:name} should not contain parentheses and be ' .
-			'on its own line.';
+		$message = 'Construct {:name} should not contain parentheses and be on its own line.';
 		$tokens = $testable->tokens();
 		$lines = $testable->lines();
+		$usedLineIndex = array();
+
 		foreach ($tokens as $key => $token) {
 			$lineIndex = $token['line'] - 1;
 			$isInspectable = in_array($token['id'], $this->inspectableTokens);

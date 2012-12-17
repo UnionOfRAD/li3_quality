@@ -72,7 +72,7 @@ EOD;
 
 	public function testMultilineConstruct() {
 		$code = <<<EOD
-return	array (
+return array (
 	'foo' => 'bar',
 );
 EOD;
@@ -84,6 +84,20 @@ EOD;
 if(!\$this->service(\$service)) return false;
 EOD;
 		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testDoublEcho() {
+		$code = <<<EOD
+echo 'foo'; echo 'baz';
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testEmptyExist() {
+		$code = <<<EOD
+exit;
+EOD;
+		$this->assertRulePass($code, $this->rule);
 	}
 
 }
