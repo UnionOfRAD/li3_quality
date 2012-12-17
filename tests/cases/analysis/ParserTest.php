@@ -86,11 +86,11 @@ EOD;
 	public function testClassVariableName() {
 		$code = <<<EOD
 class baz {
-	public static \$foobar = 'bar';
+	static \$foobar = 'bar';
 }
 EOD;
 		$tokens = Parser::tokenize($code);
-		$variable = $tokens[10];
+		$variable = $tokens[8];
 		$this->assertIdentical(T_VARIABLE, $variable['id']);
 		$this->assertIdentical('foobar', $variable['label']);
 	}
@@ -466,6 +466,29 @@ EOD;
 		$bar = $tokens[22];
 		$this->assertIdentical(T_STRING, $bar['id']);
 		$this->assertIdentical(2, $bar['level']);
+	}
+
+	public function testIncompleteArrayException() {
+		$this->assertException('LogicException', function() {
+			$code = <<<EOD
+class Foobar {
+	\$foo = array(
+		'bar',
+}
+EOD;
+			$tokens = Parser::tokenize($code);
+		});
+	}
+
+	public function testIncompleteDoWhile() {
+		$this->assertException('LogicException', function() {
+			$code = <<<EOD
+do {
+
+} while()
+EOD;
+			$tokens = Parser::tokenize($code);
+		});
 	}
 
 }
