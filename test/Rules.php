@@ -42,7 +42,13 @@ class Rules extends \lithium\core\StaticObject {
 	 * @return void
 	 */
 	public static function add($rule, $options = array()) {
-		static::$_rules[] = $rule;
+		$class = get_class($rule);
+		$sep = strrpos($class, '\\');
+		$name = ($sep !== false) ? substr($class, $sep + 1) : $class;
+		static::$_rules[$name] = array(
+			'rule' => $rule,
+			'options' => $options,
+		);
 	}
 
 	/**
@@ -56,8 +62,10 @@ class Rules extends \lithium\core\StaticObject {
 		$warnings = array();
 		$success = true;
 
-		foreach (static::$_rules as $rule) {
-			$rule->apply($testable);
+		foreach (static::$_rules as $ruleSet) {
+			$rule = $ruleSet['rule'];
+			$options = $ruleSet['options'];
+			$rule->apply($testable, $options);
 			$warnings = array_merge($warnings, $rule->warnings());
 			if (!$rule->success()) {
 				$success = false;
@@ -80,6 +88,15 @@ class Rules extends \lithium\core\StaticObject {
 			return static::$_rules;
 		}
 		return isset(static::$_rules[$rule]) ? static::$_rules[$rule] : null;
+	}
+
+	/**
+	 * Will reset the current set of rules
+	 *
+	 * @return void
+	 */
+	public static function reset() {
+		static::$_rules = array();
 	}
 }
 
