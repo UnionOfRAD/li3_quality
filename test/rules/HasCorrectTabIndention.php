@@ -22,7 +22,6 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		'forceOneMoreLine'    => '/({|\()$/',
 		'forceOneLessLine'    => '/^\s*[}\)]+(;$|)?/',
 		'tempOneMoreLine'     => '/\.$/',
-		'optionalOneLessLine' => '/[\(}],$/'
 	);
 
 	public $commentTokens = array(
@@ -56,20 +55,15 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
 		$tempOneMoreLine = false;
-		$optionalOneLessLine = false;
 		foreach ($lines as $lineIndex => $line) {
 			if (!$this->_shouldIgnoreLine($lineIndex, $lines, $tokens)) {
 				$leaderCount = $this->_beginningTabCount($line);
 				if (preg_match($this->patterns['forceOneLessLine'], $line) === 1) {
 					$followerCount--;
 				}
-				$leaderShouldBe = array($followerCount);
-				if ($optionalOneLessLine) {
-					$optionalOneLessLine = false;
-					$leaderShouldBe[] = $followerCount - 1;
-				}
-				if (!in_array($leaderCount, $leaderShouldBe)) {
-					$extraCount = $leaderCount - $followerCount;
+				$leaderShouldBe = $followerCount;
+				if ($leaderCount !== $leaderShouldBe) {
+					$extraCount = $leaderCount - $leaderShouldBe;
 					$message = ($extraCount > 0) ? $this->positiveMessage : $this->negativeMessage;
 					$this->addViolation(array(
 						'message' => String::insert($message, array(
@@ -87,8 +81,6 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 				} elseif (preg_match($this->patterns['tempOneMoreLine'], $line) === 1) {
 					$tempOneMoreLine = true;
 					$followerCount++;
-				} elseif (preg_match($this->patterns['optionalOneLessLine'], $line) === 1) {
-					$optionalOneLessLine = true;
 				}
 			}
 		}
