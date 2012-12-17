@@ -8,13 +8,17 @@ class HasCorrectDocblockStyleTest extends \li3_quality\test\Unit {
 
 	public function testCorrectBlankLinedDocBlock() {
 		$code = <<<EOD
+<?php
 /**
  * This is a comment
  *
  * bar
  */
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testCorrectBlankLinedDocBlockForMethod() {
@@ -35,6 +39,7 @@ EOD;
 
 	public function testClassAndMethodComments() {
 		$code = <<<EOD
+<?php
 
 /**
  * This is a comment
@@ -49,29 +54,41 @@ class Foo {
 	}
 }
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testLonelyDocBlocks() {
 		$code = <<<EOD
+<?php
 /**
  * This is a comment
  */
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testIncorrectLonelyDocBlocks() {
 		$code = <<<EOD
+<?php
 /**
 * This is a comment
 */
 EOD;
-		$this->assertRuleFail($code, $this->rule);
+		$this->assertRuleFail(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testAbstractClassComments() {
 		$code = <<<EOD
+<?php
 
 /**
  * This is a comment
@@ -79,11 +96,15 @@ EOD;
 abstract class Foo {
 }
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testClassCommentsWithoutSpacing() {
 		$code = <<<EOD
+<?php
 
 /**
 * This is a comment
@@ -91,11 +112,15 @@ EOD;
 class Foo {
 }
 EOD;
-		$this->assertRuleFail($code, $this->rule);
+		$this->assertRuleFail(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testClassCommentsWithAdditionalSpacing() {
 		$code = <<<EOD
+<?php
 
 	/**
 	 * This is a comment
@@ -103,7 +128,10 @@ EOD;
 class Foo {
 }
 EOD;
-		$this->assertRuleFail($code, $this->rule);
+		$this->assertRuleFail(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testMethodCommentsWithNoSpacing() {
@@ -138,6 +166,7 @@ EOD;
 
 	public function testDocBlockCorrectTagPlacement() {
 		$code = <<<EOD
+<?php
 
 /**
  * Here is some info about class Foo
@@ -149,11 +178,15 @@ EOD;
 class Foo {
 }
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testDocBlockIncorrectTagPlacement() {
 		$code = <<<EOD
+<?php
 
 /**
  * Here is some info about class Foo
@@ -165,11 +198,15 @@ class Foo {
 }'Docblocks should only be at the beginning of the page or before '.
 						'a class/function.'
 EOD;
-		$this->assertRuleFail($code, $this->rule);
+		$this->assertRuleFail(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testDocBlockMustBeLast() {
 		$code = <<<EOD
+<?php
 
 /**
  * Here is some info about class Foo
@@ -180,11 +217,15 @@ EOD;
 class Foo {
 }
 EOD;
-		$this->assertRuleFail($code, $this->rule);
+		$this->assertRuleFail(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testMultiLineParam() {
 		$code = <<<EOD
+<?php
 
 /**
  * Splits the provided `\$code` into PHP language tokens.
@@ -201,11 +242,15 @@ EOD;
 class Foo {
 }
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testRandomDocblockBelowClass() {
 		$code = <<<EOD
+<?php
 
 class Foo {
 }
@@ -213,7 +258,10 @@ class Foo {
  * Splits the provided `\$code` into PHP language tokens.
  */
 EOD;
-		$this->assertRuleFail($code, $this->rule);
+		$this->assertRuleFail(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 }

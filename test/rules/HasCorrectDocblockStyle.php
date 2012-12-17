@@ -67,7 +67,7 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 				if (isset($tokens[$tokenId - 1]) && $tokens[$tokenId - 1]['id'] === T_WHITESPACE) {
 					$content .= $tokens[$tokenId - 1]['content'];
 				}
-			} elseif ($level === 0 && ($inClass XOR $inFunction XOR $token['line'] === 1)) {
+			} elseif ($level === 0 && ($inClass XOR $inFunction XOR $token['line'] === 2)) {
 				$match = 'NO_LEVEL';
 			} else {
 				$this->addViolation(array(
