@@ -85,6 +85,45 @@ EOD;
 		$this->assertIdentical($expected, $result);
 	}
 
+	public function testAssertHasWarnings() {
+		$code = <<<EOD
+class foobar {
+	public function bar() {
+		return false;
+	}
+}
+EOD;
+		$unit = new MockUnit();
+		$unit->rule = new $this->_rule();
+		$unit->rule->addWarning(array(
+			'message' => 'foobar',
+			'line' => 0,
+			'position' => 0,
+		));
+
+		$expected = true;
+		$result = $unit->assertRuleWarning($code, $this->_rule);
+
+		$this->assertIdentical($expected, $result);
+	}
+
+	public function testAssertHasNoWarnings() {
+		$code = <<<EOD
+class foobar {
+	public function bar() {
+		return false;
+	}
+}
+EOD;
+		$unit = new MockUnit();
+		$unit->rule = new $this->_rule();
+
+		$expected = true;
+		$result = $unit->assertRuleNoWarning($code, $this->_rule);
+
+		$this->assertIdentical($expected, $result);
+	}
+
 }
 
 ?>
