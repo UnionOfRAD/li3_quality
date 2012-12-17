@@ -440,6 +440,34 @@ EOD;
 		$this->assertIdentical(T_VARIABLE, $parent['id']);
 	}
 
+	public function testLevelStarts() {
+		$code = <<<EOD
+class Foobar {
+	abstract function foo(array \$bar);
+	public function bar() {
+		return false;
+	}
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$abstract = $tokens[6];
+		$this->assertIdentical(T_ABSTRACT, $abstract['id']);
+		$this->assertIdentical(1, $abstract['level']);
+
+		$foo = $tokens[10];
+		$this->assertIdentical(T_STRING, $foo['id']);
+		$this->assertIdentical(2, $foo['level']);
+
+		$public = $tokens[18];
+		$this->assertIdentical(T_PUBLIC, $public['id']);
+		$this->assertIdentical(1, $public['level']);
+
+		$bar = $tokens[22];
+		$this->assertIdentical(T_STRING, $bar['id']);
+		$this->assertIdentical(2, $bar['level']);
+	}
+
 }
 
 ?>

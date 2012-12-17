@@ -306,7 +306,7 @@ class Parser extends \lithium\analysis\Parser {
 				}
 				if (isset($tokens[$currentParent])) {
 					$closeByBrackets = $tokens[$currentParent]['level'] >= $level;
-					$closeByNoBlock = $mustInclude == $tokenId && $token['content'] === ';';
+					$closeByNoBlock = $mustInclude === $tokenId && $token['content'] === ';';
 					if ($closeByBrackets || $closeByNoBlock) {
 						$originalToken = $tokens[$currentParent]['id'];
 						$currentParent = $tokens[$currentParent]['parent'];
@@ -330,20 +330,19 @@ class Parser extends \lithium\analysis\Parser {
 			}
 
 			if (self::_isParent($token, $tokens)) {
-				$level++;
-				$maxLevel = max($level, $maxLevel);
 				$currentParent = $tokenId;
 				$mustInclude = self::_mustInclude($token, $tokens);
 				$token['mustInclude'] = $mustInclude;
 				if ($queue !== -1) {
 					foreach (range($queue, $tokenId - 1) as $key) {
-						$tempLevel = $tokens[$key]['id'] === T_DOC_COMMENT ? $level - 1 : $level;
 						$tokens[$key]['parent'] = $currentParent;
-						$tokens[$key]['level'] = $tempLevel;
+						$tokens[$key]['level'] = $level;
 						$token['children'][] = $key;
 					}
 				}
+				$level++;
 				$queue = -1;
+				$maxLevel = max($level, $maxLevel);
 			} elseif ($queue === -1 && self::_canQueue($token, $tokens)) {
 				$queue = $tokenId;
 			} elseif ($token['id'] === T_CURLY_OPEN) {
