@@ -254,11 +254,11 @@ class Parser extends \lithium\analysis\Parser {
 			$height = count(preg_split('/\r\n|\r|\n/', $token['content']));
 			$parentLine = $token['line'] + $height;
 			$nextParent = false;
-			foreach (range($tokenId, count($tokens)) as $id) {
+			foreach (range($tokenId, count($tokens) - 1) as $id) {
 				$possibleParent = $tokens[$id];
 				if ($possibleParent['line'] > $parentLine) {
 					return false;
-				} elseif (in_array($possibleParent['id'], array(T_CLASS, T_FUNCTION))) {
+				} elseif (in_array($possibleParent['id'], array(T_CLASS, T_FUNCTION, T_VARIABLE))) {
 					return true;
 				}
 			}
@@ -337,8 +337,9 @@ class Parser extends \lithium\analysis\Parser {
 				$token['mustInclude'] = $mustInclude;
 				if ($queue !== -1) {
 					foreach (range($queue, $tokenId - 1) as $key) {
+						$tempLevel = $tokens[$key]['id'] === T_DOC_COMMENT ? $level - 1 : $level;
 						$tokens[$key]['parent'] = $currentParent;
-						$tokens[$key]['level'] = $level;
+						$tokens[$key]['level'] = $tempLevel;
 						$token['children'][] = $key;
 					}
 				}

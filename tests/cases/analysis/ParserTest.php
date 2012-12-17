@@ -419,6 +419,27 @@ EOD;
 		$this->assertIdentical(T_CLASS, $parent['id']);
 	}
 
+	public function testDocBlockHasVarParent() {
+		$code = <<<EOD
+/**
+ * The Quality command helps you to run static code analysis on your codebase.
+ */
+class Quality {
+
+	/**
+	 * The library to run the quality checks on.
+	 */
+	public \$library = true;
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+		$docblock = $tokens[8];
+		$this->assertIdentical(T_DOC_COMMENT, $docblock['id']);
+
+		$parent = $tokens[$docblock['parent']];
+		$this->assertIdentical(T_VARIABLE, $parent['id']);
+	}
+
 }
 
 ?>

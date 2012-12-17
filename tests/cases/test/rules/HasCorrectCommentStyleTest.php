@@ -191,7 +191,8 @@ EOD;
  * @package FooPackage
  */
 class Foo {
-}
+}'Docblocks should only be at the beginning of the page or before '.
+						'a class/function.'
 EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
@@ -229,5 +230,7 @@ class Foo {
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
+
 }
+
 ?>

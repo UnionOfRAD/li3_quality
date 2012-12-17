@@ -13,25 +13,13 @@ use lithium\util\String;
 class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 
 	/**
-	 * The PHP 5+ comment tokens
-	 *
-	 * @var array
-	 */
-	public $inspectableTokens = array(
-		T_COMMENT,
-		T_DOC_COMMENT,
-	);
-
-	/**
 	 * The regexes to use on detecting docblocks
 	 *
 	 * @var array
 	 */
 	public $patterns = array(
-		'PAGE_LEVEL'    => '/{:begin}\/\*\*({:wline} \*( (.*))?)+{:wline} \*\/$/',
-		'CLASS_LEVEL'   => '/{:begin}\t\/\*\*({:wline}\t \*( (.*))?)+{:wline}\t \*\/$/',
-		'TEST_LEVEL'    => '/\s?\/\/( (.*))?$/',
-		'TEST_FUNCTION' => '/^test/',
+		'NO_LEVEL'      => '/{:begin}\/\*\*({:wline} \*( (.*))?)+{:wline} \*\/$/',
+		'FIRST_LEVEL'   => '/{:begin}\t\/\*\*({:wline}\t \*( (.*))?)+{:wline}\t \*\/$/',
 		'HAS_TAGS'      => '/ \* @/',
 		'TAG_FORMAT'    => array(
 			'/',
@@ -65,50 +53,65 @@ class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 	 */
 	public function apply($testable) {
 		$tokens = $testable->tokens();
-		foreach ($tokens as $tokenId => $token) {
-			if (in_array($token['id'], $this->inspectableTokens)) {
-				$inClass = $testable->tokenIn(array(T_CLASS), $tokenId);
-				$inFunction = $testable->tokenIn(array(T_FUNCTION), $tokenId);
-				$content = null;
-				if ($inClass && $inFunction) {
-					$parentLabel = $tokens[$token['parent']]['label'];
-					$pattern = $this->compilePattern('TEST_FUNCTION');
-					if (preg_match($pattern, $parentLabel) === 0) {
-						$this->addViolation(array(
-							'message' => 'Comments should not appear in methods.',
-							'line' => $token['line'],
-						));
-					}
-					$match = 'TEST_LEVEL';
-				} elseif ($inClass XOR $inFunction) {
-					$match = 'CLASS_LEVEL';
-				} elseif (!$inClass && !$inFunction) {
-					$match = 'PAGE_LEVEL';
-				}
+
+		$comments = $testable->findAll(array(T_COMMENT));
+		foreach ($comments as $tokenId) {
+			$token = $tokens[$tokenId];
+			$parentId = $token['parent'];
+			if ($parentId === -1 || $tokens[$parentId]['id'] !== T_FUNCTION) {
+				$this->addViolation(array(
+					'message' => 'Inline comments should never appear.',
+					'line' => $token['line'],
+				));
+			} elseif (preg_match('/^test/', $tokens[$parentId]['label']) === 0) {
+				$this->addViolation(array(
+					'message' => 'Inline comments should only appear in testing methods.',
+					'line' => $token['line'],
+				));
+			}
+		}
+
+		$docComments = $testable->findAll(array(T_DOC_COMMENT));
+		foreach ($docComments as $tokenId) {
+			$token = $tokens[$tokenId];
+			$level = $token['level'];
+			$parent = $token['parent'];
+			$inClass = $testable->tokenIn(array(T_CLASS), $tokenId);
+			$inFunction = $testable->tokenIn(array(T_FUNCTION), $tokenId);
+			$inVariable = $testable->tokenIn(array(T_VARIABLE), $tokenId);
+			$content = null;
+
+			if ($inClass && ($inFunction || $inVariable)) {
+				$match = 'FIRST_LEVEL';
 				if (isset($tokens[$tokenId - 1]) && $tokens[$tokenId - 1]['id'] === T_WHITESPACE) {
 					$content .= $tokens[$tokenId - 1]['content'];
 				}
-				$content .= $token['content'];
-				$pattern = $this->compilePattern($match);
-				if (preg_match($pattern, $content) === 0) {
-					$this->addViolation(array(
-						'message' => 'Docblocks are in the incorrect format.',
-						'line' => $token['line'],
-					));
-				} else {
-					$hasTagsPattern = $this->compilePattern('HAS_TAGS');
-					if (preg_match($hasTagsPattern, $content) === 1) {
-						$tagsPattern = $this->compilePattern('TAG_FORMAT');
-						if (preg_match($tagsPattern, $content) === 0) {
-							$this->addViolation(array(
-								'pattern' => $tagsPattern,
-								'content' => $content,
-								'message' => 'Tags should be last and have a blank docblock line.',
-								'line' => $token['line'],
-							));
-						}
-					}
-				}
+			} elseif ($level === 0 && ($inClass XOR $inFunction XOR $parent === -1)) {
+				$match = 'NO_LEVEL';
+			} else {
+				$this->addViolation(array(
+					'message' => 'Docblocks should only be at the beginning of the page or ' .
+						'before a class/function.',
+					'line' => $token['line'],
+				));
+				continue;
+			}
+
+			$content .= $token['content'];
+
+			$correctFormat = preg_match($this->compilePattern($match), $content) === 1;
+			$hasTags = preg_match($this->compilePattern('HAS_TAGS'), $content) === 1;
+			$correctTagFormat = preg_match($this->compilePattern('TAG_FORMAT'), $content) === 1;
+			if (!$correctFormat) {
+				$this->addViolation(array(
+					'message' => 'Docblocks are in the incorrect format.',
+					'line' => $token['line'],
+				));
+			} elseif ($hasTags && !$correctTagFormat) {
+				$this->addViolation(array(
+					'message' => 'Tags should be last and have a blank docblock line.',
+					'line' => $token['line'],
+				));
 			}
 		}
 	}
