@@ -210,6 +210,36 @@ EOD;
 		$this->assertIdentical('private', $tokens[$visibility]['content']);
 	}
 
+	public function testFindNextContentBasic() {
+		$code = <<<EOD
+class foo {
+	private function bar() {
+	}
+}
+EOD;
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
+		$tokens = $testable->tokens();
+
+		$visibility = $testable->findNextContent(array('private'), 0);
+		$this->assertIdentical('private', $tokens[$visibility]['content']);
+	}
+
+	public function testFindNextContentBasicUnreachable() {
+		$code = <<<EOD
+class foo {
+}
+EOD;
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
+		$tokens = $testable->tokens();
+
+		$visibility = $testable->findNextContent(array('private'), 0);
+		$this->assertIdentical(false, $visibility);
+	}
+
 	public function testFindPrevWithArray() {
 		$code = <<<EOD
 class foo {
@@ -248,6 +278,37 @@ EOD;
 
 		$foundId = $testable->findPrevContent($contentToFind, $children);
 		$this->assertIdentical('function', $tokens[$foundId]['content']);
+	}
+
+	public function testFindPrevContentBasic() {
+		$code = <<<EOD
+class foo {
+	function bar() {}
+}
+EOD;
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
+		$tokens = $testable->tokens();
+		$start = count($tokens) - 1;
+
+		$foundId = $testable->findPrevContent(array('function'), $start);
+		$this->assertIdentical('function', $tokens[$foundId]['content']);
+	}
+
+	public function testFindPrevContentBasicUnreachable() {
+		$code = <<<EOD
+class foo {
+}
+EOD;
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
+		$tokens = $testable->tokens();
+		$start = count($tokens) - 1;
+
+		$foundId = $testable->findPrevContent(array('function', $start));
+		$this->assertIdentical(false, $foundId);
 	}
 
 	public function testFindAll() {
