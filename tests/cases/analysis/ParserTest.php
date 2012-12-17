@@ -491,6 +491,33 @@ EOD;
 		});
 	}
 
+	public function testAnonymousFunction() {
+		$code = <<<EOD
+return function() {
+	return Parser::tokenize();
+};
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$function = $tokens[2];
+		$this->assertIdentical(T_FUNCTION, $function['id']);
+		$this->assertIdentical('anonymous', $function['label']);
+	}
+
+	public function testAnonymousClass() {
+		$code = <<<EOD
+class {
+	return Parser::tokenize();
+};
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$class = $tokens[0];
+		$this->assertIdentical(T_CLASS, $class['id']);
+		$this->assertIdentical('anonymous', $class['label']);
+	}
+
+
 }
 
 ?>

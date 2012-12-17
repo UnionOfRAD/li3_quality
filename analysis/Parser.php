@@ -229,6 +229,8 @@ class Parser extends \lithium\analysis\Parser {
 			foreach (range(array_search($token, $tokens), $total) as $key) {
 				if ($tokens[$key]['id'] === T_STRING) {
 					return $tokens[$key]['content'];
+				} elseif (in_array($tokens[$key]['content'], array('(', '{'))) {
+					return 'anonymous';
 				}
 			}
 		}
