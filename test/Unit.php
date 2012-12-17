@@ -122,7 +122,7 @@ class Unit extends \lithium\test\Unit  {
 		$options += array(
 			'wrap' => true,
 		);
-		return new Testable($options);;
+		return new Testable($options);
 	}
 
 }

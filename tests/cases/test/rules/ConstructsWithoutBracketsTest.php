@@ -100,6 +100,24 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testReturnWithWhiteSpace() {
+		$code = <<<EOD
+function foobar() {
+	return;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testReturnWithSingleNumber() {
+		$code = <<<EOD
+function foobar() {
+	return 1;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>

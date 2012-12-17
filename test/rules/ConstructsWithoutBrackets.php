@@ -35,7 +35,7 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 	 *
 	 * @var array
 	 */
-	public $pattern = "/^[a-z_]+((\s([^(]|\([^)]+\))[^;]+(;|$))|;)$/";
+	public $pattern = "/^\s*[a-z_]+((\s(([^(][^;]*)|(\([^)]+\)[^;]+))(;|$))|;)$/";
 
 	/**
 	 * Will iterate the tokens for $inspectableTokens, once found it'll find
