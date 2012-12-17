@@ -15,6 +15,11 @@ abstract class Rule extends \lithium\core\Object {
 	protected $_violations = array();
 
 	/**
+	 * Contains the current violations.
+	 */
+	protected $_warnings = array();
+
+	/**
 	 * This method will need to addViolations if one is found
 	 *
 	 * @param   object $testable The testable object
@@ -42,6 +47,16 @@ abstract class Rule extends \lithium\core\Object {
 	}
 
 	/**
+	 * Will add violations in the correct way
+	 *
+	 * @param   array $violation The violation should include message and line keys
+	 * @return  void
+	 */
+	public function addWarning($warning = array()) {
+		$this->_warnings[] = $warning;
+	}
+
+	/**
 	 * Will return a list of current violations
 	 *
 	 * @return  array
@@ -51,12 +66,28 @@ abstract class Rule extends \lithium\core\Object {
 	}
 
 	/**
+	 * Will return a list of current violations
+	 *
+	 * @return  array
+	 */
+	public function warnings() {
+		return $this->_warnings;
+	}
+
+	/**
 	 * Will reset the current list of violations
 	 *
 	 * @return  void
 	 */
-	public function reset() {
-		$this->_violations = array();
+	public function reset($name = null) {
+		if ($name === 'violations') {
+			$this->_violations = array();
+		} elseif ($name === 'warnings') {
+			$this->_warnings = array();
+		} else {
+			$this->_violations = array();
+			$this->_warnings = array();
+		}
 	}
 
 	/**

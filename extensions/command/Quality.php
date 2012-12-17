@@ -21,6 +21,24 @@ use li3_quality\test\Testable;
 class Quality extends \lithium\console\command\Test {
 
 	/**
+	 * Default violation array
+	 */
+	protected $_defaultViolation = array(
+		'line' => '-',
+		'position' => '-',
+		'message' => 'Unnamed Violation'
+	);
+
+	/**
+	 * Default warning array
+	 */
+	protected $_defaultWarning = array(
+		'line' => '-',
+		'position' => '-',
+		'message' => 'Unnamed Warning'
+	);
+
+	/**
 	 * The library to run the quality checks on.
 	 */
 	public $library = true;
@@ -52,40 +70,41 @@ class Quality extends \lithium\console\command\Test {
 			$this->plain = true;
 			$this->silent = true;
 		}
-		$pass = true;
 		$testables = $this->_testables(compact('path'));
 		$this->header('Lithium Syntax Check');
 		$this->out(
 			"Performing " . count(Rules::get()) . " rules " .
 				"on " . count($testables) . " classes."
 		);
-
 		foreach ($testables as $count => $path) {
 			$result = Rules::apply(new Testable(compact('path')));
 			if ($result['success']) {
 				$this->out("[OK] $path", "green");
-			}
-			if (!$result['success']) {
-				$pass = false;
+			} else {
 				$this->error("[FAIL] $path", "red");
 				$output = array(
 					array("Line", "Position", "Violation"),
 					array("----", "--------", "---------")
 				);
 				foreach ($result['violations'] as $violation) {
-					$defaults = array(
-						'line' => '-',
-						'position' => '-',
-						'message' => 'Unnamed Violation'
-					);
-					$params = $violation + $defaults;
-					extract($params);
-					$output[] = array($line, $position, $message);
+					$params = $violation + $this->_defaultViolation;
+					$output[] = array($params['line'], $params['position'], $params['message']);
 				}
 				$this->columns($output, array('style' => 'red', 'error' => true));
 			}
+			if (count($result['warnings']) > 0) {
+				$output = array(
+					array("Line", "Position", "Warning"),
+					array("----", "--------", "-------")
+				);
+				foreach ($result['warnings'] as $warning) {
+					$params = $warning + $this->_defaultWarning;
+					$output[] = array($params['line'], $params['position'], $params['message']);
+				}
+				$this->columns($output, array('style' => 'yellow', 'error' => false));
+			}
 		}
-		return (boolean) $pass;
+		return $result['success'];
 	}
 
 	/**

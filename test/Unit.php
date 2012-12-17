@@ -50,6 +50,38 @@ class Unit extends \lithium\test\Unit  {
 	}
 
 	/**
+	 * Will return true if the rule passed based on the provided source
+	 *
+	 * @param  string $source  The source to test against
+	 * @param  string $rule    The nonspaced class of the rule
+	 * @param  string $message The error message to throw upon failure
+	 * @return bool
+	 */
+	public function assertRuleWarning($source, $rule, $message = '{:message}') {
+		$this->_mockRuleSuccess($rule, $source);
+		return $this->assert(count($this->rule->warnings()) > 0, $message, array(
+			'expected' => 'pass',
+			'result' => $this->rule->warnings(),
+		));
+	}
+
+	/**
+	 * Will return true if the rule failed based on the provided source
+	 *
+	 * @param  string $source  The source to test against
+	 * @param  string $rule    The nonspaced class of the rule
+	 * @param  string $message The error message to throw upon failure
+	 * @return bool
+	 */
+	public function assertRuleNoWarning($source, $rule, $message = '{:message}') {
+		$this->_mockRuleSuccess($rule, $source);
+		return $this->assert(count($this->rule->warnings()) === 0, $message, array(
+			'expected' => 'fail',
+			'result' => $this->rule->warnings(),
+		));
+	}
+
+	/**
 	 * Will generate a new rule and call apply on it.
 	 *
 	 * @param  string       $rule    The nonspaced class of the rule

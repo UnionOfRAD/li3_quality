@@ -53,10 +53,12 @@ class Rules extends \lithium\core\StaticObject {
 	 */
 	public static function apply($testable) {
 		$violations = array();
+		$warnings = array();
 		$success = true;
 
 		foreach (static::$_rules as $rule) {
 			$rule->apply($testable);
+			$warnings = array_merge($warnings, $rule->warnings());
 			if (!$rule->success()) {
 				$success = false;
 				$violations = array_merge($violations, $rule->violations());
@@ -64,7 +66,7 @@ class Rules extends \lithium\core\StaticObject {
 			$rule->reset();
 		}
 
-		return compact('violations', 'success');
+		return compact('violations', 'success', 'warnings');
 	}
 
 	/**
