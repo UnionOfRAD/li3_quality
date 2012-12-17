@@ -89,7 +89,12 @@ class Unit extends \lithium\test\Unit  {
 	 * @return object
 	 */
 	protected function _mockRuleSuccess($rule, $options = array()) {
-		$rule = $this->_rule($rule);
+		if (!is_array($options)) {
+			$options = array(
+				'source' => $options,
+			);
+		}
+		$rule = $this->_rule($rule, $options);
 		$testable = $this->_testable($options);
 		$rule->apply($testable);
 		return $rule->success();
@@ -98,27 +103,22 @@ class Unit extends \lithium\test\Unit  {
 	/**
 	 * Will generate a new rule and call apply on it.
 	 *
-	 * @param  string       $rule    The nonspaced class of the rule
-	 * @param  string|array $options Source code, or arary of config options
+	 * @param  string $rule    The nonspaced class of the rule
+	 * @param  array  $options Source code, or arary of config options
 	 * @return object
 	 */
-	protected function _rule($rule) {
-		$this->rule = new $rule();
+	protected function _rule($rule, array $options = array()) {
+		$this->rule = new $rule($options);
 		return $this->rule;
 	}
 
 	/**
 	 * Will generate a new Testable object
 	 *
-	 * @param  string|array $options Source code, or arary of config options
-	 * @return li3_quality\tests\mocks\test\Testable
+	 * @param  array $options Source code, or arary of config options
+	 * @return object
 	 */
-	protected function _testable($options) {
-		if (is_string($options)) {
-			$options = array(
-				'source' => $options,
-			);
-		}
+	protected function _testable(array $options = array()) {
 		$options += array(
 			'wrap' => true,
 		);

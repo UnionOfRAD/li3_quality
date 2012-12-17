@@ -49,7 +49,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$id = $testable->findNext(array(T_FUNCTION), 0);
 		$this->assertIdentical(6, $id);
 	}
@@ -59,7 +61,9 @@ EOD;
 class foo {
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$id = $testable->findNext(array(T_FUNCTION), 0);
 		$this->assertIdentical(false, $id);
 	}
@@ -72,7 +76,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$id = $testable->findPrev(array(T_CLASS), 6);
 		$this->assertIdentical(0, $id);
 	}
@@ -85,7 +91,9 @@ function foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$id = $testable->findPrev(array(T_CLASS), 6);
 		$this->assertIdentical(false, $id);
 	}
@@ -98,7 +106,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
 
 		$inClass = $testable->tokenIn(array(T_CLASS), $id);
@@ -113,7 +123,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
 
 		$inClass = $testable->tokenIn(array(T_WHILE), $id);
@@ -131,7 +143,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$id = $testable->findNext(array(T_WHILE), 0); // while (false)
 
 		$inClass = $testable->tokenIn(array(T_CLASS), $id);
@@ -149,7 +163,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$id = $testable->findNext(array(T_WHILE), 0); // while (false)
 
 		$inClass = $testable->tokenIn(array(T_WHILE), $id);
@@ -163,7 +179,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$tokens = $testable->tokens();
 		$visibilityTokens = array(T_PUBLIC, T_PROTECTED, T_PRIVATE);
 		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
@@ -180,7 +198,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$tokens = $testable->tokens();
 		$contentToFind = array('public', 'protected', 'private');
 		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
@@ -198,7 +218,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$tokens = $testable->tokens();
 		$tokensToFind = array(T_FUNCTION, T_VARIABLE);
 		$id = $testable->findNext(array(T_CLASS), 0); // class foo
@@ -216,7 +238,9 @@ class foo {
 	}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$tokens = $testable->tokens();
 		$contentToFind = array('$var', 'function');
 		$id = $testable->findNext(array(T_CLASS), 0); // class foo
@@ -233,7 +257,9 @@ class foo {
 	private function bar() {}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 
 		$ids = $testable->findAll(array(T_FUNCTION), 0);
 		$this->assertIdentical(2, count($ids));
@@ -247,7 +273,9 @@ class foo {
 	private function bar() {}
 }
 EOD;
-		$testable = $this->_testable($code);
+		$testable = $this->_testable(array(
+			'source' => $code
+		));
 		$tokens = $testable->tokens();
 		$classId = $testable->findNext(array(T_CLASS), 0);
 		$children = $tokens[$classId]['children'];

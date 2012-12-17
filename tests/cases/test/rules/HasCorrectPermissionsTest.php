@@ -2,23 +2,25 @@
 
 namespace li3_quality\tests\cases\test\rules;
 
+use li3_quality\tests\mocks\MockHasCorrectPermissions;
+
 class HasCorrectPermissionsTest extends \li3_quality\test\Unit {
 
-	public $rule = 'li3_quality\test\rules\HasCorrectPermissions';
+	public $rule = 'li3_quality\tests\mocks\test\rules\MockHasCorrectPermissions';
 
-	public function testWithClosingTag() {
-		$file = __FILE__ . '/../../../mocks/execute/ExecuteableFile.php';
+	public function testNonExecuteableFile() {
 		$this->assertRulePass(array(
 			'source' => null,
-			'path' => $file,
+			'path' => __FILE__,
+			'executeable' => false,
 		), $this->rule);
 	}
 
-	public function testWithoutClosingTag() {
-		$file = __FILE__ . '/../../../mocks/execute/NonExecuteableFile.php';
-		$this->assertRulePass(array(
+	public function testExecuteableFile() {
+		$this->assertRuleFail(array(
 			'source' => null,
-			'path' => $file,
+			'path' => __FILE__,
+			'executeable' => true,
 		), $this->rule);
 	}
 
