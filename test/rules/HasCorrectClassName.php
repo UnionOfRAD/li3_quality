@@ -22,18 +22,18 @@ class HasCorrectClassName extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$tokens = $testable->tokens();
 		$pathinfo = pathinfo($testable->config('path'));
-		if ($pathinfo['extension'] != 'php') {
+		if ($pathinfo['extension'] !== 'php') {
 			return;
 		}
 		foreach ($tokens as $key => $token) {
 			if ($token['id'] === T_CLASS) {
 				$className = $tokens[$key + 2]['content'];
-				if ($className != Inflector::camelize($className)) {
+				if ($className !== Inflector::camelize($className)) {
 					$this->addViolation(array(
 						'message' => 'Class name is not in CamelCase style',
 						'line' => $token['line']
 					));
-				} elseif ($className != $pathinfo['filename']) {
+				} elseif ($className !== $pathinfo['filename']) {
 					$this->addViolation(array(
 						'message' => 'Class name and file name should match',
 						'line' => $token['line']

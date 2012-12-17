@@ -159,7 +159,7 @@ class Quality extends \lithium\console\command\Test {
 				$color = 'yellow';
 			}
 
-			if ($coverage == null || $coverage <= $this->threshold) {
+			if ($coverage === null || $coverage <= $this->threshold) {
 				$this->out(sprintf(
 					'%10s | %7s | %s',
 					$hasTest ? 'has test' : 'no test',
@@ -179,7 +179,7 @@ class Quality extends \lithium\console\command\Test {
 		$options += $defaults;
 
 		if ($path = $this->_path($options['path'])) {
-			if (pathinfo($options['path'], PATHINFO_EXTENSION) == 'php') {
+			if (pathinfo($options['path'], PATHINFO_EXTENSION) === 'php') {
 				return array($path);
 			}
 			$parts = explode('\\', $path) + array($this->library);
