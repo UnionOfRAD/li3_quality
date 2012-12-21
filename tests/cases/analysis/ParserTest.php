@@ -517,6 +517,20 @@ EOD;
 		$this->assertIdentical('anonymous', $class['label']);
 	}
 
+	public function testComplexVariables() {
+		$code = <<<EOD
+class Quality {
+	public \$foo = true;
+	public function __construct() {
+		\$this->{'foo'} = 'bar'
+		\$this->{\$this->{'foo'}} = 'baz';
+		\$this->{'foobar' . \$this->{'foo'}} = 'foobaz';
+	}
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+		$this->assertIdentical(72, count($tokens));
+	}
 
 }
 

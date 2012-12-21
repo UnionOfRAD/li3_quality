@@ -270,6 +270,29 @@ class Parser extends \lithium\analysis\Parser {
 	}
 
 	/**
+	 * Will determine if this token is a fake opening bracket
+	 *
+	 * @param  array $token       The token you are analyzing
+	 * @param  array $tokens      The array of the currently created tokens
+	 * @param  int   $mustInclude The tokenId that must be included by the parent
+	 * @return bool
+	 */
+	protected static function _fakeParent(&$token, &$tokens, $mustInclude) {
+		$tokenId = array_search($token, $tokens);
+		$previousToken = null;
+		$prevId = $tokenId - 1;
+		$hasOpeningToken = in_array($token['id'], array(
+			T_DOLLAR_OPEN_CURLY_BRACES,
+			T_CURLY_OPEN,
+		));
+		$hasOpeningContent = $token['content'] === '{';
+		$afterMustInclude = $mustInclude < $tokenId;
+		$objectOperator = $prevId > 0 && $tokens[$prevId]['id'] === T_OBJECT_OPERATOR;
+		$token['self'] = $tokenId;
+		return $hasOpeningToken || ($hasOpeningContent && $afterMustInclude && $objectOperator);
+	}
+
+	/**
 	 * Adds more token information than the base lithium tokenizer such as name,
 	 * parent, and children.
 	 *
@@ -284,11 +307,9 @@ class Parser extends \lithium\analysis\Parser {
 	 */
 	public static function tokenize($code, array $options = array()) {
 		$tokens = parent::tokenize($code, $options);
-		$level = 0;
 		$queue = $currentParent = $mustInclude = -1;
 		$total = count($tokens);
-		$maxLevel = 0;
-		$curlyOpen = false;
+		$level = $fakeParents = $maxLevel = 0;
 		foreach ($tokens as $tokenId => &$token) {
 			if (isset($tokens[$currentParent])) {
 				$tokens[$currentParent]['children'][] = $tokenId;
@@ -299,10 +320,8 @@ class Parser extends \lithium\analysis\Parser {
 			$token['label'] = static::_findLabel($token, $tokens);
 
 			if ($maxLevel > 0 && $mustInclude <= $tokenId) {
-				if ($token['content'] === '}' || in_array($token['id'], self::$_endingBlocks)) {
-					if ($curlyOpen) {
-						$curlyOpen = false;
-					} else {
+				if ($token['content'] === '}' || in_array($token['id'], static::$_endingBlocks)) {
+					if ($token['content'] === '}' && $fakeParents === 0) {
 						$level--;
 					}
 				}
@@ -347,13 +366,15 @@ class Parser extends \lithium\analysis\Parser {
 				$maxLevel = max($level, $maxLevel);
 			} elseif ($queue === -1 && static::_canQueue($token, $tokens)) {
 				$queue = $tokenId;
-			} elseif ($token['id'] === T_CURLY_OPEN) {
-				$curlyOpen = true;
+			} elseif (static::_fakeParent($token, $tokens, $mustInclude)) {
+				$fakeParents++;
+			} elseif ($token['content'] === '}' && $fakeParents > 0) {
+				$fakeParents--;
 			}
 		}
-		if ($queue !== -1 || $level !== 0) {
+		if ($queue !== -1 || $level !== 0 || $fakeParents !== 0) {
 			$smallTokens = array_slice($tokens, 0, 20);
-			$data = print_r(compact('queue', 'level', 'tokens'), true);
+			$data = print_r(compact('queue', 'level', 'fakeParents', 'tokens'), true);
 			throw new \LogicException('A parse error has been encountered.' . $data);
 		}
 		return $tokens;
