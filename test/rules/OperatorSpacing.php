@@ -115,7 +115,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				'before' => 3,
 				'length' => 7,
 			),
-			'regex' => '/[^ ] (\?:|\?|:) [^ ]/',
+			'regex' => '/([^ ] (\?:|\?|:) [^ ])|((case|default)(.*):$)/',
 			'message' => 'Operator {:content} must be surrounded by spaces.',
 			'tokens' => array(),
 			'content' => array(
@@ -157,6 +157,8 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 					$html = preg_split('/\r\n|\r|\n/', $html);
 					if (preg_match($pattern, $html[0]) === 0) {
 						$this->addViolation(array(
+							'pattern' => $pattern,
+							'html' => $html,
 							'message' => String::insert($inspector['message'], $token),
 							'line' => $token['line'],
 						));

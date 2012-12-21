@@ -260,6 +260,18 @@ EOD;
 		$code = '$this->stop(0, "Could not find any files in {$library}.");';
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	public function testSwitchStatement() {
+		$code = <<<EOD
+switch(1) {
+	case 2:
+		return false;
+	default:
+		return true;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>
