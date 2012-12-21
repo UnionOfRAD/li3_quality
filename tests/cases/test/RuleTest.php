@@ -11,6 +11,7 @@ class RuleTest extends \li3_quality\test\Unit {
 		$violation = array(
 			'message' => 'Foobar',
 			'line' => 0,
+			'position' => '-',
 		);
 		$rule->addViolation($violation);
 		$violations = $rule->violations();
@@ -48,6 +49,7 @@ class RuleTest extends \li3_quality\test\Unit {
 		$warning = array(
 			'message' => 'Foobar',
 			'line' => 0,
+			'position' => '-',
 		);
 		$rule->addWarning($warning);
 		$warnings = $rule->warnings();

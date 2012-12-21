@@ -21,24 +21,6 @@ use li3_quality\test\Testable;
 class Quality extends \lithium\console\command\Test {
 
 	/**
-	 * Default violation array
-	 */
-	protected $_defaultViolation = array(
-		'line' => '-',
-		'position' => '-',
-		'message' => 'Unnamed Violation'
-	);
-
-	/**
-	 * Default warning array
-	 */
-	protected $_defaultWarning = array(
-		'line' => '-',
-		'position' => '-',
-		'message' => 'Unnamed Warning'
-	);
-
-	/**
 	 * The library to run the quality checks on.
 	 */
 	public $library = true;
@@ -87,7 +69,7 @@ class Quality extends \lithium\console\command\Test {
 					array("----", "--------", "---------")
 				);
 				foreach ($result['violations'] as $violation) {
-					$params = $violation + $this->_defaultViolation;
+					$params = $violation;
 					$output[] = array($params['line'], $params['position'], $params['message']);
 				}
 				$this->columns($output, array('style' => 'red', 'error' => true));
@@ -98,7 +80,7 @@ class Quality extends \lithium\console\command\Test {
 					array("----", "--------", "-------")
 				);
 				foreach ($result['warnings'] as $warning) {
-					$params = $warning + $this->_defaultWarning;
+					$params = $warning;
 					$output[] = array($params['line'], $params['position'], $params['message']);
 				}
 				$this->columns($output, array('style' => 'yellow', 'error' => false));

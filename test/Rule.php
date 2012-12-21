@@ -43,7 +43,11 @@ abstract class Rule extends \lithium\core\Object {
 	 * @return  void
 	 */
 	public function addViolation($violation = array()) {
-		$this->_violations[] = $violation;
+		$this->_violations[] = $violation + array(
+			'line' => '-',
+			'position' => '-',
+			'message' => 'Unnamed Violation',
+		);
 	}
 
 	/**
@@ -53,7 +57,11 @@ abstract class Rule extends \lithium\core\Object {
 	 * @return  void
 	 */
 	public function addWarning($warning = array()) {
-		$this->_warnings[] = $warning;
+		$this->_warnings[] = $warning + array(
+			'line' => '-',
+			'position' => '-',
+			'message' => 'Unnamed Warning',
+		);
 	}
 
 	/**
