@@ -131,10 +131,10 @@ class Parser extends \lithium\analysis\Parser {
 	 * @return bool          If this token is a parent or not
 	 */
 	protected static function _isParent(&$token, &$tokens) {
-		if (!isset(self::$_parentTokens[$token['id']])) {
+		if (!isset(static::$_parentTokens[$token['id']])) {
 			return false;
 		}
-		$requiredParents = self::$_parentTokens[$token['id']]['parents'];
+		$requiredParents = static::$_parentTokens[$token['id']]['parents'];
 		$parentId = $token['parent'];
 		$isDecoy = false;
 		$hasRequiredParents = empty($requiredParents);
@@ -166,16 +166,16 @@ class Parser extends \lithium\analysis\Parser {
 		$lastSafeId = 0;
 		$total = count($tokens);
 		$tokenId = array_search($token, $tokens) + 1;
-		$content = self::$_parentTokens[$token['id']]['mustInclude'];
+		$content = static::$_parentTokens[$token['id']]['mustInclude'];
 		if ($token['id'] === T_DO) {
-			return self::_mustIncludeDo($token, $tokens);
+			return static::_mustIncludeDo($token, $tokens);
 		}
 		for ($id = $tokenId; $id < $total; $id++) {
 			if ($tokens[$id]['line'] === $token['line']) {
 				$lastSafeId = $id;
 			}
 			$nonVar = $tokens[$id]['id'] !== T_VARIABLE;
-			$foundParent = isset(self::$_parentTokens[$tokens[$id]['id']]);
+			$foundParent = isset(static::$_parentTokens[$tokens[$id]['id']]);
 			if ($nonVar && $foundParent) {
 				return $lastSafeId;
 			} elseif (in_array($tokens[$id]['content'], $content)) {
@@ -220,8 +220,8 @@ class Parser extends \lithium\analysis\Parser {
 	 * @return string
 	 */
 	protected static function _findLabel(&$token, &$tokens) {
-		$isParent = isset(self::$_parentTokens[$token['id']]);
-		if ($isParent && self::$_parentTokens[$token['id']]['hasName']) {
+		$isParent = isset(static::$_parentTokens[$token['id']]);
+		if ($isParent && static::$_parentTokens[$token['id']]['hasName']) {
 			if ($token['id'] === T_VARIABLE) {
 				return substr($token['content'], 1);
 			}
@@ -266,7 +266,7 @@ class Parser extends \lithium\analysis\Parser {
 			}
 			return false;
 		}
-		return in_array($token['id'], self::$_beforeParents);
+		return in_array($token['id'], static::$_beforeParents);
 	}
 
 	/**
@@ -296,7 +296,7 @@ class Parser extends \lithium\analysis\Parser {
 			$token['parent'] = $currentParent;
 			$token['level'] = $level;
 			$token['children'] = array();
-			$token['label'] = self::_findLabel($token, $tokens);
+			$token['label'] = static::_findLabel($token, $tokens);
 
 			if ($maxLevel > 0 && $mustInclude <= $tokenId) {
 				if ($token['content'] === '}' || in_array($token['id'], self::$_endingBlocks)) {
@@ -331,9 +331,9 @@ class Parser extends \lithium\analysis\Parser {
 				}
 			}
 
-			if (self::_isParent($token, $tokens)) {
+			if (static::_isParent($token, $tokens)) {
 				$currentParent = $tokenId;
-				$mustInclude = self::_mustInclude($token, $tokens);
+				$mustInclude = static::_mustInclude($token, $tokens);
 				$token['mustInclude'] = $mustInclude;
 				if ($queue !== -1) {
 					foreach (range($queue, $tokenId - 1) as $key) {
@@ -345,7 +345,7 @@ class Parser extends \lithium\analysis\Parser {
 				$level++;
 				$queue = -1;
 				$maxLevel = max($level, $maxLevel);
-			} elseif ($queue === -1 && self::_canQueue($token, $tokens)) {
+			} elseif ($queue === -1 && static::_canQueue($token, $tokens)) {
 				$queue = $tokenId;
 			} elseif ($token['id'] === T_CURLY_OPEN) {
 				$curlyOpen = true;
