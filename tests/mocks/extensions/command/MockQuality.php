@@ -17,3 +17,5 @@ class MockQuality extends \li3_quality\extensions\command\Quality {
 	}
 
 }
+
+?>

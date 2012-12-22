@@ -70,23 +70,9 @@ class QualityTest extends \li3_quality\test\Unit {
 		$mockRule = new Rules;
 		$this->classes['rules'] = $mockRule;
 		print_r($this->classes);
-		$mockQuality = new Quality(array(
+		$mockQuality = new MockQuality(array(
 			'request' => $this->request, 'classes' => $this->classes
 		));
-		$mockRule->get = function() {
-			echo 'foo';
-			exit;
-			return array('rule1');
-		};
-		$mockRule->apply = function($testable, $parent) {
-			echo 'ruff';
-			exit;
-			return array(
-				'warnings' => array(),
-				'violations' => array(),
-				'success' => true,
-			);
-		};
 		$mockQuality->_testables = function($options, $parent) {
 			echo 'meow';
 			exit;
