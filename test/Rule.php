@@ -123,6 +123,26 @@ abstract class Rule extends \lithium\core\Object {
 		return $line === 0 ? -1 : $this->_findTokenByLine($line - 1, $tokens);
 	}
 
+	/**
+	 * Will determine if a set of tokens is on a given line.
+	 *
+	 * @param  int    $line     The line you are on
+	 * @param  array  $tokens   The tokens to iterate
+	 * @param  array  $tokenIds The tokens you are looking for
+	 * @return int              The token id if found, -1 if not
+	 */
+	protected function _lineHasToken($line, $tokens, array $tokenIds = array()) {
+		foreach($tokens as $token) {
+			$correctLine = $token['line'] === $line;
+			if ($correctLine && in_array($token['id'], $tokenIds)) {
+				return true;
+			} elseif ($token['line'] > $line) {
+				break;
+			}
+		}
+		return false;
+	}
+
 }
 
 ?>

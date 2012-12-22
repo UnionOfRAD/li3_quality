@@ -329,6 +329,81 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testCorrectTabIndentionWithSwitch() {
+		$code = <<<EOD
+switch (true) {
+	case (\$formatter instanceof Closure):
+		return \$formatter(\$message);
+	case (is_string(\$formatter)):
+		\$data = \$this->_message_data(\$message);
+		return String::insert(\$formatter, \$data);
+	default:
+		throw new RuntimeException(
+			"Formatter for format `{\$format}` is neither string nor closure."
+		);
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testComlpexSwitch() {
+		$code = <<<EOD
+switch (true) {
+	case 1:
+		return 2;
+	case 3:
+		switch(false) {
+			case 4:
+				return 3;
+			case 5:
+				return 7;
+			case 8:
+				break;
+		}
+		break;
+	default:
+		echo false;
+		break;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testBrokenComplexSwitch() {
+		$code = <<<EOD
+switch (true) {
+	case 1:
+		return 2;
+	case 3:
+		switch (true) {
+			case 1:
+				return 2;
+			case 3:
+				break;
+			default:
+				echo false;
+				break;
+			}
+		break;
+	default:
+		echo false;
+		break;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testCorrectTryCatch() {
+		$code = <<<EOD
+try {
+	return true;
+} catch(\Exception \$e) {
+	return false;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>
