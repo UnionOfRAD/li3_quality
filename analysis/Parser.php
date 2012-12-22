@@ -287,9 +287,14 @@ class Parser extends \lithium\analysis\Parser {
 		));
 		$hasOpeningContent = $token['content'] === '{';
 		$afterMustInclude = $mustInclude < $tokenId;
-		$objectOperator = $prevId > 0 && $tokens[$prevId]['id'] === T_OBJECT_OPERATOR;
+		$isVariable = false;
+		if ($prevId > 0) {
+			$objectOperator = $tokens[$prevId]['id'] === T_OBJECT_OPERATOR;
+			$dollarSign = $tokens[$prevId]['content'] === '$';
+			$isVariable = $dollarSign || $objectOperator;
+		}
 		$token['self'] = $tokenId;
-		return $hasOpeningToken || ($hasOpeningContent && $afterMustInclude && $objectOperator);
+		return $hasOpeningToken || ($hasOpeningContent && $afterMustInclude && $isVariable);
 	}
 
 	/**
@@ -373,7 +378,8 @@ class Parser extends \lithium\analysis\Parser {
 			}
 		}
 		if ($queue !== -1 || $level !== 0 || $fakeParents !== 0) {
-			$data = print_r(compact('queue', 'level', 'fakeParents'), true);
+			$smallTokens = array_slice($tokens, 0, 20);
+			$data = print_r(compact('queue', 'level', 'fakeParents', 'tokens'), true);
 			throw new \LogicException('A parse error has been encountered.' . $data);
 		}
 		return $tokens;

@@ -532,6 +532,18 @@ EOD;
 		$this->assertIdentical(72, count($tokens));
 	}
 
+	public function testStaticDynamicVariable() {
+		$code = <<<EOD
+class Inflector {
+	function rules() {
+		static::\${\$var} = null;
+	}
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+		$this->assertIdentical(29, count($tokens));
+	}
+
 }
 
 ?>
