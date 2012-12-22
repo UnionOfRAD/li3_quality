@@ -14,6 +14,7 @@ use lithium\test\Dispatcher;
 use lithium\test\Group;
 use li3_quality\test\Rules;
 use li3_quality\test\Testable;
+use li3_quality\analysis\ParserException;
 
 /**
  * The Quality command helps you to run static code analysis on your codebase.
@@ -59,7 +60,16 @@ class Quality extends \lithium\console\command\Test {
 				"on " . count($testables) . " classes."
 		);
 		foreach ($testables as $count => $path) {
-			$result = Rules::apply(new Testable(compact('path')));
+			try {
+				$result = Rules::apply(new Testable(compact('path')));
+			} catch (ParserException $e) {
+				$this->error("[FAIL] $path", "red");
+				$this->error("Parse error: " . $e->getMessage(), "red");
+				if ($this->verbose) {
+					$this->error(print_r($e->parserData, true), "red");
+				}
+				continue;
+			}
 			if ($result['success']) {
 				$this->out("[OK] $path", "green");
 			} else {
