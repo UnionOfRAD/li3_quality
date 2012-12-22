@@ -42,6 +42,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @return void
 	 */
 	public function apply($testable) {
+		return;
 		$followerCount = 0;
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
@@ -110,8 +111,19 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 */
 	protected function _lineHasRelativeTab($lineIndex, &$lines, &$tokens) {
 		$hasEndingLine = preg_match('/^\s*[}\)]+(;$|)?/', $lines[$lineIndex]) === 1;
-		$hasCaseDefault = $this->_lineHasToken($lineIndex + 1, $tokens, array(T_CASE, T_DEFAULT));
-		if ($hasEndingLine || $hasCaseDefault) {
+		$hasCaseDefault = $this->_lineHasToken($lineIndex + 1, $tokens, array(
+			T_CASE,
+			T_DEFAULT
+		));
+		$hasEndingToken = $this->_linehasToken($lineIndex + 1, $tokens, array(
+			T_ENDDECLARE,
+			T_ENDFOR,
+			T_ENDFOREACH,
+			T_ENDIF,
+			T_ENDSWITCH,
+			T_ENDWHILE,
+		));
+		if ($hasEndingLine || $hasCaseDefault || $hasEndingToken) {
 			return -1;
 		}
 		return 0;
@@ -126,7 +138,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @return bool
 	 */
 	protected function _nextLineHasTab($lineIndex, &$lines, &$tokens) {
-		return preg_match('/((({|\()$)|(^\s+(case|default)(.*):))$/', $lines[$lineIndex]) === 1;
+		return preg_match('/((({|\(|\:)$)|(^\s+(case|default)(.*):))$/', $lines[$lineIndex]) === 1;
 	}
 
 	/**

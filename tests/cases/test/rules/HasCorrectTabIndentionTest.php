@@ -404,6 +404,15 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testAlternateSyntaxIf() {
+		$code = <<<EOD
+if (false):
+	echo 'foo';
+endif;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>
