@@ -132,7 +132,7 @@ abstract class Rule extends \lithium\core\Object {
 	 * @return int              The token id if found, -1 if not
 	 */
 	protected function _lineHasToken($line, $tokens, array $tokenIds = array()) {
-		foreach($tokens as $token) {
+		foreach ($tokens as $token) {
 			$correctLine = $token['line'] === $line;
 			if ($correctLine && in_array($token['id'], $tokenIds)) {
 				return true;

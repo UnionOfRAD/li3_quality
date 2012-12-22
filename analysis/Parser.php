@@ -320,10 +320,10 @@ class Parser extends \lithium\analysis\Parser {
 			$token['label'] = static::_findLabel($token, $tokens);
 
 			if ($maxLevel > 0 && $mustInclude <= $tokenId) {
-				if ($token['content'] === '}' || in_array($token['id'], static::$_endingBlocks)) {
-					if ($token['content'] === '}' && $fakeParents === 0) {
-						$level--;
-					}
+				$closingBracket = $token['content'] === '}' && $fakeParents === 0;
+				$closingToken = in_array($token['id'], static::$_endingBlocks);
+				if ($closingToken || $closingBracket) {
+					$level--;
 				}
 				if (isset($tokens[$currentParent])) {
 					$closeByBrackets = $tokens[$currentParent]['level'] >= $level;
@@ -373,8 +373,7 @@ class Parser extends \lithium\analysis\Parser {
 			}
 		}
 		if ($queue !== -1 || $level !== 0 || $fakeParents !== 0) {
-			$smallTokens = array_slice($tokens, 0, 20);
-			$data = print_r(compact('queue', 'level', 'fakeParents', 'tokens'), true);
+			$data = print_r(compact('queue', 'level', 'fakeParents'), true);
 			throw new \LogicException('A parse error has been encountered.' . $data);
 		}
 		return $tokens;
