@@ -54,7 +54,7 @@ EOD;
 
 	public function testIgnoreLineComments() {
 		$code = <<<EOD
-// foo	bar	baz	
+// foo	bar	baz
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
