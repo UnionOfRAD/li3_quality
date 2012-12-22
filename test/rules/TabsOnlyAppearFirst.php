@@ -25,6 +25,9 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 	 */
 	public $ignoreableTokens = array(
 		T_ENCAPSED_AND_WHITESPACE,
+		T_DOC_COMMENT,
+		T_COMMENT,
+		T_START_HEREDOC,
 	);
 
 	/**
