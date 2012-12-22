@@ -55,14 +55,16 @@ class Rules extends \lithium\core\StaticObject {
 	 * Will iterate over each rule calling apply on them
 	 *
 	 * @param   object $testable The testable object
+	 * @param   array  $filters  Filter rules by name
 	 * @return  array
 	 */
-	public static function apply($testable) {
+	public static function apply($testable, array $filters = array()) {
 		$violations = array();
 		$warnings = array();
 		$success = true;
+		$rules = count($filters) > 0 ? static::filterByName($filters) : static::$_rules;
 
-		foreach (static::$_rules as $ruleSet) {
+		foreach ($rules as $ruleSet) {
 			$rule = $ruleSet['rule'];
 			$options = $ruleSet['options'];
 			$rule->apply($testable, $options);
@@ -97,6 +99,16 @@ class Rules extends \lithium\core\StaticObject {
 	 */
 	public static function reset() {
 		static::$_rules = array();
+	}
+
+	/**
+	 * Will find filtered rules
+	 *
+	 * @param  array $names Rule names to filter for
+	 * @return array        Filtered rules
+	 */
+	public static function filterByName(array $names) {
+		return array_intersect_key(static::$_rules, array_fill_keys($names, NULL));
 	}
 }
 

@@ -55,13 +55,19 @@ class Quality extends \lithium\console\command\Test {
 		}
 		$testables = $this->_testables(compact('path'));
 		$this->header('Lithium Syntax Check');
+		$filters = $this->filters ? array_map('trim', explode(',', $this->filters)) : array();
+		if (count($filters) > 0) {
+			$rules = Rules::filterByName($filters);
+		} else {
+			$rules = Rules::get();
+		}
 		$this->out(
-			"Performing " . count(Rules::get()) . " rules " .
+			"Performing " . count($rules) . " rules " .
 				"on " . count($testables) . " classes."
 		);
 		foreach ($testables as $count => $path) {
 			try {
-				$result = Rules::apply(new Testable(compact('path')));
+				$result = Rules::apply(new Testable(compact('path')), $filters);
 			} catch (ParserException $e) {
 				$this->error("[FAIL] $path", "red");
 				$this->error("Parse error: " . $e->getMessage(), "red");
