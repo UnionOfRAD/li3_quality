@@ -272,6 +272,14 @@ switch(1) {
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	public function testAssignByReference() {
+		$code = <<<EOD
+\$foo =& \$bar;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>

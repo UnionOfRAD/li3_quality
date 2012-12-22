@@ -54,10 +54,21 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				T_INSTANCEOF,
 			),
 			'content' => array(
-				'=',
 				'+',
 				'*',
 				'/',
+			),
+		),
+		'equals' => array(
+			'relativeTokens' => array(
+				'before' => 1,
+				'length' => 4,
+			),
+			'regex' => '/ (\\=|\\=\\&) /',
+			'message' => 'Operator {:content} must only have one leading and trailing space.',
+			'tokens' => array(),
+			'content' => array(
+				'=',
 			),
 		),
 		'optionalEnding' => array(
@@ -115,7 +126,8 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				'before' => 3,
 				'length' => 7,
 			),
-			'regex' => '/([^ ] (\?:|\?|:) [^ ])|((case|default)(.*):$)/',
+			'fullLineRegex' => '/^\s+(case|default)(.*):$/',
+			'regex' => '/(([^ ] (\?:|\?|:) [^ ])|(:$))/',
 			'message' => 'Operator {:content} must be surrounded by spaces.',
 			'tokens' => array(),
 			'content' => array(
@@ -157,8 +169,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 					$html = preg_split('/\r\n|\r|\n/', $html);
 					if (preg_match($pattern, $html[0]) === 0) {
 						$this->addViolation(array(
-							'pattern' => $pattern,
-							'html' => $html,
 							'message' => String::insert($inspector['message'], $token),
 							'line' => $token['line'],
 						));
