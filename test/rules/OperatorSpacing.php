@@ -154,7 +154,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				$badToken = $token['id'] === T_ENCAPSED_AND_WHITESPACE;
 				if (($hasTokens || $hasContent) && !$badToken) {
 					$pattern = String::insert($inspector['regex'], array(
-						'content' => preg_quote($token['content']),
+						'content' => preg_quote($token['content'], "/"),
 					));
 					$firstId = $id - $inspector['relativeTokens']['before'];
 					$firstId = ($firstId < 0) ? 0 : $firstId;
