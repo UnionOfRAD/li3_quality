@@ -118,6 +118,21 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testReturnWithParentheses() {
+		$code = <<<EOD
+function foobar() {
+	return (true ? "foo" : "bar");
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testReturnInOneLineFunction() {
+		$code = <<<EOD
+\$foo = function() { return true; };
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>

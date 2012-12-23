@@ -41,6 +41,14 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testFunctionInlineComments() {
+		$code = <<<EOD
+function foo() {
+	//explain some things
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>

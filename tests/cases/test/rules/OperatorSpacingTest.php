@@ -280,6 +280,49 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testDivision() {
+		$code = '$a = 10 / 3;';
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testMultilineExpression() {
+		$code = <<<EOD
+\$foo = true
+	&& false;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testMultilineAssignment() {
+		$code = <<<EOD
+\$foo =
+	true ?: false;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testMultilineArrayAssignment() {
+		$code = <<<EOD
+\$foo = array(
+	'bar' =>
+		'baz'
+);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testMultilineTernary() {
+		$code = <<<EOD
+\$foo = true
+	? true : false;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testNegativeAsUnary() {
+		$code = '$foo = -$bar;';
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>

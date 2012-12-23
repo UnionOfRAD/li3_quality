@@ -527,6 +527,18 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testMultilineExpression() {
+		$code = <<<EOD
+if (true
+	&& false) {
+	return false;
+} elseif (true
+	&& false) {
+	return false;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>

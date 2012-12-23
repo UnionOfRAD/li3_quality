@@ -52,6 +52,27 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testMagicMethods() {
+		$code = <<<EOD
+class FooBar {
+	public function __construct() {}
+	public function __destruct() {}
+	public function __call() {}
+	public static function __callStatic() {}
+	public function __get() {}
+	public function __set() {}
+	public function __isset() {}
+	public function __unset() {}
+	public function __sleep() {}
+	public function __wakeup() {}
+	public function __toString() {}
+	public function __invoke() {}
+	public static function __set_state() {}
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>
