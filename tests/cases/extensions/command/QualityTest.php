@@ -9,23 +9,25 @@ use lithium\console\Request;
 
 class QualityTest extends \li3_quality\test\Unit {
 
+	/**
+	 * $this->_backup['cwd'] = getcwd();
+	 * $this->_backup['_SERVER'] = $_SERVER;
+	 * $_SERVER['argv'] = array();
+	 * chdir(LITHIUM_LIBRARY_PATH . '/lithium');
+	 */
 	public function setUp() {
 		$this->classes = array(
 			'response' => 'lithium\tests\mocks\console\MockResponseRRR'
 		);
-		// $this->_backup['cwd'] = getcwd();
-		// $this->_backup['_SERVER'] = $_SERVER;
-		// $_SERVER['argv'] = array();
-
-		// chdir(LITHIUM_LIBRARY_PATH . '/lithium');
 
 		$this->request = new Request(array('input' => fopen('php://temp', 'w+')));
-		// $this->request->params = array('library' => 'build_test');
 	}
 
+	/**
+	 * $_SERVER = $this->_backup['_SERVER'];
+	 * chdir($this->_backup['cwd']);
+	 */
 	public function tearDown() {
-		// $_SERVER = $this->_backup['_SERVER'];
-		// chdir($this->_backup['cwd']);
 	}
 
 	public function checkDefaultInput() {

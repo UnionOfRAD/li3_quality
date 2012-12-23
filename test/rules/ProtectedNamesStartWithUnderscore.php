@@ -9,6 +9,7 @@
 namespace li3_quality\test\rules;
 
 use lithium\util\String;
+use li3_quality\analysis\Parser;
 
 class ProtectedNamesStartWithUnderscore extends \li3_quality\test\Rule {
 
@@ -21,10 +22,11 @@ class ProtectedNamesStartWithUnderscore extends \li3_quality\test\Rule {
 	 */
 	public function apply($testable) {
 		$message = 'Protected method {:name} must start with an underscore';
-		$tokens = $testable->tokens();
-		foreach ($tokens as $position => $token) {
+		$tokens = $testable->relationships();
+		foreach ($tokens as $tokenId => $token) {
 			if ($token['id'] === T_PROTECTED) {
-				$parentLabel = $tokens[$token['parent']]['label'];
+				$parent = $testable->findNext(array(T_FUNCTION, T_VARIABLE), $tokenId);
+				$parentLabel = Parser::label($parent, $tokens);
 				if (substr($parentLabel, 0, 1) !== '_') {
 					$this->addViolation(array(
 						'message' => String::insert($message, array(

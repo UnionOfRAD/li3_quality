@@ -35,6 +35,15 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	public $negativeMessage = 'This line is missing {:extraCount} tabs.';
 
 	/**
+	 * This method is foobared.
+	 *
+	 * @return bool
+	 */
+	public function enabled() {
+		return false;
+	}
+
+	/**
 	 * Will iterate the lines looking for $patterns while keeping track of how many tabs
 	 * the current line should have.
 	 *
@@ -42,7 +51,6 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @return void
 	 */
 	public function apply($testable) {
-		return;
 		$followerCount = 0;
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();

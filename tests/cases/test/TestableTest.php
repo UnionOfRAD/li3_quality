@@ -4,6 +4,7 @@ namespace li3_quality\tests\cases\test;
 
 use li3_quality\tests\mocks\test\MockTestable as Testable;
 use li3_quality\test\Testable as RealTestable;
+use li3_quality\analysis\Parser;
 
 class TestableTest extends \li3_quality\test\Unit {
 
@@ -182,12 +183,12 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->tokens();
+		$tokens = $testable->relationships();
 		$visibilityTokens = array(T_PUBLIC, T_PROTECTED, T_PRIVATE);
 		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
-		$children = $tokens[$id]['children'];
+		$modifiers = Parser::modifiers($id, $tokens);
 
-		$visibility = $testable->findNext($visibilityTokens, $children);
+		$visibility = $testable->findNext($visibilityTokens, $modifiers);
 		$this->assertIdentical(T_PRIVATE, $tokens[$visibility]['id']);
 	}
 
@@ -201,12 +202,12 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->tokens();
+		$tokens = $testable->relationships();
 		$contentToFind = array('public', 'protected', 'private');
 		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
-		$children = $tokens[$id]['children'];
+		$modifiers = Parser::modifiers($id, $tokens);
 
-		$visibility = $testable->findNextContent($contentToFind, $children);
+		$visibility = $testable->findNextContent($contentToFind, $modifiers);
 		$this->assertIdentical('private', $tokens[$visibility]['content']);
 	}
 
@@ -251,7 +252,7 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->tokens();
+		$tokens = $testable->relationships();
 		$tokensToFind = array(T_FUNCTION, T_VARIABLE);
 		$id = $testable->findNext(array(T_CLASS), 0); // class foo
 		$children = $tokens[$id]['children'];
@@ -271,7 +272,7 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->tokens();
+		$tokens = $testable->relationships();
 		$contentToFind = array('$var', 'function');
 		$id = $testable->findNext(array(T_CLASS), 0); // class foo
 		$children = $tokens[$id]['children'];
@@ -337,7 +338,7 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->tokens();
+		$tokens = $testable->relationships();
 		$classId = $testable->findNext(array(T_CLASS), 0);
 		$children = $tokens[$classId]['children'];
 

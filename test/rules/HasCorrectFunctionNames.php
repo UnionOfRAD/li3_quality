@@ -9,6 +9,7 @@
 namespace li3_quality\test\rules;
 
 use lithium\util\Inflector;
+use li3_quality\analysis\Parser;
 
 class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 
@@ -21,7 +22,7 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 	protected $_magicMethods = array(
 		'__construct', '__destruct', '__call',
 		'__callStatic', '__get', '__set',
-		'__isset', ' __unset', '__sleep',
+		'__isset', '__unset', '__sleep',
 		'__wakeup', '__toString', '__invoke',
 		'__set_state', '__clone', '__init',
 	);
@@ -34,17 +35,19 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 	 * @return void
 	 */
 	public function apply($testable) {
-		$tokens = $testable->tokens();
+		$tokens = $testable->relationships();
 		foreach ($tokens as $key => $token) {
 			if ($token['id'] === T_FUNCTION) {
-				$label = $token['label'];
+				$label = Parser::label($key, $tokens);
+				$modifiers = Parser::modifiers($key, $tokens);
+				$isClosure = Parser::closure($key, $tokens);
 				if (in_array($label, $this->_magicMethods)) {
 					continue;
 				}
-				if ($testable->findNext(array(T_PROTECTED), $token['children']) !== false) {
+				if ($testable->findNext(array(T_PROTECTED), $modifiers) !== false) {
 					$label = preg_replace('/^_/', '', $label);
 				}
-				if ($label !== Inflector::camelize($label, false)) {
+				if (!$isClosure && $label !== Inflector::camelize($label, false)) {
 					$this->addViolation(array(
 						'message' => 'Function "' . $label . '" is not in camelBack style',
 						'line' => $tokens[$token['parent']]['line'],

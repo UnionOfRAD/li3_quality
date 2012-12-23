@@ -14,23 +14,38 @@ class Testable extends \lithium\core\Object {
 
 	/**
 	 * The source code of the testable class.
+	 *
+	 * @var string
 	 */
 	protected $_source = null;
 
 	/**
 	 * Contains the source code as an array for each line.
+	 *
+	 * @var array
 	 */
 	protected $_lines = null;
 
 	/**
 	 * Contains the class tokens.
+	 *
+	 * @var array
 	 */
 	protected $_tokens = null;
 
 	/**
 	 * Contains the config of the testable class.
+	 *
+	 * @var array
 	 */
 	protected $_config = array();
+
+	/**
+	 * Flag to remember if we have relationship tokens or not
+	 *
+	 * @var boolean
+	 */
+	protected $_hasRelationships = false;
 
 	/**
 	 * Locates the file and reads its source code.
@@ -81,6 +96,19 @@ class Testable extends \lithium\core\Object {
 	public function tokens() {
 		if ($this->_tokens === null) {
 			$this->_tokens = Parser::tokenize($this->source(), $this->_config);
+		}
+		return $this->_tokens;
+	}
+
+	/**
+	 * Accessor method for the tokens relationships.
+	 *
+	 * @return  array
+	 */
+	public function relationships() {
+		if (!$this->_hasRelationships) {
+			$this->_hasRelationships = true;
+			$this->_tokens = Parser::relationships($this->tokens());
 		}
 		return $this->_tokens;
 	}
@@ -225,7 +253,7 @@ class Testable extends \lithium\core\Object {
 	 * @return bool
 	 */
 	public function tokenIn(array $haystack, $needle) {
-		$tokens = $this->tokens();
+		$tokens = $this->relationships();
 		$self = $tokens[$needle];
 		while (isset($tokens[$self['parent']])) {
 			if (in_array($tokens[$self['parent']]['id'], $haystack)) {

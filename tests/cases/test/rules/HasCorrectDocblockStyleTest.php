@@ -6,6 +6,10 @@ class HasCorrectDocblockStyleTest extends \li3_quality\test\Unit {
 
 	public $rule = 'li3_quality\test\rules\HasCorrectDocblockStyle';
 
+	public function skip() {
+		$this->skipIf(true);
+	}
+
 	public function testCorrectBlankLinedDocBlock() {
 		$code = <<<EOD
 <?php

@@ -6,6 +6,10 @@ class HasCorrectTabIndentionTest extends \li3_quality\test\Unit {
 
 	public $rule = 'li3_quality\test\rules\HasCorrectTabIndention';
 
+	public function skip() {
+		$this->skipIf(true);
+	}
+
 	public function testCorrectNoTabs() {
 		$code = <<<EOD
 \$a = true;

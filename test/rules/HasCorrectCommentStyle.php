@@ -8,6 +8,8 @@
 
 namespace li3_quality\test\rules;
 
+use li3_quality\analysis\Parser;
+
 class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 
 	/**
@@ -18,7 +20,7 @@ class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 	 * @return void
 	 */
 	public function apply($testable) {
-		$tokens = $testable->tokens();
+		$tokens = $testable->relationships();
 
 		$comments = $testable->findAll(array(T_COMMENT));
 		foreach ($comments as $tokenId) {
@@ -29,7 +31,7 @@ class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 					'message' => 'Inline comments should never appear.',
 					'line' => $token['line'],
 				));
-			} elseif (preg_match('/^test/', $tokens[$parentId]['label']) === 0) {
+			} elseif (preg_match('/^test/', Parser::label($parentId, $tokens)) === 0) {
 				$this->addViolation(array(
 					'message' => 'Inline comments should only appear in testing methods.',
 					'line' => $token['line'],

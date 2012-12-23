@@ -45,6 +45,15 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 	);
 
 	/**
+	 * This method is foobared.
+	 *
+	 * @return bool
+	 */
+	public function enabled() {
+		return false;
+	}
+
+	/**
 	 * Will iterate tokens looking for comments and if found will determine the regex
 	 * to test the comment against.
 	 *

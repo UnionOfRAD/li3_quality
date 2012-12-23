@@ -15,6 +15,8 @@ class Foobar {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+
 		$this->assertIdentical(26, count($tokens));
 	}
 
@@ -28,6 +30,8 @@ class Foobar {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+
 		$bar = $tokens[18];
 		$this->assertIdentical(T_FUNCTION, $bar['id']);
 
@@ -44,9 +48,10 @@ class Foobar {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+
 		$function = $tokens[10];
 		$this->assertIdentical(T_FUNCTION, $function['id']);
-		$this->assertIdentical('bar', $function['label']);
+		$this->assertIdentical('bar', Parser::label(10, $tokens));
 	}
 
 	public function testFunctionName() {
@@ -56,9 +61,10 @@ function foobar() {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+
 		$function = $tokens[0];
 		$this->assertIdentical(T_FUNCTION, $function['id']);
-		$this->assertIdentical('foobar', $function['label']);
+		$this->assertIdentical('foobar', Parser::label(0, $tokens));
 	}
 
 	public function testClassName() {
@@ -68,9 +74,10 @@ class foobarbaz {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+
 		$class = $tokens[0];
 		$this->assertIdentical(T_CLASS, $class['id']);
-		$this->assertIdentical('foobarbaz', $class['label']);
+		$this->assertIdentical('foobarbaz', Parser::label(0, $tokens));
 	}
 
 	public function testVariableName() {
@@ -78,9 +85,10 @@ EOD;
 \$foo = 'bar';
 EOD;
 		$tokens = Parser::tokenize($code);
+
 		$variable = $tokens[0];
 		$this->assertIdentical(T_VARIABLE, $variable['id']);
-		$this->assertIdentical('foo', $variable['label']);
+		$this->assertIdentical('foo', Parser::label(0, $tokens));
 	}
 
 	public function testClassVariableName() {
@@ -90,9 +98,10 @@ class baz {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+
 		$variable = $tokens[8];
 		$this->assertIdentical(T_VARIABLE, $variable['id']);
-		$this->assertIdentical('foobar', $variable['label']);
+		$this->assertIdentical('foobar', Parser::label(8, $tokens));
 	}
 
 	public function testBasicChildren() {
@@ -106,6 +115,7 @@ class Foobar {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 		$class = $tokens[0];
 		$this->assertIdentical(T_CLASS, $class['id']);
 
@@ -148,6 +158,7 @@ class Foobar {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 		$class = $tokens[0];
 		$this->assertIdentical(T_CLASS, $class['id']);
 
@@ -172,6 +183,7 @@ class Foobar {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 		$class = $tokens[0];
 		$this->assertIdentical(T_CLASS, $class['id']);
 		$this->assertIdentical('{', $tokens[4]['content']);
@@ -216,6 +228,7 @@ class Foobar {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 		$failure = false;
 		foreach ($tokens as $tokenId => $token) {
 			if ($token['parent'] !== -1) {
@@ -248,6 +261,7 @@ do {
 EOD;
 
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 
 		$while = $tokens[0];
 		$this->assertIdentical(T_WHILE, $while['id']);
@@ -267,43 +281,7 @@ EOD;
 
 		$dowhile = $tokens[48];
 		$this->assertIdentical(T_WHILE, $dowhile['id']);
-		$this->assertIdentical(39, $dowhile['parent']);
-	}
-
-	public function testDoWhileParent() {
-		$code = <<<EOD
-\$i = 0;
-do {
-	\$i++;
-} while(false);
-EOD;
-		$tokens = Parser::tokenize($code);
-		$while = $tokens[17];
-		$this->assertIdentical(T_WHILE, $while['id']);
-		$this->assertIdentical(T_DO, $tokens[$while['parent']]['id']);
-	}
-
-	public function testComplexDoWhileParent() {
-		$code = <<<EOD
-do {
-	do {
-		true;
-	} while(false);
-} while(false);
-EOD;
-		$tokens = Parser::tokenize($code);
-
-		// Inner do/while
-		$while = $tokens[13];
-		$this->assertIdentical(T_WHILE, $while['id']);
-		$this->assertIdentical(4, $while['parent']);
-		$this->assertIdentical(T_DO, $tokens[$while['parent']]['id']);
-
-		// Outter do/while
-		$while = $tokens[21];
-		$this->assertIdentical(T_WHILE, $while['id']);
-		$this->assertIdentical(0, $while['parent']);
-		$this->assertIdentical(T_DO, $tokens[$while['parent']]['id']);
+		$this->assertIdentical(-1, $dowhile['parent']);
 	}
 
 	public function testNoParents() {
@@ -311,6 +289,7 @@ EOD;
 return (!empty(\$name)) ? "{\$path}/{\$name}" : \$path;
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 
 		foreach ($tokens as $token) {
 			$this->assertIdentical(-1, $token['parent']);
@@ -326,6 +305,7 @@ class Rules {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 		$this->assertIdentical(6, $tokens[16]['parent']);
 	}
 
@@ -340,26 +320,9 @@ if (true) {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 		$this->assertIdentical(39, count($tokens));
 	}
-
-	public function testDocBlockWithClassParent() {
-		$code = <<<EOD
-/**
- * Do I have a parent?
- */
-class Rules {}
-EOD;
-		$tokens = Parser::tokenize($code);
-
-		$this->assertIdentical(T_DOC_COMMENT, $tokens[0]['id']);
-		$this->assertIdentical(T_CLASS, $tokens[2]['id']);
-
-		$expected = 2;
-		$result = $tokens[0]['parent'];
-		$this->assertIdentical($expected, $result);
-	}
-
 	public function testDocBlockTooFarHasNoParent() {
 		$code = <<<EOD
 /**
@@ -369,6 +332,7 @@ EOD;
 class Rules {}
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 
 		$this->assertIdentical(T_DOC_COMMENT, $tokens[0]['id']);
 		$this->assertIdentical(T_CLASS, $tokens[2]['id']);
@@ -376,26 +340,6 @@ EOD;
 		$expected = -1;
 		$result = $tokens[0]['parent'];
 		$this->assertIdentical($expected, $result);
-	}
-
-	public function testDocBlockHasMethodParent() {
-		$code = <<<EOD
-class Foobar {
-
-	/**
-	 * This is a docblock
-	 */
-	public static function bar() {
-		return false;
-	}
-}
-EOD;
-		$tokens = Parser::tokenize($code);
-		$docblock = $tokens[6];
-		$this->assertIdentical(T_DOC_COMMENT, $docblock['id']);
-
-		$parent = $tokens[$docblock['parent']];
-		$this->assertIdentical(T_FUNCTION, $parent['id']);
 	}
 
 	public function testDocBlockHasClassParent() {
@@ -412,32 +356,12 @@ class Foobar {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 		$docblock = $tokens[6];
 		$this->assertIdentical(T_DOC_COMMENT, $docblock['id']);
 
 		$parent = $tokens[$docblock['parent']];
 		$this->assertIdentical(T_CLASS, $parent['id']);
-	}
-
-	public function testDocBlockHasVarParent() {
-		$code = <<<EOD
-/**
- * The Quality command helps you to run static code analysis on your codebase.
- */
-class Quality {
-
-	/**
-	 * The library to run the quality checks on.
-	 */
-	public \$library = true;
-}
-EOD;
-		$tokens = Parser::tokenize($code);
-		$docblock = $tokens[8];
-		$this->assertIdentical(T_DOC_COMMENT, $docblock['id']);
-
-		$parent = $tokens[$docblock['parent']];
-		$this->assertIdentical(T_VARIABLE, $parent['id']);
 	}
 
 	public function testLevelStarts() {
@@ -450,6 +374,7 @@ class Foobar {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 
 		$abstract = $tokens[6];
 		$this->assertIdentical(T_ABSTRACT, $abstract['id']);
@@ -477,6 +402,7 @@ class Foobar {
 }
 EOD;
 			$tokens = Parser::tokenize($code);
+			$tokens = Parser::relationships($tokens);
 		});
 	}
 
@@ -488,6 +414,7 @@ do {
 } while()
 EOD;
 			$tokens = Parser::tokenize($code);
+			$tokens = Parser::relationships($tokens);
 		});
 	}
 
@@ -501,7 +428,7 @@ EOD;
 
 		$function = $tokens[2];
 		$this->assertIdentical(T_FUNCTION, $function['id']);
-		$this->assertIdentical('anonymous', $function['label']);
+		$this->assertIdentical(null, Parser::label(2, $tokens));
 	}
 
 	public function testAnonymousClass() {
@@ -514,7 +441,7 @@ EOD;
 
 		$class = $tokens[0];
 		$this->assertIdentical(T_CLASS, $class['id']);
-		$this->assertIdentical('anonymous', $class['label']);
+		$this->assertIdentical(null, Parser::label(0, $tokens));
 	}
 
 	public function testComplexVariables() {
@@ -529,6 +456,7 @@ class Quality {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 		$this->assertIdentical(72, count($tokens));
 	}
 
@@ -541,7 +469,104 @@ class Inflector {
 }
 EOD;
 		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
 		$this->assertIdentical(29, count($tokens));
+	}
+
+	public function testModifiers() {
+		$code = <<<EOD
+class Inflector {
+	public static function rules() {
+		static::\${\$var} = null;
+	}
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$modifiers = Parser::modifiers(10, $tokens);
+		$this->assertIdentical(array(8, 6), $modifiers);
+
+		$public = $tokens[$modifiers[1]];
+		$this->assertIdentical(T_PUBLIC, $public['id']);
+
+		$static = $tokens[$modifiers[0]];
+		$this->assertIdentical(T_STATIC, $static['id']);
+	}
+
+	public function testNoModifiers() {
+		$code = <<<EOD
+class Inflector {
+	public static \$foo;
+	function rules() {
+		static::\${\$var} = null;
+	}
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$modifiers = Parser::modifiers(13, $tokens);
+		$this->assertIdentical(T_FUNCTION, $tokens[13]['id']);
+		$this->assertIdentical(array(), $modifiers);
+	}
+
+	public function testNonClosureIsClosure() {
+		return;
+		$code = <<<EOD
+class Inflector {
+	public static function rules() {
+		static::\${\$var} = null;
+	}
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$this->assertIdentical(T_FUNCTION, $tokens[10]['id']);
+		$isClosure = Parser::closure(10, $tokens);
+		$this->assertFalse($isClosure);
+	}
+
+	public function testClosureIsClosure() {
+		$code = <<<EOD
+\$foo = function() {
+	return false;
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$this->assertIdentical(T_FUNCTION, $tokens[4]['id']);
+		$isClosure = Parser::closure(4, $tokens);
+		$this->assertTrue($isClosure);
+	}
+
+	public function testBasicParams() {
+		$code = <<<EOD
+function foo(\$bar, \$baz = null) {
+	return false;
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$this->assertIdentical(T_FUNCTION, $tokens[0]['id']);
+
+		$params = Parser::parameters(0, $tokens);
+		$this->assertIdentical(array(4, 7), $params);
+
+		$this->assertIdentical('$bar', $tokens[$params[0]]['content']);
+		$this->assertIdentical('$baz', $tokens[$params[1]]['content']);
+	}
+
+	public function testNoParams() {
+		$code = <<<EOD
+function foo() {
+	return false;
+}
+EOD;
+		$tokens = Parser::tokenize($code);
+
+		$this->assertIdentical(T_FUNCTION, $tokens[0]['id']);
+
+		$params = Parser::parameters(0, $tokens);
+		$this->assertIdentical(array(), $params);
 	}
 
 }

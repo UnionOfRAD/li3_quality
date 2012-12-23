@@ -9,6 +9,7 @@
 namespace li3_quality\test\rules;
 
 use lithium\util\String;
+use li3_quality\analysis\Parser;
 
 class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 
@@ -44,17 +45,18 @@ class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 	 */
 	public function apply($testable) {
 		$message = '{:name} has no declared visibility.';
-		$tokens = $testable->tokens();
+		$tokens = $testable->relationships();
 		$classes = $testable->findAll(array(T_CLASS));
 		foreach ($classes as $classId) {
 			$children = $tokens[$classId]['children'];
 			$members = $testable->findAll($this->inspectableTokens, $children);
 			foreach ($members as $member) {
-				$token = $tokens[$member];
-				$tokenChildren = $token['children'];
-				$visibility = $testable->findNext($this->findTokens, $tokenChildren);
+				$modifiers = Parser::modifiers($member, $tokens);
+				$visibility = $testable->findNext($this->findTokens, $modifiers);
 				if ($visibility === false) {
+					$token = $tokens[$member];
 					$this->addViolation(array(
+						'modifiers' => $modifiers,
 						'message' => String::insert($message, $token),
 						'line' => $token['line'],
 					));
