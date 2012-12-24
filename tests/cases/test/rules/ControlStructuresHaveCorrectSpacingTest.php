@@ -537,7 +537,7 @@ if (true
 	return false;
 }
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRuleFail($code, $this->rule);
 	}
 }
 

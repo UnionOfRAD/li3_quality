@@ -290,7 +290,7 @@ EOD;
 \$foo = true
 	&& false;
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRuleFail($code, $this->rule);
 	}
 
 	public function testMultilineAssignment() {
@@ -298,7 +298,7 @@ EOD;
 \$foo =
 	true ?: false;
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRuleFail($code, $this->rule);
 	}
 
 	public function testMultilineArrayAssignment() {
@@ -308,7 +308,7 @@ EOD;
 		'baz'
 );
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRuleFail($code, $this->rule);
 	}
 
 	public function testMultilineTernary() {
@@ -316,7 +316,7 @@ EOD;
 \$foo = true
 	? true : false;
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRuleFail($code, $this->rule);
 	}
 
 	public function testNegativeAsUnary() {
