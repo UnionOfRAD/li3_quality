@@ -88,7 +88,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				'before' => 2,
 				'length' => 5,
 			),
-			'regex' => '/(( {:content} )|([^\d]{:content}\d+))/',
+			'regex' => '/(( {:content} )|([^\d]{:content}(\d+|\$)))/',
 			'tokens' => array(),
 			'message' => 'Operator {:content} must have 1 leading and an optional trailing space.',
 			'content' => array(

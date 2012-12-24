@@ -26,7 +26,6 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 		T_PRINT,
 		T_REQUIRE,
 		T_REQUIRE_ONCE,
-		T_RETURN,
 		T_THROW,
 	);
 

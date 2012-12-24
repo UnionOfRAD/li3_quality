@@ -34,16 +34,16 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
-	public function testReturnWithCast() {
+	public function testEchoWithCast() {
 		$code = <<<EOD
-return (bool) \$var;
+echo (bool) \$var;
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
 	public function testCorrectBeginningParntheses() {
 		$code = <<<EOD
-return (!empty(\$name)) ? "{\$path}/{\$name}" : \$path;
+require_once (!empty(\$name)) ? "{\$path}/{\$name}" : \$path;
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
@@ -51,39 +51,32 @@ EOD;
 
 	public function testCorrectEndingParntheses() {
 		$code = <<<EOD
-return false ? true : in_array(\$a, \$b);
+exit false ? true : in_array(\$a, \$b);
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
 	public function testCorrectBeginningAndEndingParntheses() {
 		$code = <<<EOD
-return (false) ? (false===false) : (true===true);
+print (false) ? (false===false) : (true===true);
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testEmptyReturn() {
+	public function testEmptyExit() {
 		$code = <<<EOD
-return;
+exit;
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
 	public function testMultilineConstruct() {
 		$code = <<<EOD
-return array (
+echo array (
 	'foo' => 'bar',
 );
 EOD;
 		$this->assertRulePass($code, $this->rule);
-	}
-
-	public function testConstructsNotOnOwnLine() {
-		$code = <<<EOD
-if(!\$this->service(\$service)) return false;
-EOD;
-		$this->assertRuleFail($code, $this->rule);
 	}
 
 	public function testDoublEcho() {
@@ -100,19 +93,19 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testReturnWithWhiteSpace() {
+	public function testRequireOnceWithWhiteSpace() {
 		$code = <<<EOD
 function foobar() {
-	return;
+	require_once 'foo.php';
 }
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testReturnWithSingleNumber() {
+	public function testEchoWithSingleNumber() {
 		$code = <<<EOD
 function foobar() {
-	return 1;
+	echo 1;
 }
 EOD;
 		$this->assertRulePass($code, $this->rule);
