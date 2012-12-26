@@ -569,6 +569,53 @@ EOD;
 		$this->assertIdentical(array(), $params);
 	}
 
+	public function testCorrectLevel() {
+		$code = '$foo = "(foo{$bar})";';
+		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+		$this->assertEqual(12, count($tokens));
+
+		$code = '$foo = "{foo{$bar}}";';
+		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+		$this->assertEqual(12, count($tokens));
+
+		$code = '$foo = "$a)";';
+		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+		$this->assertEqual(9, count($tokens));
+
+		$code = '$foo = "$a(";';
+		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+		$this->assertEqual(9, count($tokens));
+
+		$code = '$foo = "$a}";';
+		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+		$this->assertEqual(9, count($tokens));
+
+		$code = '$foo = "$a{";';
+		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+		$this->assertEqual(9, count($tokens));
+
+		$code = '$foo = "($a";';
+		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+		$this->assertEqual(9, count($tokens));
+
+		$code = '$foo = ")$a";';
+		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+		$this->assertEqual(9, count($tokens));
+
+		$code = '$foo = "}$a";';
+		$tokens = Parser::tokenize($code);
+		$tokens = Parser::relationships($tokens);
+		$this->assertEqual(9, count($tokens));
+	}
+
 }
 
 ?>

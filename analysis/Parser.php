@@ -223,14 +223,16 @@ class Parser extends \lithium\analysis\Parser {
 		$currentParent = -1;
 		$brackets = $curlyBrackets = $level = 0;
 		foreach ($tokens as $tokenId => &$token) {
-			if ($token['content'] === '{') {
-				$curlyBrackets++;
-			} elseif ($token['content'] === '}') {
-				$curlyBrackets--;
-			} elseif ($token['content'] === '(') {
-				$brackets++;
-			} elseif ($token['content'] === ')') {
-				$brackets--;
+			if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
+				if ($token['content'] === '{') {
+					$curlyBrackets++;
+				} elseif ($token['content'] === '}') {
+					$curlyBrackets--;
+				} elseif ($token['content'] === '(') {
+					$brackets++;
+				} elseif ($token['content'] === ')') {
+					$brackets--;
+				}
 			}
 
 			if (isset($tokens[$currentParent])) {
