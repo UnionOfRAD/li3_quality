@@ -65,6 +65,7 @@ class Quality extends \lithium\console\command\Test {
 			"Performing " . count($rules) . " rules " .
 				"on " . count($testables) . " classes."
 		);
+		$success = true;
 		foreach ($testables as $count => $path) {
 			try {
 				$result = Rules::apply(new Testable(compact('path')), $filters);
@@ -74,6 +75,7 @@ class Quality extends \lithium\console\command\Test {
 				if ($this->verbose) {
 					$this->error(print_r($e->parserData, true), "red");
 				}
+				$success = false;
 				continue;
 			}
 			if ($result['success']) {
@@ -89,6 +91,7 @@ class Quality extends \lithium\console\command\Test {
 					$output[] = array($params['line'], $params['position'], $params['message']);
 				}
 				$this->columns($output, array('style' => 'red', 'error' => true));
+				$success = false;
 			}
 			if (count($result['warnings']) > 0) {
 				$output = array(
@@ -102,7 +105,7 @@ class Quality extends \lithium\console\command\Test {
 				$this->columns($output, array('style' => 'yellow', 'error' => false));
 			}
 		}
-		return $result['success'];
+		return $success;
 	}
 
 	/**

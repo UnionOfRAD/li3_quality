@@ -253,7 +253,7 @@ class Parser extends \lithium\analysis\Parser {
 		if ($level !== 0 || $curlyBrackets !== 0 || $brackets !== 0) {
 			$smallTokens = array_slice($tokens, 0, 20);
 			$exception = new ParserException('A parse error has been encountered.');
-			$exception->parserData = compact('queue', 'level', 'fakeParents', 'tokens');
+			$exception->parserData = compact('level', 'curlyBrackets', 'brackets', 'tokens');
 			throw $exception;
 		}
 		return $tokens;
