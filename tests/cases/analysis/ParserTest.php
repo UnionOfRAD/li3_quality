@@ -569,47 +569,63 @@ EOD;
 		$this->assertIdentical(array(), $params);
 	}
 
-	public function testCorrectLevel() {
+	public function testCorrectLevelWithFalsePositiveEndingParentheses() {
 		$code = '$foo = "(foo{$bar})";';
 		$tokens = Parser::tokenize($code);
 		$tokens = Parser::relationships($tokens);
 		$this->assertEqual(12, count($tokens));
+	}
 
+	public function testCorrectLevelWithFalsePositiveEndingBracket() {
 		$code = '$foo = "{foo{$bar}}";';
 		$tokens = Parser::tokenize($code);
 		$tokens = Parser::relationships($tokens);
 		$this->assertEqual(12, count($tokens));
+	}
 
+	public function testCorrectLevelWithFalsePositiveEndingParenWithVar() {
 		$code = '$foo = "$a)";';
 		$tokens = Parser::tokenize($code);
 		$tokens = Parser::relationships($tokens);
 		$this->assertEqual(9, count($tokens));
+	}
 
+	public function testCorrectLevelWithFalsePositiveBeginningParenWithVar() {
 		$code = '$foo = "$a(";';
 		$tokens = Parser::tokenize($code);
 		$tokens = Parser::relationships($tokens);
 		$this->assertEqual(9, count($tokens));
+	}
 
+	public function testCorrectLevelWithFalsePositiveEndingBracketWithVar() {
 		$code = '$foo = "$a}";';
 		$tokens = Parser::tokenize($code);
 		$tokens = Parser::relationships($tokens);
 		$this->assertEqual(9, count($tokens));
+	}
 
+	public function testCorrectLevelWithFalsePositiveBeginningBracketWithVar() {
 		$code = '$foo = "$a{";';
 		$tokens = Parser::tokenize($code);
 		$tokens = Parser::relationships($tokens);
 		$this->assertEqual(9, count($tokens));
+	}
 
+	public function testCorrectLevelWithOpeningParenthesesAtTheBeginning() {
 		$code = '$foo = "($a";';
 		$tokens = Parser::tokenize($code);
 		$tokens = Parser::relationships($tokens);
 		$this->assertEqual(9, count($tokens));
+	}
 
+	public function testCorrectLevelWithClosingParenthesesAtTheBeginning() {
 		$code = '$foo = ")$a";';
 		$tokens = Parser::tokenize($code);
 		$tokens = Parser::relationships($tokens);
 		$this->assertEqual(9, count($tokens));
+	}
 
+	public function testCorrectLevelWithOpeningBracketAtTheBeginning() {
 		$code = '$foo = "}$a";';
 		$tokens = Parser::tokenize($code);
 		$tokens = Parser::relationships($tokens);
