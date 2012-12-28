@@ -308,6 +308,23 @@ class Testable extends \lithium\core\Object {
 	}
 
 	/**
+	 * A helper method which helps finding tokens. If there are no tokens
+	 * on this line, we go backwards assuming a multiline token.
+	 *
+	 * @param  int    $line   The line you are on
+	 * @return int            The line id if found, -1 if not
+	 */
+	public function findTokensByLine($line) {
+		$lineCache = $this->lineCache();
+		for (;$line >= 0;$line--) {
+			if (isset($lineCache[$line])) {
+				return $line;
+			}
+		}
+		return -1;
+	}
+
+	/**
 	 * Will determine if a set of tokens is on a given line.
 	 *
 	 * @param  int    $line     The line you are on
@@ -317,7 +334,7 @@ class Testable extends \lithium\core\Object {
 	public function lineHasToken($line, array $tokenIds = array()) {
 		$lineCache = $this->lineCache();
 		if (!isset($lineCache[$line])) {
-			return false;
+			return -1;
 		}
 		$tokens = $this->tokens();
 		foreach ($lineCache[$line] as $tokenId) {
@@ -325,7 +342,7 @@ class Testable extends \lithium\core\Object {
 				return true;
 			}
 		}
-		return false;
+		return -1;
 	}
 
 	/**

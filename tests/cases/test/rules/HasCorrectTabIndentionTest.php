@@ -6,10 +6,6 @@ class HasCorrectTabIndentionTest extends \li3_quality\test\Unit {
 
 	public $rule = 'li3_quality\test\rules\HasCorrectTabIndention';
 
-	public function skip() {
-		$this->skipIf(true);
-	}
-
 	public function testCorrectNoTabs() {
 		$code = <<<EOD
 \$a = true;
@@ -202,7 +198,7 @@ EOD;
 		$code = <<<EOD
 function foo() {
 	return <<<EOR
-\$arr = array(
+array(
 	foo,
 	bar,
 	baz,
@@ -413,6 +409,31 @@ EOD;
 if (false):
 	echo 'foo';
 endif;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testAlternateSyntaxIfComplex() {
+		$code = <<<EOD
+if (false):
+	echo 'foo';
+elseif (true):
+	echo 'bar';
+else:
+	echo 'baz';
+endif;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIgnoresIndentedDocblocks() {
+		$code = <<<EOD
+class Unit {
+	/**
+	 * The rule that is being tested against.
+	 */
+	public \$rule = null;
+}
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}

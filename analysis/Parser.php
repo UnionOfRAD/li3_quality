@@ -13,22 +13,22 @@ class Parser extends \lithium\analysis\Parser {
 	 */
 	protected static $_parentTokens = array(
 		T_CLASS => array(
-			'endingTokens' => array(T_ENDFOR),
+			'endingTokens' => array(),
 			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_IF => array(
-			'endingTokens' => array(T_ENDFOR),
+			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
 			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_ELSE => array(
-			'endingTokens' => array(T_ENDFOR),
+			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
 			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_ELSEIF => array(
-			'endingTokens' => array(T_ENDFOR),
+			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
 			'endingContent' => array('}'),
 			'parents' => array(),
 		),
