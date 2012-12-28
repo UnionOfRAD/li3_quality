@@ -21,12 +21,11 @@ class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 	 */
 	public function apply($testable) {
 		$tokens = $testable->tokens();
-		$relationships = $testable->relationships();
 
 		$comments = $testable->findAll(array(T_COMMENT));
 		foreach ($comments as $tokenId) {
 			$token = $tokens[$tokenId];
-			$parentId = $relationships[$tokenId]['parent'];
+			$parentId = $tokens[$tokenId]['parent'];
 			if ($parentId === -1 || $tokens[$parentId]['id'] !== T_FUNCTION) {
 				$this->addViolation(array(
 					'message' => 'Inline comments should never appear.',

@@ -41,20 +41,6 @@ class Testable extends \lithium\core\Object {
 	protected $_config = array();
 
 	/**
-	 * Contains relationships for tokens.
-	 *
-	 * @var array
-	 */
-	protected $_relationships = null;
-
-	/**
-	 * Contains meta for tokens.
-	 *
-	 * @var array
-	 */
-	protected $_tokenMeta = null;
-
-	/**
 	 * Contains lineCache for tokens.
 	 *
 	 * @var array
@@ -120,34 +106,8 @@ class Testable extends \lithium\core\Object {
 			$this->_tokens = $tokenized['tokens'];
 			$this->_lineCache = $tokenized['lineCache'];
 			$this->_typeCache = $tokenized['typeCache'];
-			$this->_tokenMeta = $tokenized['meta'];
-			$this->_relationships = $tokenized['relationships'];
 		}
 		return $this->_tokens;
-	}
-
-	/**
-	 * Accessor method for the tokens relationships.
-	 *
-	 * @return  array
-	 */
-	public function relationships() {
-		if ($this->_relationships === null) {
-			$this->tokens();
-		}
-		return $this->_relationships;
-	}
-
-	/**
-	 * Accessor method for the tokens meta.
-	 *
-	 * @return  array
-	 */
-	public function tokenMeta() {
-		if ($this->_tokenMeta === null) {
-			$this->tokens();
-		}
-		return $this->_tokenMeta;
 	}
 
 	/**
@@ -377,13 +337,12 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function tokenIn(array $haystack, $needle) {
 		$tokens = $this->tokens();
-		$relationships = $this->relationships();
-		$parent = $relationships[$needle]['parent'];
+		$parent = $tokens[$needle]['parent'];
 		while (isset($tokens[$parent])) {
 			if (in_array($tokens[$parent]['id'], $haystack)) {
 				return true;
 			}
-			$parent = $relationships[$parent]['parent'];
+			$parent = $tokens[$parent]['parent'];
 		}
 		return false;
 	}

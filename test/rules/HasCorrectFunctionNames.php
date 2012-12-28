@@ -36,7 +36,6 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 	 */
 	public function apply($testable) {
 		$tokens = $testable->tokens();
-		$relationships = $testable->relationships();
 		$filtered = $testable->findAll(array(T_FUNCTION));
 
 		foreach ($filtered as $key) {
@@ -53,7 +52,7 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 			if (!$isClosure && $label !== Inflector::camelize($label, false)) {
 				$this->addViolation(array(
 					'message' => 'Function "' . $label . '" is not in camelBack style',
-					'line' => $tokens[$relationships[$key]['parent']]['line'],
+					'line' => $tokens[$tokens[$key]['parent']]['line'],
 				));
 			}
 		}
