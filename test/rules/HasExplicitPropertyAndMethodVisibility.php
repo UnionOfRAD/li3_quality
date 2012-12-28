@@ -45,12 +45,17 @@ class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 	 */
 	public function apply($testable) {
 		$message = '{:name} has no declared visibility.';
-		$tokens = $testable->relationships();
+		$tokens = $testable->tokens();
+		$relationships = $testable->relationships();
 		$classes = $testable->findAll(array(T_CLASS));
+		$filtered = $testable->findAll($this->inspectableTokens);
+
 		foreach ($classes as $classId) {
-			$children = $tokens[$classId]['children'];
-			$members = $testable->findAll($this->inspectableTokens, $children);
-			foreach ($members as $member) {
+			$children = $relationships[$classId]['children'];
+			foreach ($children as $member) {
+				if (!in_array($member, $filtered)) {
+					continue;
+				}
 				$modifiers = Parser::modifiers($member, $tokens);
 				$visibility = $testable->findNext($this->findTokens, $modifiers);
 				if ($visibility === false) {

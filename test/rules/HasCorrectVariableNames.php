@@ -26,11 +26,12 @@ class HasCorrectVariableNames extends \li3_quality\test\Rule {
 
 	public function apply($testable) {
 		$tokens = $testable->tokens();
+		$filtered = $testable->findAll(array(T_VARIABLE));
 
-		foreach ($tokens as $token) {
-			$isVariable = $token['name'] === 'T_VARIABLE';
+		foreach ($filtered as $id) {
+			$token = $tokens[$id];
 			$isntSuperGlobal = !isset($this->_superglobals[$token['content']]);
-			if ($isVariable && $isntSuperGlobal) {
+			if ($isntSuperGlobal) {
 				$name = preg_replace('/(\$_?|_+$)/', '', $token['content']);
 				if ($name !== Inflector::camelize($name, false)) {
 					$this->addViolation(array(

@@ -59,7 +59,8 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		foreach ($lines as $lineIndex => $line) {
 			if (!$this->_shouldIgnoreLine($lineIndex, $lines, $tokens)) {
 				$leaderCount = $this->_beginningTabCount($lineIndex, $lines, $tokens);
-				$followerCount += $this->_lineHasRelativeTab($lineIndex, $lines, $tokens);
+				$relTab = $this->_lineHasRelativeTab($testable, $lineIndex, $lines, $tokens);
+				$followerCount += $relTab;
 				$leaderShouldBe = $followerCount;
 
 				if ($leaderCount !== $leaderShouldBe) {
@@ -95,7 +96,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 					$followerCount++;
 				}
 
-				if ($this->_lineHasToken($lineIndex + 1, $tokens, array(T_SWITCH))) {
+				if ($testable->lineHasToken($lineIndex + 1, array(T_SWITCH))) {
 					$switchQueue[] = $followerCount - 1;
 					$followerCount++;
 				}
@@ -117,13 +118,13 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @param  array $tokens
 	 * @return int
 	 */
-	protected function _lineHasRelativeTab($lineIndex, &$lines, &$tokens) {
+	protected function _lineHasRelativeTab($testable, $lineIndex, &$lines, &$tokens) {
 		$hasEndingLine = preg_match('/^\s*[}\)]+(;$|)?/', $lines[$lineIndex]) === 1;
-		$hasCaseDefault = $this->_lineHasToken($lineIndex + 1, $tokens, array(
+		$hasCaseDefault = $testable->lineHasToken($lineIndex + 1, array(
 			T_CASE,
 			T_DEFAULT
 		));
-		$hasEndingToken = $this->_linehasToken($lineIndex + 1, $tokens, array(
+		$hasEndingToken = $testable->linehasToken($lineIndex + 1, array(
 			T_ENDDECLARE,
 			T_ENDFOR,
 			T_ENDFOREACH,

@@ -62,7 +62,11 @@ class Rules extends \lithium\core\StaticObject {
 		$violations = array();
 		$warnings = array();
 		$success = true;
-		$rules = count($filters) > 0 ? static::filterByName($filters) : static::$_rules;
+		if (count($filters) > 0) {
+			$rules = static::filterByName($filters);
+		} else {
+			$rules = static::$_rules;
+		}
 
 		foreach ($rules as $ruleSet) {
 			$rule = $ruleSet['rule'];
@@ -108,7 +112,8 @@ class Rules extends \lithium\core\StaticObject {
 	 * @return array        Filtered rules
 	 */
 	public static function filterByName(array $names) {
-		return array_intersect_key(static::$_rules, array_fill_keys($names, NULL));
+		$filter = array_fill_keys($names, NULL);
+		return array_intersect_key(static::$_rules, $filter);
 	}
 }
 

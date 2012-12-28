@@ -18,7 +18,6 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 	 * @var array
 	 */
 	public $inspectableTokens = array(
-		T_EXIT,
 		T_ECHO,
 		T_EXIT,
 		T_INCLUDE_ONCE,
@@ -47,13 +46,13 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$message = 'Construct {:name} should not contain parentheses and be on its own line.';
 		$tokens = $testable->tokens();
+		$inspectable = $testable->findAll($this->inspectableTokens);
 		$lines = $testable->lines();
-		$usedLineIndex = array();
 
-		foreach ($tokens as $key => $token) {
+		foreach ($inspectable as $key) {
+			$token = $tokens[$key];
 			$lineIndex = $token['line'] - 1;
-			$isInspectable = in_array($token['id'], $this->inspectableTokens);
-			if ($isInspectable && isset($lines[$lineIndex])) {
+			if (isset($lines[$lineIndex])) {
 				$line = $lines[$lineIndex];
 				$next = $key + 1;
 				if (preg_match($this->pattern, $line) === 0) {

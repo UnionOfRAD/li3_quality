@@ -43,13 +43,13 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 		foreach ($lines as $lineId => $line) {
 			$lineNumber = $lineId + 1;
 			$ignore = false;
-			$key = $this->_findTokenByLine($lineNumber, $tokens);
+			$key = $testable->findTokenByLine($lineNumber);
 			if (isset($tokens[$key])) {
 				$token = $tokens[$key];
 				$ignore = in_array($token['id'], $this->ignoreableTokens);
 			}
 			if (!$ignore && preg_match($this->pattern, $line) === 0) {
-				$token = $tokens[$this->_findTokenByLine($lineNumber, $tokens)];
+				$token = $tokens[$testable->findTokenByLine($lineNumber)];
 				$this->addViolation(array(
 					'message' => $message,
 					'line' => $lineNumber,

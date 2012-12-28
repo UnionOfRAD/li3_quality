@@ -32,16 +32,17 @@ class WeakComparisonOperators extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$tokens = $testable->tokens();
 		$message = 'Weak comparison operator {:key} used, try {:value} instead';
-		foreach ($tokens as $token) {
-			if (isset($this->inspectableTokens[$token['id']])) {
-				$this->addWarning(array(
-					'message' => String::insert($message, array(
-						'key' => token_name($token['id']),
-						'value' => $this->inspectableTokens[$token['id']],
-					)),
-					'line' => $token['line'],
-				));
-			}
+		$filtered = $testable->findAll(array_keys($this->inspectableTokens));
+
+		foreach ($filtered as $id) {
+			$token = $tokens[$id];
+			$this->addWarning(array(
+				'message' => String::insert($message, array(
+					'key' => token_name($token['id']),
+					'value' => $this->inspectableTokens[$token['id']],
+				)),
+				'line' => $token['line'],
+			));
 		}
 	}
 

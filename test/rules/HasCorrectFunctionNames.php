@@ -35,24 +35,26 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 	 * @return void
 	 */
 	public function apply($testable) {
-		$tokens = $testable->relationships();
-		foreach ($tokens as $key => $token) {
-			if ($token['id'] === T_FUNCTION) {
-				$label = Parser::label($key, $tokens);
-				$modifiers = Parser::modifiers($key, $tokens);
-				$isClosure = Parser::closure($key, $tokens);
-				if (in_array($label, $this->_magicMethods)) {
-					continue;
-				}
-				if ($testable->findNext(array(T_PROTECTED), $modifiers) !== false) {
-					$label = preg_replace('/^_/', '', $label);
-				}
-				if (!$isClosure && $label !== Inflector::camelize($label, false)) {
-					$this->addViolation(array(
-						'message' => 'Function "' . $label . '" is not in camelBack style',
-						'line' => $tokens[$token['parent']]['line'],
-					));
-				}
+		$tokens = $testable->tokens();
+		$relationships = $testable->relationships();
+		$filtered = $testable->findAll(array(T_FUNCTION));
+
+		foreach ($filtered as $key) {
+			$token = $tokens[$key];
+			$label = Parser::label($key, $tokens);
+			$modifiers = Parser::modifiers($key, $tokens);
+			$isClosure = Parser::closure($key, $tokens);
+			if (in_array($label, $this->_magicMethods)) {
+				continue;
+			}
+			if ($testable->findNext(array(T_PROTECTED), $modifiers) !== false) {
+				$label = preg_replace('/^_/', '', $label);
+			}
+			if (!$isClosure && $label !== Inflector::camelize($label, false)) {
+				$this->addViolation(array(
+					'message' => 'Function "' . $label . '" is not in camelBack style',
+					'line' => $tokens[$relationships[$key]['parent']]['line'],
+				));
 			}
 		}
 	}

@@ -22,19 +22,20 @@ class ProtectedNamesStartWithUnderscore extends \li3_quality\test\Rule {
 	 */
 	public function apply($testable) {
 		$message = 'Protected method {:name} must start with an underscore';
-		$tokens = $testable->relationships();
-		foreach ($tokens as $tokenId => $token) {
-			if ($token['id'] === T_PROTECTED) {
-				$parent = $testable->findNext(array(T_FUNCTION, T_VARIABLE), $tokenId);
-				$parentLabel = Parser::label($parent, $tokens);
-				if (substr($parentLabel, 0, 1) !== '_') {
-					$this->addViolation(array(
-						'message' => String::insert($message, array(
-							'name' => $parentLabel,
-						)),
-						'line' => $token['line']
-					));
-				}
+		$tokens = $testable->tokens();
+		$filtered = $testable->findAll(array(T_PROTECTED));
+
+		foreach ($filtered as $tokenId) {
+			$token = $tokens[$tokenId];
+			$parent = $testable->findNext(array(T_FUNCTION, T_VARIABLE), $tokenId);
+			$parentLabel = Parser::label($parent, $tokens);
+			if (substr($parentLabel, 0, 1) !== '_') {
+				$this->addViolation(array(
+					'message' => String::insert($message, array(
+						'name' => $parentLabel,
+					)),
+					'line' => $token['line']
+				));
 			}
 		}
 	}

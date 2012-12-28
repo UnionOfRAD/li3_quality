@@ -27,7 +27,7 @@ class HasTabsAsIndentation extends \li3_quality\test\Rule {
 		foreach ($lines as $number => $line) {
 			$lineNumber = $number + 1;
 			$ignore = false;
-			$key = $this->_findTokenByLine($lineNumber, $tokens);
+			$key = $testable->findTokenByLine($lineNumber);
 			if (isset($tokens[$key])) {
 				$token = $tokens[$key];
 				$ignore = in_array($token['id'], $this->ignoreableTokens);

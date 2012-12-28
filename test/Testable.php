@@ -41,11 +41,32 @@ class Testable extends \lithium\core\Object {
 	protected $_config = array();
 
 	/**
-	 * Flag to remember if we have relationship tokens or not
+	 * Contains relationships for tokens.
 	 *
-	 * @var boolean
+	 * @var array
 	 */
-	protected $_hasRelationships = false;
+	protected $_relationships = null;
+
+	/**
+	 * Contains meta for tokens.
+	 *
+	 * @var array
+	 */
+	protected $_tokenMeta = null;
+
+	/**
+	 * Contains lineCache for tokens.
+	 *
+	 * @var array
+	 */
+	protected $_lineCache = null;
+
+	/**
+	 * Contains typeCache for tokens.
+	 *
+	 * @var array
+	 */
+	protected $_typeCache = null;
 
 	/**
 	 * Locates the file and reads its source code.
@@ -95,7 +116,12 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function tokens() {
 		if ($this->_tokens === null) {
-			$this->_tokens = Parser::tokenize($this->source(), $this->_config);
+			$tokenized = Parser::tokenize($this->source(), $this->_config);
+			$this->_tokens = $tokenized['tokens'];
+			$this->_lineCache = $tokenized['lineCache'];
+			$this->_typeCache = $tokenized['typeCache'];
+			$this->_tokenMeta = $tokenized['meta'];
+			$this->_relationships = $tokenized['relationships'];
 		}
 		return $this->_tokens;
 	}
@@ -106,11 +132,46 @@ class Testable extends \lithium\core\Object {
 	 * @return  array
 	 */
 	public function relationships() {
-		if (!$this->_hasRelationships) {
-			$this->_hasRelationships = true;
-			$this->_tokens = Parser::relationships($this->tokens());
+		if ($this->_relationships === null) {
+			$this->tokens();
 		}
-		return $this->_tokens;
+		return $this->_relationships;
+	}
+
+	/**
+	 * Accessor method for the tokens meta.
+	 *
+	 * @return  array
+	 */
+	public function tokenMeta() {
+		if ($this->_tokenMeta === null) {
+			$this->tokens();
+		}
+		return $this->_tokenMeta;
+	}
+
+	/**
+	 * Accessor method for the tokens lineCache.
+	 *
+	 * @return  array
+	 */
+	public function lineCache() {
+		if ($this->_lineCache === null) {
+			$this->tokens();
+		}
+		return $this->_lineCache;
+	}
+
+	/**
+	 * Accessor method for the tokens typeCache.
+	 *
+	 * @return  array
+	 */
+	public function typeCache() {
+		if ($this->_typeCache === null) {
+			$this->tokens();
+		}
+		return $this->_typeCache;
 	}
 
 	/**
@@ -122,12 +183,17 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function findNextContent(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		$total = count($tokens);
-		if (!is_array($range)) {
-			$range = range($range, $total);
+		if (is_array($range)) {
+			$start = 0;
+			$end = count($range);
+		} else {
+			$start = $range;
+			$end = count($tokens);
 		}
-		foreach ($range as $id) {
-			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
+		for ($idx = $start;$idx < $end;$idx++) {
+			$id = is_array($range) ? $range[$idx] : $idx;
+			$token = isset($tokens[$id]);
+			if ($token && in_array($tokens[$id]['content'], $types)) {
 				return $id;
 			}
 		}
@@ -143,13 +209,15 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function findPrevContent(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		if (!is_array($range)) {
-			$range = range($range, 0);
+		if (is_array($range)) {
+			$end = count($range) - 1;
 		} else {
-			$range = array_reverse($range);
+			$end = $range;
 		}
-		foreach ($range as $id) {
-			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
+		for ($idx = $end;$idx >= 0;$idx--) {
+			$id = is_array($range) ? $range[$idx] : $idx;
+			$token = isset($tokens[$id]);
+			if ($token && in_array($tokens[$id]['content'], $types)) {
 				return $id;
 			}
 		}
@@ -165,13 +233,15 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function findNext(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		$total = count($tokens);
-		if (!is_array($range)) {
-			$range = range($range, $total);
+		if (is_array($range)) {
+			$start = 0;
+			$end = count($range);
 		} else {
-			$range = array_reverse($range);
+			$start = $range;
+			$end = count($tokens);
 		}
-		foreach ($range as $id) {
+		for ($idx = $start;$idx < $end;$idx++) {
+			$id = is_array($range) ? $range[$idx] : $idx;
 			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
 				return $id;
 			}
@@ -188,12 +258,13 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function findPrev(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		if (!is_array($range)) {
-			$range = range($range, 0);
+		if (is_array($range)) {
+			$end = count($range) - 1;
 		} else {
-			$range = array_reverse($range);
+			$end = $range;
 		}
-		foreach ($range as $id) {
+		for ($idx = $end;$idx >= 0;$idx--) {
+			$id = is_array($range) ? $range[$idx] : $idx;
 			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
 				return $id;
 			}
@@ -208,19 +279,28 @@ class Testable extends \lithium\core\Object {
 	 * @param  integer|array   $range Where you want to start, or an array of items to search
 	 * @return array           An array of found item ids, or an empty array when nothing is found
 	 */
-	public function findAll(array $types, $range = 0) {
-		$found = array();
-		$tokens = $this->tokens();
-		$total = count($tokens);
-		if (!is_array($range)) {
-			$range = range($range, $total);
-		}
-		foreach ($range as $id) {
-			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
-				$found[] = $id;
+	public function findAll(array $types, $range = NULL) {
+		$typeCache = $this->typeCache();
+		$ids = array();
+		foreach ($types as $type) {
+			if (isset($typeCache[$type])) {
+				$ids = array_merge($ids, $typeCache[$type]);
 			}
 		}
-		return $found;
+
+		if (!is_int($range) && !is_array($range)) {
+			return $ids;
+		}
+
+		$filtered = array();
+		foreach ($ids as $id) {
+			$inRange = is_array($range) && in_array($id, $range);
+			$belowRange = is_int($range) && $id >= $range;
+			if ($inRange || $belowRange) {
+				$filtered[] = $id;
+			}
+		}
+		return $filtered;
 	}
 
 	/**
@@ -231,18 +311,61 @@ class Testable extends \lithium\core\Object {
 	 * @return array           An array of found item ids, or an empty array when nothing is found
 	 */
 	public function findAllContent(array $types, $range = 0) {
-		$found = array();
 		$tokens = $this->tokens();
-		$total = count($tokens);
-		if (!is_array($range)) {
-			$range = range($range, $total);
+		$found = array();
+		if (is_array($range)) {
+			$start = 0;
+			$end = count($range);
+		} else {
+			$start = $range;
+			$end = count($tokens);
 		}
-		foreach ($range as $id) {
-			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
+		for ($idx = $start;$idx < $end;$idx++) {
+			$id = is_array($range) ? $range[$idx] : $idx;
+			$token = isset($tokens[$id]);
+			if ($tokens && in_array($tokens[$id]['content'], $types)) {
 				$found[] = $id;
 			}
 		}
 		return $found;
+	}
+
+	/**
+	 * A helper method which helps finding tokens. If there are no tokens
+	 * on this line, we go backwards assuming a multiline token.
+	 *
+	 * @param  int    $line   The line you are on
+	 * @return int            The token id if found, -1 if not
+	 */
+	public function findTokenByLine($line) {
+		$lineCache = $this->lineCache();
+		for (;$line >= 0;$line--) {
+			if (isset($lineCache[$line])) {
+				return $lineCache[$line][0];
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Will determine if a set of tokens is on a given line.
+	 *
+	 * @param  int    $line     The line you are on
+	 * @param  array  $tokenIds The tokens you are looking for
+	 * @return int              The token id if found, -1 if not
+	 */
+	public function lineHasToken($line, array $tokenIds = array()) {
+		$lineCache = $this->lineCache();
+		if (!isset($lineCache[$line])) {
+			return false;
+		}
+		$tokens = $this->tokens();
+		foreach ($lineCache[$line] as $tokenId) {
+			if (in_array($tokens[$tokenId]['id'], $tokenIds)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -253,13 +376,14 @@ class Testable extends \lithium\core\Object {
 	 * @return bool
 	 */
 	public function tokenIn(array $haystack, $needle) {
-		$tokens = $this->relationships();
-		$self = $tokens[$needle];
-		while (isset($tokens[$self['parent']])) {
-			if (in_array($tokens[$self['parent']]['id'], $haystack)) {
+		$tokens = $this->tokens();
+		$relationships = $this->relationships();
+		$parent = $relationships[$needle]['parent'];
+		while (isset($tokens[$parent])) {
+			if (in_array($tokens[$parent]['id'], $haystack)) {
 				return true;
 			}
-			$self = $tokens[$self['parent']];
+			$parent = $relationships[$parent]['parent'];
 		}
 		return false;
 	}

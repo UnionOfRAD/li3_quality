@@ -25,20 +25,20 @@ class HasCorrectClassName extends \li3_quality\test\Rule {
 		if ($pathinfo['extension'] !== 'php') {
 			return;
 		}
-		foreach ($tokens as $key => $token) {
-			if ($token['id'] === T_CLASS) {
-				$className = $tokens[$key + 2]['content'];
-				if ($className !== Inflector::camelize($className)) {
-					$this->addViolation(array(
-						'message' => 'Class name is not in CamelCase style',
-						'line' => $token['line']
-					));
-				} elseif ($className !== $pathinfo['filename']) {
-					$this->addViolation(array(
-						'message' => 'Class name and file name should match',
-						'line' => $token['line']
-					));
-				}
+		$filtered = $testable->findAll(array(T_CLASS));
+		foreach ($filtered as $key) {
+			$token = $tokens[$key];
+			$className = $tokens[$key + 2]['content'];
+			if ($className !== Inflector::camelize($className)) {
+				$this->addViolation(array(
+					'message' => 'Class name is not in CamelCase style',
+					'line' => $token['line']
+				));
+			} elseif ($className !== $pathinfo['filename']) {
+				$this->addViolation(array(
+					'message' => 'Class name and file name should match',
+					'line' => $token['line']
+				));
 			}
 		}
 	}

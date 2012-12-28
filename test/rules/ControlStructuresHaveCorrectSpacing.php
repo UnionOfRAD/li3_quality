@@ -106,18 +106,19 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 	public function apply($testable) {
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
-		foreach ($tokens as $token) {
-			if (isset($this->_tokenMap[$token['id']])) {
-				$tokenMap = $this->_tokenMap[$token['id']];
-				$line = $lines[$token['line'] - 1];
-				$patterns = $tokenMap['patterns'];
-				$lineNumber = $token['line'];
-				if ($this->_matchPattern($lines, $lineNumber, $patterns, $token['id']) === false) {
-					$this->addViolation(array(
-						'message' => $this->_tokenMap[$token['id']]['message'],
-						'line' => $token['line'],
-					));
-				}
+		$filtered = $testable->findAll(array_keys($this->_tokenMap));
+
+		foreach ($filtered as $tokenId) {
+			$token = $tokens[$tokenId];
+			$tokenMap = $this->_tokenMap[$token['id']];
+			$line = $lines[$token['line'] - 1];
+			$patterns = $tokenMap['patterns'];
+			$lineNumber = $token['line'];
+			if ($this->_matchPattern($lines, $lineNumber, $patterns, $token['id']) === false) {
+				$this->addViolation(array(
+					'message' => $this->_tokenMap[$token['id']]['message'],
+					'line' => $token['line'],
+				));
 			}
 		}
 	}

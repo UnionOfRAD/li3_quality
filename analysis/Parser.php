@@ -112,8 +112,8 @@ class Parser extends \lithium\analysis\Parser {
 	 * @param  array $tokens  The array of the currently created tokens
 	 * @return string
 	 */
-	public static function label($tokenId, array &$tokens) {
-		$token =& $tokens[$tokenId];
+	public static function label($tokenId, array $tokens) {
+		$token = $tokens[$tokenId];
 		$hasName = in_array($token['id'], array(
 			T_FUNCTION,
 			T_CLASS,
@@ -125,7 +125,7 @@ class Parser extends \lithium\analysis\Parser {
 				return substr($token['content'], 1);
 			}
 			$total = count($tokens);
-			foreach (range($tokenId, $total) as $key) {
+			for ($key = $tokenId;$key <= $total;$key++) {
 				if ($tokens[$key]['id'] === T_STRING) {
 					return $tokens[$key]['content'];
 				} elseif (in_array($tokens[$key]['content'], array('(', '{', ':'))) {
@@ -143,15 +143,15 @@ class Parser extends \lithium\analysis\Parser {
 	 * @param  array $tokens  The array of the currently created tokens
 	 * @return array
 	 */
-	public static function parameters($tokenId, array &$tokens) {
+	public static function parameters($tokenId, array $tokens) {
 		$params = array();
 		if ($tokens[$tokenId]['id'] !== T_FUNCTION) {
 			throw new \Exception('Cannot call params on non function');
 		}
 		$foundOpen = false;
 		$total = count($tokens);
-		foreach (range($tokenId, $total) as $key) {
-			$token =& $tokens[$key];
+		for ($key = $tokenId;$key <= $total;$key++) {
+			$token = $tokens[$key];
 			if ($foundOpen) {
 				if ($token['content'] === ')') {
 					break;
@@ -172,12 +172,12 @@ class Parser extends \lithium\analysis\Parser {
 	 * @param  array $tokens  The array of the currently created tokens
 	 * @return bool
 	 */
-	public static function closure($tokenId, array &$tokens) {
+	public static function closure($tokenId, array $tokens) {
 		if ($tokens[$tokenId]['id'] !== T_FUNCTION) {
 			throw new \Exception('Cannot call params on non function');
 		}
 		$total = count($tokens);
-		foreach (range($tokenId, $total) as $key) {
+		for ($key = $tokenId;$key <= $total;$key++) {
 			if ($tokens[$key]['id'] === T_STRING) {
 				return false;
 			} elseif (in_array($tokens[$key]['content'], array('(', '{', ':'))) {
@@ -194,14 +194,14 @@ class Parser extends \lithium\analysis\Parser {
 	 * @param  array $tokens  The array of the currently created tokens
 	 * @return array          An array of tokenId's
 	 */
-	public static function modifiers($tokenId, array &$tokens) {
+	public static function modifiers($tokenId, array $tokens) {
 		if (!in_array($tokens[$tokenId]['id'], array(T_CLASS, T_FUNCTION, T_VARIABLE))) {
 			$token = print_r($tokens[$tokenId], true);
 			throw new \Exception('Cannot call modifiers on non class/function/variable' . $token);
 		}
 		$modifiers = array();
-		foreach (range($tokenId - 1, 0) as $key) {
-			$token =& $tokens[$key];
+		for ($key = $tokenId - 1;$key >= 0;$key--) {
+			$token = $tokens[$key];
 			if ($token['id'] === T_WHITESPACE) {
 				continue;
 			} elseif (in_array($token['id'], static::$modifiers)) {
@@ -214,15 +214,28 @@ class Parser extends \lithium\analysis\Parser {
 	}
 
 	/**
-	 * Will generate child/parent/level relationships data on each token.
+	 * Adds more token information than the base lithium tokenizer such as name,
+	 * parent, and children.
 	 *
-	 * @param  array $tokens Tokens generate from parent::tokenize
-	 * @return array         Modified tokens array
+	 * @param string $code Source code to be tokenized.
+	 * @param array $options Options consists of:
+	 *        -'wrap': Boolean indicating whether or not to wrap the supplied
+	 *          code in PHP tags.
+	 *        -'ignore': An array containing PHP language tokens to ignore.
+	 *        -'include': If supplied, an array of the only language tokens
+	 *         to include in the output.
+	 * @return array An array of extracted information from the supplied source code:
+	 *         - lineCache: token ids indexed by line number
+	 *         - typeCache: token ids indexed by token type
+	 *         - meta: parsing information (level, etc.) indexed by token id
+	 *         - relationships: parent and child relations (token ids) indexed by token id
 	 */
-	public static function relationships($tokens) {
+	public static function tokenize($code, array $options = array()) {
+		$tokens = parent::tokenize($code, $options);
 		$currentParent = -1;
 		$brackets = $curlyBrackets = $level = 0;
-		foreach ($tokens as $tokenId => &$token) {
+		$lineCache = $typeCache = $meta = $relationships = array();
+		foreach ($tokens as $tokenId => $token) {
 			if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
 				if ($token['content'] === '{') {
 					$curlyBrackets++;
@@ -235,19 +248,35 @@ class Parser extends \lithium\analysis\Parser {
 				}
 			}
 
-			if (isset($tokens[$currentParent])) {
-				$tokens[$currentParent]['children'][] = $tokenId;
+			if (!isset($lineCache[$token['line']])) {
+				$lineCache[$token['line']] = array();
 			}
-			$token['parent'] = $currentParent;
-			$token['level'] = $level;
-			$token['children'] = array();
-			$token['brackets'] = $brackets;
-			$token['curlyBrackets'] = $curlyBrackets;
+			$lineCache[$token['line']][] = $tokenId;
 
-			if (($parent = static::_isEndOfParent($tokenId, $currentParent, $tokens)) !== false) {
+			if (!isset($typeCache[$token['id']])) {
+				$typeCache[$token['id']] = array();
+			}
+			$typeCache[$token['id']][] = $tokenId;
+
+			$meta[$tokenId] = array();
+			$meta[$tokenId]['level'] = $level;
+			$meta[$tokenId]['brackets'] = $brackets;
+			$meta[$tokenId]['curlyBrackets'] = $curlyBrackets;
+
+			$relationships[$tokenId] = array();
+			$relationships[$tokenId]['parent'] = $currentParent;
+			$relationships[$tokenId]['children'] = array();
+			if (isset($tokens[$currentParent])) {
+				$relationships[$currentParent]['children'][] = $tokenId;
+			}
+
+			$parent = static::_isEndOfParent(
+				$tokenId, $currentParent, $tokens, $meta, $relationships
+			);
+			if ($parent !== false) {
 				$level--;
 				$currentParent = $parent;
-			} elseif (static::_isParent($tokenId, $tokens)) {
+			} elseif (static::_isParent($tokenId, $tokens, $relationships)) {
 				$level++;
 				$currentParent = $tokenId;
 			}
@@ -258,7 +287,7 @@ class Parser extends \lithium\analysis\Parser {
 			$exception->parserData = compact('level', 'curlyBrackets', 'brackets', 'tokens');
 			throw $exception;
 		}
-		return $tokens;
+		return compact('tokens', 'lineCache', 'typeCache', 'meta', 'relationships');
 	}
 
 	/**
@@ -267,15 +296,18 @@ class Parser extends \lithium\analysis\Parser {
 	 * @param  int   $tokenId  The tokenId you are analyzing
 	 * @param  int   $parentId The tokenId of the currentParent
 	 * @param  array $tokens   The array of the currently created tokens
+	 * @param  array $meta     Meta map
+	 * @param  array $relationships Relationship map
 	 * @return int|bool        Will either return `false` or the id of the new currentParent.
 	 */
-	protected static function _isEndOfParent($tokenId, $parentId, array &$tokens) {
+	protected static
+	function _isEndOfParent($tokenId, $parentId, array $tokens, array $meta, array $relationships) {
 		if (!isset($tokens[$parentId])) {
 			return false;
 		}
 		$token = $tokens[$tokenId];
 		$parent = $tokens[$parentId];
-		if ($token['curlyBrackets'] !== $parent['curlyBrackets']) {
+		if ($meta[$tokenId]['curlyBrackets'] !== $meta[$parentId]['curlyBrackets']) {
 			return false;
 		}
 		$endingTokens = static::$_parentTokens[$parent['id']]['endingTokens'];
@@ -283,7 +315,7 @@ class Parser extends \lithium\analysis\Parser {
 		$hasEndingTokens = in_array($token['id'], $endingTokens);
 		$hasEndingContent = in_array($token['content'], $endingContent);
 		if ($hasEndingTokens || $hasEndingContent) {
-			return $parent['parent'];
+			return $relationships[$parentId]['parent'];
 		}
 		return false;
 	}
@@ -294,15 +326,16 @@ class Parser extends \lithium\analysis\Parser {
 	 *
 	 * @param  array $tokenId The tokenId you are analyzing
 	 * @param  array $tokens The array of the currently created tokens
+	 * @param  array $relationships Relationship map
 	 * @return bool          If this token is a parent or not
 	 */
-	protected static function _isParent($tokenId, array &$tokens) {
-		$token =& $tokens[$tokenId];
+	protected static function _isParent($tokenId, array $tokens, array $relationships) {
+		$token = $tokens[$tokenId];
 		if (!isset(static::$_parentTokens[$token['id']])) {
 			return false;
 		}
 		$requiredParents = static::$_parentTokens[$token['id']]['parents'];
-		$parentId = $token['parent'];
+		$parentId = $relationships[$tokenId]['parent'];
 		$isDecoy = false;
 		$hasRequiredParents = empty($requiredParents);
 		if (isset($tokens[$parentId])) {

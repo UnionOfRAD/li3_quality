@@ -66,7 +66,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 			),
 			'regex' => '/ (\\=|\\=\\&) /',
 			'message' => 'Operator {:content} must only have one leading and trailing space.',
-			'tokens' => array(),
 			'content' => array(
 				'=',
 			),
@@ -77,7 +76,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				'length' => 3,
 			),
 			'regex' => '/^ {:content}( )?$/',
-			'tokens' => array(),
 			'message' => 'Operator {:content} must have 1 leading and an optional trailing space.',
 			'content' => array(
 				'.',
@@ -89,7 +87,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				'length' => 5,
 			),
 			'regex' => '/(( {:content} )|([^\d]{:content}(\d+|\$)))/',
-			'tokens' => array(),
 			'message' => 'Operator {:content} must have 1 leading and an optional trailing space.',
 			'content' => array(
 				'-',
@@ -107,7 +104,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				T_PAAMAYIM_NEKUDOTAYIM,
 				T_OBJECT_OPERATOR,
 			),
-			'content' => array(),
 		),
 		'oneOrMoreSpace' => array(
 			'relativeTokens' => array(
@@ -119,7 +115,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 			'tokens' => array(
 				T_DOUBLE_ARROW,
 			),
-			'content' => array(),
 		),
 		'ternarySpacing' => array(
 			'relativeTokens' => array(
@@ -129,7 +124,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 			'fullLineRegex' => '/^\s+(case|default)(.*):$/',
 			'regex' => '/(([^ ] (\?:|\?|:) [^ ])|(:$))/',
 			'message' => 'Operator {:content} must be surrounded by spaces.',
-			'tokens' => array(),
 			'content' => array(
 				':',
 				'?',
@@ -146,13 +140,21 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 	 */
 	public function apply($testable) {
 		$tokens = $testable->tokens();
-		foreach ($tokens as $id => $token) {
-			$pattern = false;
-			foreach ($this->inspector as $inspector) {
-				$hasTokens = in_array($token['id'], $inspector['tokens']);
-				$hasContent = in_array($token['content'], $inspector['content']);
-				$badToken = $token['id'] === T_ENCAPSED_AND_WHITESPACE;
-				if (($hasTokens || $hasContent) && !$badToken) {
+
+		foreach ($this->inspector as $inspector) {
+			if (isset($inspector['tokens'])) {
+				$byToken = $testable->findAll($inspector['tokens']);
+			} else {
+				$byToken = array();
+			}
+			if (isset($inspector['content'])) {
+				$byContent = $testable->findAllContent($inspector['content']);
+			} else {
+				$byContent = array();
+			}
+			foreach (array_merge($byToken, $byContent) as $id) {
+				$token = $tokens[$id];
+				if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
 					$pattern = String::insert($inspector['regex'], array(
 						'content' => preg_quote($token['content'], "/"),
 					));

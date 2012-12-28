@@ -183,7 +183,7 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->relationships();
+		$tokens = $testable->tokens();
 		$visibilityTokens = array(T_PUBLIC, T_PROTECTED, T_PRIVATE);
 		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
 		$modifiers = Parser::modifiers($id, $tokens);
@@ -191,6 +191,7 @@ EOD;
 		$visibility = $testable->findNext($visibilityTokens, $modifiers);
 		$this->assertIdentical(T_PRIVATE, $tokens[$visibility]['id']);
 	}
+
 
 	public function testFindNextContentWithArray() {
 		$code = <<<EOD
@@ -202,7 +203,7 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->relationships();
+		$tokens = $testable->tokens();
 		$contentToFind = array('public', 'protected', 'private');
 		$id = $testable->findNext(array(T_FUNCTION), 0); // function bar
 		$modifiers = Parser::modifiers($id, $tokens);
@@ -252,10 +253,11 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->relationships();
+		$tokens = $testable->tokens();
+		$relationships = $testable->relationships();
 		$tokensToFind = array(T_FUNCTION, T_VARIABLE);
 		$id = $testable->findNext(array(T_CLASS), 0); // class foo
-		$children = $tokens[$id]['children'];
+		$children = $relationships[$id]['children'];
 
 		$visibility = $testable->findPrev($tokensToFind, $children);
 		$this->assertIdentical(T_FUNCTION, $tokens[$visibility]['id']);
@@ -272,10 +274,11 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->relationships();
+		$tokens = $testable->tokens();
+		$relationships = $testable->relationships();
 		$contentToFind = array('$var', 'function');
 		$id = $testable->findNext(array(T_CLASS), 0); // class foo
-		$children = $tokens[$id]['children'];
+		$children = $relationships[$id]['children'];
 
 		$foundId = $testable->findPrevContent($contentToFind, $children);
 		$this->assertIdentical('function', $tokens[$foundId]['content']);
@@ -338,9 +341,9 @@ EOD;
 		$testable = $this->_testable(array(
 			'source' => $code
 		));
-		$tokens = $testable->relationships();
+		$relationships = $testable->relationships();
 		$classId = $testable->findNext(array(T_CLASS), 0);
-		$children = $tokens[$classId]['children'];
+		$children = $relationships[$classId]['children'];
 
 		$ids = $testable->findAllContent(array('function', '$foo'), $children);
 		$this->assertIdentical(3, count($ids));
