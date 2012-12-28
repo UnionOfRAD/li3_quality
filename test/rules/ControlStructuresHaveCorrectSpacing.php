@@ -19,6 +19,12 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 	 * @var array
 	 */
 	protected $_tokenMap = array(
+		T_CLASS => array(
+			'message' => 'Unexpected T_CLASS format. Should be: "class Foo {"',
+			'patterns' => array(
+				"/^{:whitespace}^(abstract )?class [^\s]+ (extends [^\s]+ )?{\$/",
+			),
+		),
 		T_IF => array(
 			'message' => 'Unexpected T_IF format. Should be: "if (...) {" or "} else if () {"',
 			'patterns' => array(

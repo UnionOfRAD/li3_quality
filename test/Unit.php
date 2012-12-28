@@ -12,7 +12,7 @@ use li3_quality\tests\mocks\test\MockTestable as Testable;
 /**
  * Internal Class for testing rules
  */
-class Unit extends \lithium\test\Unit  {
+class Unit extends \lithium\test\Unit {
 
 	/**
 	 * The rule that is being tested against.

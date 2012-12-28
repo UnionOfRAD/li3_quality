@@ -539,6 +539,47 @@ if (true
 EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
+
+	public function testGoodClassDef() {
+		$code = <<<EOD
+class Foo {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testGoodAbstractClassDef() {
+		$code = <<<EOD
+abstract class Foo {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testBadClassDef() {
+		$code = <<<EOD
+class Foo  {
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testClassWithExtends() {
+		$code = <<<EOD
+class Foo extends \bar {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIncorrectClassWithExtends() {
+		$code = <<<EOD
+class Foo  extends \bar {
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
 }
 
 ?>
