@@ -72,8 +72,8 @@ class Quality extends \lithium\console\command\Test {
 			}
 		}
 		$ruleCount = count(Rules::filterByName($filters));
-
-		$this->out("Performing {$ruleCount} rules on {count($testables)} classes.");
+		$classCount = count($testables);
+		$this->out("Performing {$ruleCount} rules on {$classCount} classes.");
 		$success = true;
 		foreach ($testables as $count => $path) {
 			try {
