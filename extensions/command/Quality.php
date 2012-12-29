@@ -57,20 +57,7 @@ class Quality extends \lithium\console\command\Test {
 		$testables = $this->_testables(compact('path'));
 		$this->header('Lithium Syntax Check');
 
-		$filters = $this->filters ? array_map('trim', explode(',', $this->filters)) : array();
-		if (count($filters) === 0) {
-			$config = Libraries::get($this->library);
-			$ruleConfig = $config['path'] . '/test/rules.json';
-			if (!file_exists($ruleConfig)) {
-				$config = Libraries::get('li3_quality');
-				$ruleConfig = $config['path'] . '/test/defaultRules.json';
-			}
-			$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
-			$filters = $ruleConfig['rules'];
-			if (isset($ruleConfig['variables'])) {
-				Rules::ruleOptions($ruleConfig['variables']);
-			}
-		}
+		$filters = $this->_syntaxFilters();
 		$ruleCount = count(Rules::filterByName($filters));
 		$classCount = count($testables);
 		$this->out("Performing {$ruleCount} rules on {$classCount} classes.");
@@ -204,6 +191,33 @@ class Quality extends \lithium\console\command\Test {
 		}
 		return $testables;
 	}
+
+	/**
+	 * Will get the filters either from the filter option or the json ruleset
+	 *
+	 * @return array
+	 */
+	protected function _syntaxFilters() {
+		if (!is_array($this->filters)) {
+			$filters = $this->filters ? array_map('trim', explode(',', $this->filters)) : array();
+			if (count($filters) === 0) {
+				$config = Libraries::get($this->library);
+				$ruleConfig = $config['path'] . '/test/rules.json';
+				if (!file_exists($ruleConfig)) {
+					$config = Libraries::get('li3_quality');
+					$ruleConfig = $config['path'] . '/test/defaultRules.json';
+				}
+				$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
+				$filters = $ruleConfig['rules'];
+				if (isset($ruleConfig['variables'])) {
+					Rules::ruleOptions($ruleConfig['variables']);
+				}
+			}
+			$this->filters = $filters;
+		}
+		return $this->filters;
+	}
+
 }
 
 ?>
