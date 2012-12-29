@@ -7,7 +7,7 @@ namespace li3_quality\tests\mocks\test;
  */
 class MockRule extends \li3_quality\test\Rule {
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 	}
 }
 

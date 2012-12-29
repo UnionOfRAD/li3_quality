@@ -24,7 +24,7 @@ class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 		T_VAR => 'var'
 	);
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 		$filtered = array_merge(array_keys($this->_forbidden), array(T_STRING));
 		$filtered = $testable->findAll($filtered);

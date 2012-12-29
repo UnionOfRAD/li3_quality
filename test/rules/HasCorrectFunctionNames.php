@@ -34,7 +34,7 @@ class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 		$filtered = $testable->findAll(array(T_FUNCTION));
 

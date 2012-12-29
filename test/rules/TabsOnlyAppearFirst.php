@@ -36,7 +36,7 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = 'Tabs can only appear at the beginning of the line';
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();

@@ -10,7 +10,7 @@ namespace li3_quality\test\rules;
 
 class HasNoPrivateMethods extends \li3_quality\test\Rule {
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 		$filtered = $testable->findAll(array(T_PRIVATE));
 

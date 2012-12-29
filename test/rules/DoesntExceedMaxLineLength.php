@@ -13,20 +13,20 @@ use lithium\g11n\Multibyte;
 class DoesntExceedMaxLineLength extends \li3_quality\test\Rule {
 
 	public $config = array(
-		'maxLimit' => 100,
+		'hardLimit' => 100,
 		'softLimit' => 80,
-		'tabWidth' => 3,
+		'tabWidth' => 4,
 	);
 
-	public function apply($testable) {
-		extract($this->config);
+	public function apply($testable, array $config = array()) {
+		extract($config += $this->config);
 		foreach ($testable->lines() as $i => $line) {
-			$tabBounty = substr_count($line, "\t") * $tabWidth;
+			$tabBounty = substr_count($line, "\t") * ($tabWidth - 1);
 			$strlen = Multibyte::strlen($line, array('name' => 'li3_quality'));
 			$totalLength = ($length = $tabBounty + $strlen);
-			if ($totalLength > $maxLimit) {
+			if ($totalLength > $hardLimit) {
 				$this->addViolation(array(
-					'message' => "Maximum line length of {$maxLimit} exceeded",
+					'message' => "Maximum line length of {$hardLimit} exceeded",
 					'line' => $i + 1,
 					'position' => $length
 				));

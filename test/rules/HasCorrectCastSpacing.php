@@ -42,7 +42,7 @@ class HasCorrectCastSpacing extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = 'Casting in the incorrect format, try: "(array) $object;"';
 		$tokens = $testable->tokens();
 		$filtered = $testable->findAll($this->tokens);

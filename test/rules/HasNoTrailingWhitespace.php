@@ -12,7 +12,7 @@ use lithium\g11n\Multibyte;
 
 class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = "Trailing whitespace found";
 		$lines = $testable->lines();
 

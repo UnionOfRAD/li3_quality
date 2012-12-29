@@ -25,7 +25,7 @@ abstract class Rule extends \lithium\core\Object {
 	 * @param   object $testable The testable object
 	 * @return  void
 	 */
-	abstract public function apply($testable);
+	abstract public function apply($testable, array $config = array());
 
 	/**
 	 * Will determine if `apply()` had any violations

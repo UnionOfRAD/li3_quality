@@ -19,7 +19,7 @@ class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 
 		$comments = $testable->findAll(array(T_COMMENT));

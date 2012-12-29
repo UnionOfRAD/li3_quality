@@ -24,7 +24,7 @@ class HasCorrectVariableNames extends \li3_quality\test\Rule {
 		'$_ENV'     => true
 	);
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 		$filtered = $testable->findAll(array(T_VARIABLE));
 

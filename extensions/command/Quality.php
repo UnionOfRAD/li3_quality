@@ -53,22 +53,31 @@ class Quality extends \lithium\console\command\Test {
 			$this->plain = true;
 			$this->silent = true;
 		}
+		$ruleOptions = array();
 		$testables = $this->_testables(compact('path'));
 		$this->header('Lithium Syntax Check');
+
 		$filters = $this->filters ? array_map('trim', explode(',', $this->filters)) : array();
-		if (count($filters) > 0) {
-			$rules = Rules::filterByName($filters);
-		} else {
-			$rules = Rules::get();
+		if (count($filters) === 0) {
+			$config = Libraries::get($this->library);
+			$ruleConfig = $config['path'] . '/test/rules.json';
+			if (!file_exists($ruleConfig)) {
+				$config = Libraries::get('li3_quality');
+				$ruleConfig = $config['path'] . '/test/defaultRules.json';
+			}
+			$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
+			$filters = $ruleConfig['rules'];
+			if (isset($ruleConfig['variables'])) {
+				Rules::ruleOptions($ruleConfig['variables']);
+			}
 		}
-		$this->out(
-			"Performing " . count($rules) . " rules " .
-				"on " . count($testables) . " classes."
-		);
+		$ruleCount = count(Rules::filterByName($filters));
+
+		$this->out("Performing {$ruleCount} rules on {count($testables)} classes.");
 		$success = true;
 		foreach ($testables as $count => $path) {
 			try {
-				$result = Rules::apply(new Testable(compact('path')), $filters);
+				$result = Rules::apply(new Testable(compact('path')), $filters, $ruleOptions);
 			} catch (ParserException $e) {
 				$this->error("[FAIL] $path", "red");
 				$this->error("Parse error: " . $e->getMessage(), "red");

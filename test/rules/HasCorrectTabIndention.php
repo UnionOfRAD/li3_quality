@@ -50,7 +50,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$followerCount = 0;
 		$lines = $testable->lines();
 		$message = 'Incorrect tab indention {:actual} should be {:predicted}.';

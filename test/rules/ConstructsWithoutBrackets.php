@@ -43,7 +43,7 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = 'Construct {:name} should not contain parentheses and be on its own line.';
 		$tokens = $testable->tokens();
 		$inspectable = $testable->findAll($this->inspectableTokens);

@@ -43,7 +43,7 @@ class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = '{:name} has no declared visibility.';
 		$tokens = $testable->tokens();
 		$classes = $testable->findAll(array(T_CLASS));

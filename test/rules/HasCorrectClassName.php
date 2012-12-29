@@ -19,7 +19,7 @@ class HasCorrectClassName extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 		$pathinfo = pathinfo($testable->config('path'));
 		if ($pathinfo['extension'] !== 'php') {

@@ -19,7 +19,7 @@ class HasTabsAsIndentation extends \li3_quality\test\Rule {
 		T_ENCAPSED_AND_WHITESPACE,
 	);
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = "Uses spaces instead of tabs";
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();

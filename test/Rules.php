@@ -115,6 +115,21 @@ class Rules extends \lithium\core\StaticObject {
 		$filter = array_fill_keys($names, NULL);
 		return array_intersect_key(static::$_rules, $filter);
 	}
+
+	/**
+	 * Will remove unnecessary items and add options
+	 *
+	 * @param  array $variables The key is the rule the value is the configs
+	 * @return array            A list of all the current rules
+	 */
+	public static function ruleOptions(array $variables) {
+		foreach (static::$_rules as $key => &$rule) {
+			if (isset($variables[$key]) && is_array($variables[$key])) {
+				$rule['options'] = $variables[$key];
+			}
+		}
+		return static::$_rules;;
+	}
 }
 
 ?>

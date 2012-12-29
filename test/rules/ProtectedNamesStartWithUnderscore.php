@@ -20,7 +20,7 @@ class ProtectedNamesStartWithUnderscore extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = 'Protected method {:name} must start with an underscore';
 		$tokens = $testable->tokens();
 		$filtered = $testable->findAll(array(T_PROTECTED));

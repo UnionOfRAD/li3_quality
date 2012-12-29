@@ -60,7 +60,7 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 		foreach ($testable->findAll(array(T_DOC_COMMENT)) as $tokenId) {
 			$token = $tokens[$tokenId];

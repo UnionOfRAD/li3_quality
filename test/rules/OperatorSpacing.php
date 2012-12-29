@@ -138,7 +138,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 
 		foreach ($this->inspector as $inspector) {

@@ -47,7 +47,7 @@ class HasCorrectInlineHTML extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = 'Inline HTML should be in the following format: "<?=$var; ?>"';
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
