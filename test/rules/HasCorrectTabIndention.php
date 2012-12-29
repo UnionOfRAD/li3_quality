@@ -56,8 +56,8 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		$message = 'Incorrect tab indention {:actual} should be {:predicted}.';
 		foreach ($lines as $lineIndex => $line) {
 			if (!$this->_shouldIgnoreLine($lineIndex, $testable)) {
+				$actual = $this->_beginningTabCount($line);
 				$predicted = $this->_beginningTabCountPredicted($lineIndex, $testable);
-				$actual = $this->_beginningTabCount($lineIndex, $testable);
 				if ($predicted !== $actual) {
 					$this->addViolation(array(
 						'message' => String::insert($message, array(
@@ -80,74 +80,91 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @param  array  $testable  The testable object
 	 * @return int
 	 */
-	protected function _beginningTabCountPredicted($lineIndex, &$testable) {
+	protected function _beginningTabCountPredicted($lineIndex, $testable) {
 		$tokens = $testable->tokens();
-		$lineCache = $testable->lineCache();
 		$lines = $testable->lines();
-		$line = $lines[$lineIndex];
-		$endingTokens = array(T_ENDFOR, T_ENDFOREACH, T_ENDIF, T_ENDSWITCH, T_ENDWHILE);
+		$lineCache = $testable->lineCache();
+
+		$line = trim($lines[$lineIndex]);
+		$lineLen = strlen($line);
+		$prevLine = $lineIndex > 0 ? trim($lines[$lineIndex - 1]) : false;
+		$prevLen = strlen($prevLine);
+
 		$currentTokens = $lineCache[$testable->findTokensByLine($lineIndex + 1)];
-		$currentCount = $this->_currentCount;
+		$endingTokens = array(T_ENDFOR, T_ENDFOREACH, T_ENDIF, T_ENDSWITCH, T_ENDWHILE);
 		$switch = false;
 
-		foreach ($currentTokens as $tokenKey) {
-			if (in_array($tokens[$tokenKey]['id'], $endingTokens, true)) {
-				$currentCount = $this->_currentCount -= 1;
-				break;
-			}
-		}
-		if (isset($lines[$lineIndex - 1]) && preg_match('/\.\s*$/', $lines[$lineIndex - 1]) === 1) {
-			$currentCount = $this->_currentCount + 1;
-		}
-		if (preg_match('/^\s*(\)|\})/', $line) === 1) {
-			$hasEndingBracket = $testable->findNextContent(array('}'), $currentTokens);
-			$child = $tokens[$hasEndingBracket];
-			if ($hasEndingBracket !== false && $tokens[$child['parent']]['id'] === T_SWITCH) {
-				$currentCount = $this->_currentCount -= 2;
+		if ($lineLen > 0 && ($line[0] === ")" || $line[0] === "}")) {
+			$ending = $testable->findNextContent(array('}'), $currentTokens);
+			$child = isset($tokens[$ending]) ? $tokens[$ending] : false;
+			$parent = isset($tokens[$child['parent']]) ? $tokens[$child['parent']] : false;
+			if ($parent && $parent['id'] === T_SWITCH) {
+				$this->_currentCount -= 2;
 			} else {
-				$currentCount = $this->_currentCount -= 1;
+				$this->_currentCount -= 1;
 			}
 		}
-		if (preg_match('/(case(.*):|default:|break)\s*$/', $line) === 1) {
+		if ($lineLen > 0 && $line[$lineLen - 1] === ":") {
+			$elif = strpos($line, "elseif") !== false || strpos($line, "else if") !== false;
+			$else = $line[$lineLen - 5] . $line[$lineLen - 4];
+			$else .= $line[$lineLen - 3] . $line[$lineLen - 2];
+			if ($elif || $else === "else") {
+				$this->_currentCount -= 1;
+			}
+		}
+
+		$currentCount = $this->_currentCount;
+
+		if ($prevLine && $prevLen > 0 && $prevLine[$prevLen - 1] === ".") {
+			$currentCount += 1;
+		}
+
+		$switch = false;
+		$find = false;
+		$find = $find || substr($line, -6) === "break;";
+		$find = $find || substr($line, -8) === "default:";
+		$find = $find || ($line[$lineLen - 1] === ":" && strpos($line, "case") !== false);
+		if ($find) {
 			$childContent = array('case', 'default', 'break');
-			$child = $tokens[$testable->findNextContent($childContent, 0, $currentTokens)];
+			$child = $tokens[$testable->findNextContent($childContent, $currentTokens)];
 			if (isset($tokens[$child['parent']]) && $tokens[$child['parent']]['id'] === T_SWITCH) {
-				$currentCount = $this->_currentCount - 1;
+				$currentCount -= 1;
 				$switch = true;
 			}
 		}
-		if (preg_match('/(else( )?if(.*):|else:)\s*$/', $line) === 1) {
-			$currentCount = $this->_currentCount -= 1;
+
+		$find = !$switch && in_array($line[$lineLen - 1], array("{", ":", "("));
+		$found = false;
+		foreach ($currentTokens as $tokenKey) {
+			if (in_array($tokens[$tokenKey]['id'], $endingTokens, true)) {
+				$currentCount -= 1;
+				$this->_currentCount -= 1;
+			}
+			if ($find && $tokens[$tokenKey]['id'] === T_SWITCH) {
+				$this->_currentCount += 2;
+				$found = true;
+			}
+		}
+		if ($find && !$found) {
+			$this->_currentCount += 1;
 		}
 
-		if (!$switch && preg_match('/(\{|:|\()\s*$/', $line) === 1) {
-			$found = false;
-			foreach ($currentTokens as $token) {
-				if ($tokens[$token]['id'] === T_SWITCH) {
-					$this->_currentCount += 2;
-					$found = true;
-					break;
-				}
-			}
-			if (!$found) {
-				$this->_currentCount += 1;
-			}
-		}
 		return $currentCount;
 	}
 
 	/**
 	 * Will determine how many tabs are at the beginning of a line.
 	 *
-	 * @param  int    $lineIndex The index the current line is on
-	 * @param  array  $testable  The testable object
+	 * @param  string $line The current line is on
 	 * @return bool
 	 */
-	protected function _beginningTabCount($lineIndex, &$testable) {
-		$lines = $testable->lines();
-		$line = $lines[$lineIndex];
-		preg_match_all('/^(\t+)[^\t]/', $line, $matches);
-		return isset($matches[1][0]) ? strlen($matches[1][0]) : 0;
+	protected function _beginningTabCount($line) {
+		$count = 0;
+		$end = strlen($line);
+		while (($count < $end) && ($line[$count] === "\t")) {
+			$count++;
+		}
+		return $count;
 	}
 
 	/**
@@ -161,22 +178,28 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @param  array  $testable  The testable object
 	 * @return bool
 	 */
-	protected function _shouldIgnoreLine($lineIndex, &$testable) {
+	protected function _shouldIgnoreLine($lineIndex, $testable) {
 		$lines = $testable->lines();
-		$tokens = $testable->tokens();
-		$lineCache = $testable->lineCache();
-		$line = $lineIndex + 1;
+		$line = $lines[$lineIndex];
+		$plain = trim($line);
+
+		if (empty($plain)) {
+			return true;
+		}
+
+		$length = strlen($plain);
+		if ($length > 1 && ($plain[0] . $plain[1] === "//")) {
+			return true;
+		} else if ($length > 2 && ($plain[0] . $plain[1] . $plain[2] === "/**")) {
+			return true;
+		} else if ($plain[0] === "#" || $plain[0] === "*") {
+			return true;
+		}
+
 		$stringTokens = array(T_ENCAPSED_AND_WHITESPACE, T_END_HEREDOC);
-
-		$tokensStart = $testable->findTokensByLine($line);
-		$currentTokens = $lineCache[$tokensStart];
-		$start = $currentTokens[($tokensStart === $line) ? 0 : count($currentTokens) - 1];
-
-		$start = $testable->findTokenByLine($lineIndex + 1, $tokens);
-		$isComment = preg_match('/^\s*(\/\/|\*|\/\*\*|#)/', $lines[$lineIndex]) === 1;
-		$isEmpty = empty($lines[$lineIndex]);
-		$isString = in_array($tokens[$start]['id'], $stringTokens, true);
-		return $isComment || $isEmpty || $isString;
+		$tokens = $testable->tokens();
+		$start = $testable->findTokenByLine($lineIndex + 1);
+		return in_array($tokens[$start]['id'], $stringTokens, true);
 	}
 
 }

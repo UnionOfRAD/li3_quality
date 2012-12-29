@@ -358,12 +358,12 @@ switch (true) {
 			case 5:
 				return 7;
 			case 8:
-				break;
+			break;
 		}
-		break;
+	break;
 	default:
 		echo false;
-		break;
+	break;
 }
 EOD;
 		$this->assertRulePass($code, $this->rule);
