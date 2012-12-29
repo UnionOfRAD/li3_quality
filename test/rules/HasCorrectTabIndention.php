@@ -121,7 +121,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 
 		$switch = false;
 		$find = false;
-		$find = $find || substr($line, -5) === "break";
+		$find = $find || substr($line, -6) === "break;";
 		$find = $find || substr($line, -8) === "default:";
 		$find = $find || ($line[$lineLen - 1] === ":" && strpos($line, "case") !== false);
 		if ($find) {
