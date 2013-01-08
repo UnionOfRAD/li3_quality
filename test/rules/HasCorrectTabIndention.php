@@ -98,7 +98,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			$ending = $testable->findNextContent(array('}'), $currentTokens);
 			$child = isset($tokens[$ending]) ? $tokens[$ending] : false;
 			$parent = isset($tokens[$child['parent']]) ? $tokens[$child['parent']] : false;
-			if ($parent && $parent['id'] === T_SWITCH) {
+			if ($parent && $parent['id'] === T_SWITCH && $line[0] === "}") {
 				$this->_currentCount -= 2;
 			} else {
 				$this->_currentCount -= 1;
@@ -148,7 +148,6 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		if ($find && !$found) {
 			$this->_currentCount += 1;
 		}
-
 		return $currentCount;
 	}
 
