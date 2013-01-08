@@ -580,6 +580,22 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testMultipleExtends() {
+		$code = <<<EOD
+class FileRecord extends Record implements Iterator, ArrayAccess {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testEmptyExtends() {
+		$code = <<<EOD
+class FileRecord extends Record implements {
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
 }
 
 ?>

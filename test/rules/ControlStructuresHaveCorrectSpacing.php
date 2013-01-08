@@ -22,7 +22,7 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 		T_CLASS => array(
 			'message' => 'Unexpected T_CLASS format. Should be: "class Foo {"',
 			'patterns' => array(
-				"/^{:whitespace}^(abstract )?class [^\s]+ (extends [^\s]+ )?{\$/",
+				"/^{:whitespace}(?:abstract )?class [^\s]+ (extends [\S]+ )?(implements .+ )?{\$/",
 			),
 		),
 		T_IF => array(
