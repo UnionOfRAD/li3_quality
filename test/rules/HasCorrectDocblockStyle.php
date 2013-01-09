@@ -18,8 +18,10 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 	 * @var array
 	 */
 	public $patterns = array(
-		'NO_LEVEL'      => '/{:begin}\/\*\*({:wline} \*( (.*))?)+{:wline} \*\/$/',
-		'FIRST_LEVEL'   => '/{:begin}\t\/\*\*({:wline}\t \*( (.*))?)+{:wline}\t \*\/$/',
+		'PAGE'          => '/\/\*\*({:wline} \*( (.*))?)+{:wline} \*\/$/',
+		'CLASS'         => '/\/\*\*({:wline} \*( (.*))?)+{:wline} \*\/$/',
+		'VARIABLE'      => '/{:begin}\t?\/\*\*({:wline}\t? \*( (.*))?)+{:wline}\t? \*\/$/',
+		'METHOD'        => '/{:begin}\t?\/\*\*({:wline}\t? \*( (.*))?)+{:wline}\t? \*\/$/',
 		'HAS_TAGS'      => '/ \* @/',
 		'TAG_FORMAT'    => array(
 			'/',
@@ -45,15 +47,6 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 	);
 
 	/**
-	 * This method is foobared.
-	 *
-	 * @return bool
-	 */
-	public function enabled() {
-		return false;
-	}
-
-	/**
 	 * Will iterate tokens looking for comments and if found will determine the regex
 	 * to test the comment against.
 	 *
@@ -62,23 +55,17 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 	 */
 	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
+		$lines = $testable->lines();
+		$lineCache = $testable->lineCache();
+		$inspectable = array(T_CLASS, T_VARIABLE, T_FUNCTION);
 		foreach ($testable->findAll(array(T_DOC_COMMENT)) as $tokenId) {
 			$token = $tokens[$tokenId];
-			$level = $token['level'];
-			$parent = $token['parent'];
-			$inClass = $testable->tokenIn(array(T_CLASS), $tokenId);
-			$inFunction = $testable->tokenIn(array(T_FUNCTION), $tokenId);
-			$inVariable = $testable->tokenIn(array(T_VARIABLE), $tokenId);
-			$content = null;
-
-			if ($inClass && ($inFunction || $inVariable)) {
-				$match = 'FIRST_LEVEL';
-				if (isset($tokens[$tokenId - 1]) && $tokens[$tokenId - 1]['id'] === T_WHITESPACE) {
-					$content .= $tokens[$tokenId - 1]['content'];
-				}
-			} elseif ($level === 0 && ($inClass XOR $inFunction XOR $token['line'] === 2)) {
-				$match = 'NO_LEVEL';
-			} else {
+			$nextLine = $token['line'] + count(preg_split('/\r\n|\r|\n/', $token['content']));
+			$parentId = false;
+			if (isset($lineCache[$nextLine])) {
+				$parentId = $testable->findNext($inspectable, $lineCache[$nextLine]);
+			}
+			if ($parentId === false && $token['line'] !== 2) {
 				$this->addViolation(array(
 					'message' => 'Docblocks should only be at the beginning of the page or ' .
 						'before a class/function.',
@@ -87,8 +74,30 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 				continue;
 			}
 
+			$parent = $tokens[$parentId];
+			$content = null;
+
+			if ($token['line'] === 2) {
+				$match = 'PAGE';
+			} else {
+				switch ($parent['id']) {
+					case T_CLASS:
+						$match = 'CLASS';
+					break;
+					case T_FUNCTION:
+						$match = 'METHOD';
+					break;
+					case T_VARIABLE:
+						$match = 'VARIABLE';
+					break;
+				}
+			}
+			if (in_array($parent['id'], array(T_FUNCTION, T_VARIABLE), true)) {
+				$content .= $tokens[$tokenId - 1]['content'];
+			}
 			$content .= $token['content'];
 
+			$pattern = $this->compilePattern($match);
 			$correctFormat = preg_match($this->compilePattern($match), $content) === 1;
 			$hasTags = preg_match($this->compilePattern('HAS_TAGS'), $content) === 1;
 			$correctTagFormat = preg_match($this->compilePattern('TAG_FORMAT'), $content) === 1;
@@ -99,6 +108,9 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 				));
 			} elseif ($hasTags && !$correctTagFormat) {
 				$this->addViolation(array(
+					'hasTags' => (int) $hasTags,
+					'correctTagFormat' => (int) $correctTagFormat,
+					'tagFormat' => $this->compilePattern('TAG_FORMAT'),
 					'message' => 'Tags should be last and have a blank docblock line.',
 					'line' => $token['line'],
 				));

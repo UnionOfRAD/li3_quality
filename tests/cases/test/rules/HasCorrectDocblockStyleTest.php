@@ -6,10 +6,6 @@ class HasCorrectDocblockStyleTest extends \li3_quality\test\Unit {
 
 	public $rule = 'li3_quality\test\rules\HasCorrectDocblockStyle';
 
-	public function skip() {
-		$this->skipIf(true);
-	}
-
 	public function testCorrectBlankLinedDocBlock() {
 		$code = <<<EOD
 <?php
@@ -27,6 +23,8 @@ EOD;
 
 	public function testCorrectBlankLinedDocBlockForMethod() {
 		$code = <<<EOD
+<?php
+
 class foo {
 	/**
 	 * This is a comment
@@ -38,7 +36,10 @@ class foo {
 	}
 }
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
 	}
 
 	public function testClassAndMethodComments() {
