@@ -26,8 +26,8 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 		'TAG_FORMAT'    => array(
 			'/',
 			'{:begin}\t?\/\*\*',
-			'(({:wlinet} \*( [^@].*)?)+)',
-			'{:wlinet} \*',
+			'((({:wlinet} \*( [^@].*)?)+)',
+			'{:wlinet} \*)?',
 			'(({:wlinet} \* @(.*)))',
 			'(({:wlinet} \* (@|[ ]{5})(.*))+)?',
 			'{:wlinet} \*\/',
