@@ -19,7 +19,7 @@ class HasCorrectInlineHTML extends \li3_quality\test\Rule {
 	 *
 	 * @var string
 	 */
-	public $matchPattern = '/^\<\?=[^;\s]+\; \?\>$/';
+	public $matchPattern = '/^\<\?=[^;]+\; \?\>$/';
 
 	/**
 	 * The pattern to match all short tags
