@@ -41,11 +41,7 @@ class UnusedUseStatements extends \li3_quality\test\Rule {
 			$foundStatement = preg_match_all($compiledRegex, $line, $matches) !== false;
 			if (!$foundUse && $foundStatement) {
 				foreach ($matches[0] as $match) {
-					if (preg_match('/^new ([^ ]+)$/', $match, $smallMatches) === 1) {
-						unset($useStatements[$smallMatches[1]]);
-					} elseif (preg_match('/^([^:]+)::$/', $match, $smallMatches) === 1) {
-						unset($useStatements[$smallMatches[1]]);
-					}
+					unset($useStatements[strtolower($match)]);
 				}
 				$compiledRegex = $this->_compileRegex($regexArray);
 			}
@@ -67,7 +63,7 @@ class UnusedUseStatements extends \li3_quality\test\Rule {
 	 * @return string
 	 */
 	protected function _compileRegex(array $regexArray = array()) {
-		return '/' . implode('|', $regexArray) . '/';
+		return '/' . implode('|', $regexArray) . '/i';
 	}
 
 }

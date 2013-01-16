@@ -9,7 +9,6 @@
 namespace li3_quality\extensions\command;
 
 use lithium\core\Libraries;
-use lithium\analysis\Inspector;
 use lithium\test\Dispatcher;
 use lithium\test\Group;
 use li3_quality\test\Rules;

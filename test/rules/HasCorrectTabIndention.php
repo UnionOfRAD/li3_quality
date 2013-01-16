@@ -9,7 +9,6 @@
 namespace li3_quality\test\rules;
 
 use lithium\util\String;
-use lithium\analysis\Parser;
 
 /**
  * Tab indention is a tricky subject. Often the next line is based on the

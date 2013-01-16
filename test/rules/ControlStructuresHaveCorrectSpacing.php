@@ -8,7 +8,6 @@
 
 namespace li3_quality\test\rules;
 
-use li3_quality\test\Testable;
 use lithium\util\String;
 
 class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {

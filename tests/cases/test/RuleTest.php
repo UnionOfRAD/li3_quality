@@ -134,7 +134,6 @@ class RuleTest extends \li3_quality\test\Unit {
 		$this->assertIdentical(0, count($rule->violations()));
 	}
 
-
 }
 
 ?>

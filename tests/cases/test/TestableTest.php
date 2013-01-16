@@ -192,7 +192,6 @@ EOD;
 		$this->assertIdentical(T_PRIVATE, $tokens[$visibility]['id']);
 	}
 
-
 	public function testFindNextContentWithArray() {
 		$code = <<<EOD
 class foo {

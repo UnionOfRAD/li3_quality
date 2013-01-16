@@ -24,7 +24,9 @@
 		"OperatorSpacing",
 		"ProtectedNamesStartWithUnderscore",
 		"TabsOnlyAppearFirst",
-		"WeakComparisonOperators"
+		"WeakComparisonOperators",
+		"UnusedUseStatements",
+		"MultipleBlankLines"
 	],
 	"variables": {
 		"DoesntExceedMaxLineLength": {

@@ -2,8 +2,6 @@
 
 namespace li3_quality\tests\cases\test\rules;
 
-use li3_quality\tests\mocks\MockHasCorrectPermissions;
-
 class HasCorrectPermissionsTest extends \li3_quality\test\Unit {
 
 	public $rule = 'li3_quality\tests\mocks\test\rules\MockHasCorrectPermissions';

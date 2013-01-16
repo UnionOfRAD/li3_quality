@@ -8,7 +8,6 @@
 namespace li3_quality\test;
 
 use lithium\core\Libraries;
-use li3_quality\test\Rule;
 
 class Rules extends \lithium\core\StaticObject {
 

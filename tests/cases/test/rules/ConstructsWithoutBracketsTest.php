@@ -48,7 +48,6 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-
 	public function testCorrectEndingParntheses() {
 		$code = <<<EOD
 exit false ? true : in_array(\$a, \$b);

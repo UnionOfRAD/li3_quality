@@ -490,7 +490,6 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
-
 	public function testIncorrectDoWhileWithNoLastSpaceOnWhile() {
 		$code = <<<EOD
 do {

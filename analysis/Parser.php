@@ -2,7 +2,7 @@
 
 namespace li3_quality\analysis;
 
-use li3_quality\analysis\ParserExepction;
+use li3_quality\analysis\ParserException;
 
 class Parser extends \lithium\analysis\Parser {
 
