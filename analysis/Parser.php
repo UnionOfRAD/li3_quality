@@ -125,7 +125,7 @@ class Parser extends \lithium\analysis\Parser {
 				return substr($token['content'], 1);
 			}
 			$total = count($tokens);
-			for ($key = $tokenId;$key <= $total;$key++) {
+			for ($key = $tokenId; $key <= $total; $key++) {
 				if ($tokens[$key]['id'] === T_STRING) {
 					return $tokens[$key]['content'];
 				} elseif (in_array($tokens[$key]['content'], array('(', '{', ':'))) {
@@ -150,7 +150,7 @@ class Parser extends \lithium\analysis\Parser {
 		}
 		$foundOpen = false;
 		$total = count($tokens);
-		for ($key = $tokenId;$key <= $total;$key++) {
+		for ($key = $tokenId; $key <= $total; $key++) {
 			$token = $tokens[$key];
 			if ($foundOpen) {
 				if ($token['content'] === ')') {
@@ -177,7 +177,7 @@ class Parser extends \lithium\analysis\Parser {
 			throw new \Exception('Cannot call params on non function');
 		}
 		$total = count($tokens);
-		for ($key = $tokenId;$key <= $total;$key++) {
+		for ($key = $tokenId; $key <= $total; $key++) {
 			if ($tokens[$key]['id'] === T_STRING) {
 				return false;
 			} elseif (in_array($tokens[$key]['content'], array('(', '{', ':'))) {
@@ -200,7 +200,7 @@ class Parser extends \lithium\analysis\Parser {
 			throw new \Exception('Cannot call modifiers on non class/function/variable' . $token);
 		}
 		$modifiers = array();
-		for ($key = $tokenId - 1;$key >= 0;$key--) {
+		for ($key = $tokenId - 1; $key >= 0; $key--) {
 			$token = $tokens[$key];
 			if ($token['id'] === T_WHITESPACE) {
 				continue;

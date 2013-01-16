@@ -59,9 +59,9 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 			),
 		),
 		T_FOR => array(
-			'message' => 'Unexpected T_FOR format. Should be: "for (...) {"',
+			'message' => 'Unexpected T_FOR format. Should be: "for (...; ...; ...) {"',
 			'patterns' => array(
-				"/^{:whitespace}for {:bracket} {\$/",
+				"/^{:whitespace}for {:forBracket} {\$/",
 			),
 		),
 		T_FOREACH => array(
@@ -98,6 +98,7 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 	protected $_regexMap = array(
 		'whitespace' => '(\s+)?',
 		'bracket'    => '\(([^\s].*[^\s]|[^\s]+)\)',
+		'forBracket' => '\((?:(?:[^\s](?:[^;]+)?; )+)?(?:[^\s]([^;]+)?)?[^\s]\)',
 	);
 
 	/**

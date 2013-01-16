@@ -596,6 +596,38 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testForWithSemicolons() {
+		$code = <<<EOD
+for (1; 2; 3) {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testForShortSemicolonList() {
+		$code = <<<EOD
+for (1; 2) {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testMultiSemicolonFor() {
+		$code = <<<EOD
+for (\$i = 0, \$total = count(\$arr); \$i < 10; \$i++) {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testForExtraSpacing() {
+		$code = <<<EOD
+for (1;  2; 3) {
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
 }
 
 ?>

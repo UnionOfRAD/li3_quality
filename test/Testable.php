@@ -150,7 +150,7 @@ class Testable extends \lithium\core\Object {
 			$start = $range;
 			$end = count($tokens);
 		}
-		for ($idx = $start;$idx < $end;$idx++) {
+		for ($idx = $start; $idx < $end; $idx++) {
 			$id = is_array($range) ? $range[$idx] : $idx;
 			$token = isset($tokens[$id]);
 			if ($token && in_array($tokens[$id]['content'], $types)) {
@@ -174,7 +174,7 @@ class Testable extends \lithium\core\Object {
 		} else {
 			$end = $range;
 		}
-		for ($idx = $end;$idx >= 0;$idx--) {
+		for ($idx = $end; $idx >= 0; $idx--) {
 			$id = is_array($range) ? $range[$idx] : $idx;
 			$token = isset($tokens[$id]);
 			if ($token && in_array($tokens[$id]['content'], $types)) {
@@ -200,7 +200,7 @@ class Testable extends \lithium\core\Object {
 			$start = $range;
 			$end = count($tokens);
 		}
-		for ($idx = $start;$idx < $end;$idx++) {
+		for ($idx = $start; $idx < $end; $idx++) {
 			$id = is_array($range) ? $range[$idx] : $idx;
 			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
 				return $id;
@@ -223,7 +223,7 @@ class Testable extends \lithium\core\Object {
 		} else {
 			$end = $range;
 		}
-		for ($idx = $end;$idx >= 0;$idx--) {
+		for ($idx = $end; $idx >= 0; $idx--) {
 			$id = is_array($range) ? $range[$idx] : $idx;
 			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
 				return $id;
@@ -280,7 +280,7 @@ class Testable extends \lithium\core\Object {
 			$start = $range;
 			$end = count($tokens);
 		}
-		for ($idx = $start;$idx < $end;$idx++) {
+		for ($idx = $start; $idx < $end; $idx++) {
 			$id = is_array($range) ? $range[$idx] : $idx;
 			$token = isset($tokens[$id]);
 			if ($tokens && in_array($tokens[$id]['content'], $types)) {
@@ -299,7 +299,7 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function findTokenByLine($line) {
 		$lineCache = $this->lineCache();
-		for (;$line >= 0;$line--) {
+		for (; $line >= 0; $line--) {
 			if (isset($lineCache[$line])) {
 				return $lineCache[$line][0];
 			}
@@ -316,7 +316,7 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function findTokensByLine($line) {
 		$lineCache = $this->lineCache();
-		for (;$line >= 0;$line--) {
+		for (; $line >= 0; $line--) {
 			if (isset($lineCache[$line])) {
 				return $line;
 			}
