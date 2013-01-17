@@ -1,0 +1,38 @@
+{
+	"name": "Quality RuleSet",
+	"rules": [
+		"BeginsWithOpenTag",
+		"ConstructsWithoutBrackets",
+		"ControlStructuresHaveCorrectSpacing",
+		"DoesntExceedMaxLineLength",
+		"EndsWithCloseTag",
+		"HasCorrectCastSpacing",
+		"HasCorrectClassName",
+		"HasCorrectCommentStyle",
+		"HasCorrectDocblockStyle",
+		"HasCorrectEncoding",
+		"HasCorrectFunctionNames",
+		"HasCorrectInlineHTML",
+		"HasCorrectPermissions",
+		"HasCorrectTabIndention",
+		"HasCorrectVariableNames",
+		"HasExplicitPropertyAndMethodVisibility",
+		"HasNoForbiddenStatements",
+		"HasNoPrivateMethods",
+		"HasNoTrailingWhitespace",
+		"HasTabsAsIndentation",
+		"OperatorSpacing",
+		"ProtectedNamesStartWithUnderscore",
+		"TabsOnlyAppearFirst",
+		"WeakComparisonOperators",
+		"UnusedUseStatements",
+		"MultipleBlankLines"
+	],
+	"variables": {
+		"DoesntExceedMaxLineLength": {
+			"softLimit": 80,
+			"hardLimit": 100,
+			"tabWidth": 4
+		}
+	}
+}

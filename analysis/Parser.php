@@ -2,91 +2,89 @@
 
 namespace li3_quality\analysis;
 
+use li3_quality\analysis\ParserException;
+
 class Parser extends \lithium\analysis\Parser {
 
 	/**
-	 * Tokens that can be parent tokens. The mustInclude key has an array of
-	 * content which must exist after the found parent token. The hasName key
-	 * defines if this token can have a name. The parents array is a dependency
-	 * and if none of these are the tokens immediate parents they are not a
-	 * parent either.
+	 * Tokens that can be parent tokens.
 	 *
 	 * @var array
 	 */
 	protected static $_parentTokens = array(
 		T_CLASS => array(
-			'mustInclude' => array('{'),
-			'hasName' => true,
+			'endingTokens' => array(),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_IF => array(
-			'mustInclude' => array('{', ':'),
-			'hasName' => false,
+			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_ELSE => array(
-			'mustInclude' => array('{', ':'),
-			'hasName' => false,
+			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_ELSEIF => array(
-			'mustInclude' => array('{', ':'),
-			'hasName' => false,
+			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_FOR => array(
-			'mustInclude' => array('{', ':'),
-			'hasName' => false,
+			'endingTokens' => array(T_ENDFOR),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_FOREACH => array(
-			'mustInclude' => array('{', ':'),
-			'hasName' => false,
+			'endingTokens' => array(T_ENDFOREACH),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_FUNCTION => array(
-			'mustInclude' => array('{', ';'),
-			'hasName' => true,
+			'endingTokens' => array(),
+			'endingContent' => array('}', ';'),
 			'parents' => array(),
 		),
 		T_INTERFACE => array(
-			'mustInclude' => array('{'),
-			'hasName' => true,
+			'endingTokens' => array(),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_SWITCH => array(
-			'mustInclude' => array('{', ':'),
-			'hasName' => false,
+			'endingTokens' => array(),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_TRY => array(
-			'mustInclude' => array('{'),
-			'hasName' => false,
+			'endingTokens' => array(),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_CATCH => array(
-			'mustInclude' => array('{'),
-			'hasName' => false,
+			'endingTokens' => array(),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_WHILE => array(
-			'mustInclude' => array('{', ':', ';'),
-			'hasName' => false,
+			'endingTokens' => array(T_ENDWHILE),
+			'endingContent' => array('}', ';'),
 			'parents' => array(),
 		),
 		T_DO => array(
-			'mustInclude' => array('while'),
-			'hasName' => false,
+			'endingTokens' => array(),
+			'endingContent' => array('}'),
 			'parents' => array(),
 		),
 		T_DECLARE => array(
-			'mustInclude' => array('{', ':'),
-			'hasName' => false,
+			'endingTokens' => array(),
+			'endingContent' => array(';', '}'),
 			'parents' => array(),
 		),
 		T_VARIABLE => array(
-			'mustInclude' => array(';'),
-			'hasName' => true,
+			'endingTokens' => array(),
+			'endingContent' => array(';'),
 			'parents' => array(
 				T_CLASS,
 			),
@@ -94,142 +92,44 @@ class Parser extends \lithium\analysis\Parser {
 	);
 
 	/**
-	 * These tokens have parents that will exist after they are declared
+	 * These tokens are considered modifiers
 	 *
-	 * @var array
+	 * @var  array
 	 */
-	protected static $_beforeParents = array(
+	public static $modifiers = array(
 		T_CONST,
-		T_ABSTRACT,
 		T_PUBLIC,
-		T_PRIVATE,
 		T_PROTECTED,
+		T_PRIVATE,
+		T_ABSTRACT,
 		T_STATIC,
 	);
 
 	/**
-	 * These tokens can end blocks
+	 * Will find the label of the given token.
 	 *
-	 * @var  array
-	 */
-	protected static $_endingBlocks = array(
-		T_ENDDECLARE,
-		T_ENDFOR,
-		T_ENDFOREACH,
-		T_ENDIF,
-		T_ENDSWITCH,
-		T_ENDWHILE,
-	);
-
-	/**
-	 * Analyzes $token and determines if it is a suitable parent by checking
-	 * for it in the $_parentTokens list, and checking its dependencies.
-	 *
-	 * @param  array $token  The token you are analyzing
-	 * @param  array $tokens The array of the currently created tokens
-	 * @return bool          If this token is a parent or not
-	 */
-	protected static function _isParent(&$token, &$tokens) {
-		if (isset(self::$_parentTokens[$token['id']])) {
-			$requiredParents = self::$_parentTokens[$token['id']]['parents'];
-			$parentId = $token['parent'];
-			$isDecoy = false;
-			$hasRequiredParents = empty($requiredParents);
-			if (isset($tokens[$parentId])) {
-				$parentToken = $tokens[$parentId]['id'];
-				if (!$hasRequiredParents) {
-					$hasRequiredParents = in_array($parentToken, $requiredParents);
-				}
-				if ($token['id'] === T_IF) {
-					$tokenId = array_search($token, $tokens);
-					$correctParent = $parentToken === T_ELSE;
-					$correctSpacing = $tokenId - $parentId === 2;
-					$correctWhitespace = $tokens[$tokenId - 1]['id'] === T_WHITESPACE;
-					$isDecoy = $correctParent && $correctSpacing && $correctWhitespace;
-				}
-			}
-			if ($hasRequiredParents && !$isDecoy) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * The must include variable tells us that this parent goes at least this far, and which gives
-	 * us a good checking point for ending non-block parents.
-	 *
-	 * @param  array $token  The token you are analyzing
-	 * @param  array $tokens The array of the currently created tokens
-	 * @return int           The id of the last guaranteed child of $token
-	 */
-	protected static function _mustInclude(&$token, &$tokens) {
-		$lastSafeId = 0;
-		$total = count($tokens);
-		$tokenId = array_search($token, $tokens) + 1;
-		$content = self::$_parentTokens[$token['id']]['mustInclude'];
-		if ($token['id'] === T_DO) {
-			return self::_mustIncludeDo($token, $tokens);
-		}
-		for ($id = $tokenId; $id < $total; $id++) {
-			if ($tokens[$id]['line'] === $token['line']) {
-				$lastSafeId = $id;
-			}
-			$nonVar = $tokens[$id]['id'] !== T_VARIABLE;
-			$foundParent = isset(self::$_parentTokens[$tokens[$id]['id']]);
-			if ($nonVar && $foundParent) {
-				return $lastSafeId;
-			} elseif (in_array($tokens[$id]['content'], $content)) {
-				return $id;
-			}
-		}
-		return $lastSafeId;
-	}
-
-	/**
-	 * T_DO tokens are tricky to guess their end and require seperate logic.
-	 * Here we simply track the brackets, the first semicolon after the level
-	 * is back to zero is the ending token.
-	 *
-	 * @param  array $token  The token you are analyzing
-	 * @param  array $tokens The array of the currently created tokens
-	 * @return int           The id of the last guaranteed child of $token
-	 */
-	protected static function _mustIncludeDo(&$token, &$tokens) {
-		$total = count($tokens);
-		$tokenId = array_search($token, $tokens) + 1;
-		$level = 0;
-		$foundBracket = false;
-		for ($id = $tokenId; $id < $total; $id++) {
-			if ($tokens[$id]['content'] === '{') {
-				$level++;
-				$foundBracket = true;
-			} elseif ($tokens[$id]['content'] === '}') {
-				$level--;
-			} elseif ($level === 0 && $foundBracket && $tokens[$id]['content'] === ';') {
-				return $id;
-			}
-		}
-		return -1;
-	}
-
-	/**
-	 * Will find the label of the given token
-	 *
-	 * @param  array $token  The token you are analyzing
-	 * @param  array $tokens The array of the currently created tokens
+	 * @param  array $tokenId The tokenId you are analyzing
+	 * @param  array $tokens  The array of the currently created tokens
 	 * @return string
 	 */
-	protected static function _findLabel(&$token, &$tokens) {
-		$isParent = isset(self::$_parentTokens[$token['id']]);
-		if ($isParent && self::$_parentTokens[$token['id']]['hasName']) {
+	public static function label($tokenId, array $tokens) {
+		$token = $tokens[$tokenId];
+		$hasName = in_array($token['id'], array(
+			T_FUNCTION,
+			T_CLASS,
+			T_INTERFACE,
+			T_VARIABLE,
+		));
+		if ($hasName) {
 			if ($token['id'] === T_VARIABLE) {
 				return substr($token['content'], 1);
 			}
 			$total = count($tokens);
-			foreach (range(array_search($token, $tokens), $total) as $key) {
+			for ($key = $tokenId; $key <= $total; $key++) {
 				if ($tokens[$key]['id'] === T_STRING) {
 					return $tokens[$key]['content'];
+				} elseif (in_array($tokens[$key]['content'], array('(', '{', ':'))) {
+					break;
 				}
 			}
 		}
@@ -237,21 +137,80 @@ class Parser extends \lithium\analysis\Parser {
 	}
 
 	/**
-	 * Will determine if this token can be queued before before the parent or not.
+	 * Will return the parameters of a given token.
 	 *
-	 * @param  array $token  The token you are analyzing
-	 * @param  array $tokens The array of the currently created tokens
+	 * @param  array $tokenId The tokenId you are analyzing
+	 * @param  array $tokens  The array of the currently created tokens
+	 * @return array
+	 */
+	public static function parameters($tokenId, array $tokens) {
+		$params = array();
+		if ($tokens[$tokenId]['id'] !== T_FUNCTION) {
+			throw new \Exception('Cannot call params on non function');
+		}
+		$foundOpen = false;
+		$total = count($tokens);
+		for ($key = $tokenId; $key <= $total; $key++) {
+			$token = $tokens[$key];
+			if ($foundOpen) {
+				if ($token['content'] === ')') {
+					break;
+				} elseif ($token['id'] === T_VARIABLE) {
+					$params[] = $key;
+				}
+			} elseif ($token['content'] === '(') {
+				$foundOpen = true;
+			}
+		}
+		return $params;
+	}
+
+	/**
+	 * Will determine if the current token is an anonymous funciton/closure.
+	 *
+	 * @param  array $tokenId The tokenId you are analyzing
+	 * @param  array $tokens  The array of the currently created tokens
 	 * @return bool
 	 */
-	protected static function _canQueue(&$token, &$tokens) {
-		if ($token['id'] === T_STATIC) {
-			$tokenId = array_search($token, $tokens);
-			if ($tokens[$tokenId + 1]['id'] === T_WHITESPACE) {
+	public static function closure($tokenId, array $tokens) {
+		if ($tokens[$tokenId]['id'] !== T_FUNCTION) {
+			throw new \Exception('Cannot call params on non function');
+		}
+		$total = count($tokens);
+		for ($key = $tokenId; $key <= $total; $key++) {
+			if ($tokens[$key]['id'] === T_STRING) {
+				return false;
+			} elseif (in_array($tokens[$key]['content'], array('(', '{', ':'))) {
 				return true;
 			}
-			return false;
 		}
-		return in_array($token['id'], self::$_beforeParents);
+		return false;
+	}
+
+	/**
+	 * Will return a list of all the modifiers for a given token.
+	 *
+	 * @param  array $tokenId The tokenId you are analyzing
+	 * @param  array $tokens  The array of the currently created tokens
+	 * @return array          An array of tokenId's
+	 */
+	public static function modifiers($tokenId, array $tokens) {
+		if (!in_array($tokens[$tokenId]['id'], array(T_CLASS, T_FUNCTION, T_VARIABLE))) {
+			$token = print_r($tokens[$tokenId], true);
+			throw new \Exception('Cannot call modifiers on non class/function/variable' . $token);
+		}
+		$modifiers = array();
+		for ($key = $tokenId - 1; $key >= 0; $key--) {
+			$token = $tokens[$key];
+			if ($token['id'] === T_WHITESPACE) {
+				continue;
+			} elseif (in_array($token['id'], static::$modifiers)) {
+				$modifiers[] = $key;
+			} else {
+				break;
+			}
+		}
+		return $modifiers;
 	}
 
 	/**
@@ -265,84 +224,126 @@ class Parser extends \lithium\analysis\Parser {
 	 *        -'ignore': An array containing PHP language tokens to ignore.
 	 *        -'include': If supplied, an array of the only language tokens
 	 *         to include in the output.
-	 * @return array An array of tokens in the supplied source code.
+	 * @return array An array of extracted information from the supplied source code:
+	 *         - lineCache: token ids indexed by line number
+	 *         - typeCache: token ids indexed by token type
+	 *         - meta: parsing information (level, etc.) indexed by token id
+	 *         - relationships: parent and child relations (token ids) indexed by token id
 	 */
 	public static function tokenize($code, array $options = array()) {
 		$tokens = parent::tokenize($code, $options);
-		$level = $queue = 0;
-		$currentParent = $mustInclude = -1;
-		$total = count($tokens);
-		$maxLevel = 0;
-		$curlyOpen = false;
-		foreach ($tokens as $tokenId => &$token) {
+		$currentParent = -1;
+		$brackets = $curlyBrackets = $level = 0;
+		$lineCache = $typeCache = array();
+		foreach ($tokens as $tokenId => $token) {
+			if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
+				if ($token['content'] === '{') {
+					$curlyBrackets++;
+				} elseif ($token['content'] === '}') {
+					$curlyBrackets--;
+				} elseif ($token['content'] === '(') {
+					$brackets++;
+				} elseif ($token['content'] === ')') {
+					$brackets--;
+				}
+			}
+
+			if (!isset($lineCache[$token['line']])) {
+				$lineCache[$token['line']] = array();
+			}
+			$lineCache[$token['line']][] = $tokenId;
+
+			if (!isset($typeCache[$token['id']])) {
+				$typeCache[$token['id']] = array();
+			}
+			$typeCache[$token['id']][] = $tokenId;
+
+			$tokens[$tokenId]['level'] = $level;
+			$tokens[$tokenId]['brackets'] = $brackets;
+			$tokens[$tokenId]['curlyBrackets'] = $curlyBrackets;
+			$tokens[$tokenId]['parent'] = $currentParent;
+			$tokens[$tokenId]['children'] = array();
 			if (isset($tokens[$currentParent])) {
 				$tokens[$currentParent]['children'][] = $tokenId;
 			}
-			$token['parent'] = $currentParent;
-			$token['level'] = $level;
-			$token['children'] = array();
-			$token['label'] = self::_findLabel($token, $tokens);
 
-			if ($maxLevel > 0 && $mustInclude <= $tokenId) {
-				if ($token['content'] === '}' || in_array($token['id'], self::$_endingBlocks)) {
-					if ($curlyOpen) {
-						$curlyOpen = false;
-					} else {
-						$level--;
-					}
-				}
-				if (isset($tokens[$currentParent])) {
-					$closeByBrackets = $tokens[$currentParent]['level'] >= $level;
-					$closeByNoBlock = $mustInclude == $tokenId && $token['content'] === ';';
-					if ($closeByBrackets || $closeByNoBlock) {
-						$originalToken = $tokens[$currentParent]['id'];
-						$currentParent = $tokens[$currentParent]['parent'];
-						$currentParentId = T_WHITESPACE;
-						if (isset($tokens[$currentParent]['id'])) {
-							$currentParentId = $tokens[$currentParent]['id'];
-						}
-						if ($originalToken === T_WHILE && $currentParentId === T_DO) {
-							$currentParent = $tokens[$currentParent]['parent'];
-							$level--;
-						}
-						$mustInclude = 0;
-						if (isset($tokens[$currentParent]['mustInclude'])) {
-							$mustInclude = $tokens[$currentParent]['mustInclude'];
-						}
-						if ($closeByNoBlock) {
-							$level--;
-						}
-					}
-				}
-			}
-
-			if (self::_isParent($token, $tokens)) {
+			$parent = static::_isEndOfParent($tokenId, $currentParent, $tokens);
+			if ($parent !== false) {
+				$level--;
+				$currentParent = $parent;
+			} elseif (static::_isParent($tokenId, $tokens)) {
 				$level++;
-				$maxLevel = max($level, $maxLevel);
 				$currentParent = $tokenId;
-				$mustInclude = self::_mustInclude($token, $tokens);
-				$token['mustInclude'] = $mustInclude;
-				if ($queue !== 0) {
-					foreach (range($queue, $tokenId - 1) as $key) {
-						$tokens[$key]['parent'] = $currentParent;
-						$tokens[$key]['level'] = $level;
-						$token['children'][] = $key;
-					}
-				}
-				$queue = 0;
-			} elseif ($queue === 0 && self::_canQueue($token, $tokens)) {
-				$queue = $tokenId;
-			} elseif ($token['id'] === T_CURLY_OPEN) {
-				$curlyOpen = true;
 			}
 		}
-		if ($queue !== 0 || $level !== 0) {
+		if ($level !== 0 || $curlyBrackets !== 0 || $brackets !== 0) {
 			$smallTokens = array_slice($tokens, 0, 20);
-			$data = print_r(compact('queue', 'level', 'tokens'), true);
-			throw new \LogicException('A parse error has been encountered.' . $data);
+			$exception = new ParserException('A parse error has been encountered.');
+			$exception->parserData = compact('level', 'curlyBrackets', 'brackets', 'tokens');
+			throw $exception;
 		}
-		return $tokens;
+		return compact('tokens', 'lineCache', 'typeCache');
 	}
+
+	/**
+	 * Will determine if this is the end of the current parent.
+	 *
+	 * @param  int   $tokenId  The tokenId you are analyzing
+	 * @param  int   $parentId The tokenId of the currentParent
+	 * @param  array $tokens   The array of the currently created tokens
+	 * @return int|bool        Will either return `false` or the id of the new currentParent.
+	 */
+	protected static function _isEndOfParent($tokenId, $parentId, array $tokens) {
+		if (!isset($tokens[$parentId])) {
+			return false;
+		}
+		$token = $tokens[$tokenId];
+		$parent = $tokens[$parentId];
+		if ($tokens[$tokenId]['curlyBrackets'] !== $tokens[$parentId]['curlyBrackets']) {
+			return false;
+		}
+		$endingTokens = static::$_parentTokens[$parent['id']]['endingTokens'];
+		$endingContent = static::$_parentTokens[$parent['id']]['endingContent'];
+		$hasEndingTokens = in_array($token['id'], $endingTokens);
+		$hasEndingContent = in_array($token['content'], $endingContent);
+		if ($hasEndingTokens || $hasEndingContent) {
+			return $tokens[$parentId]['parent'];
+		}
+		return false;
+	}
+
+	/**
+	 * Analyzes $token and determines if it is a suitable parent by checking
+	 * for it in the $_parentTokens list, and checking its dependencies.
+	 *
+	 * @param  array $tokenId The tokenId you are analyzing
+	 * @param  array $tokens The array of the currently created tokens
+	 * @return bool          If this token is a parent or not
+	 */
+	protected static function _isParent($tokenId, array $tokens) {
+		$token = $tokens[$tokenId];
+		if (!isset(static::$_parentTokens[$token['id']])) {
+			return false;
+		}
+		$requiredParents = static::$_parentTokens[$token['id']]['parents'];
+		$parentId = $tokens[$tokenId]['parent'];
+		$isDecoy = false;
+		$hasRequiredParents = empty($requiredParents);
+		if (isset($tokens[$parentId])) {
+			$parentToken = $tokens[$parentId]['id'];
+			if (!$hasRequiredParents) {
+				$hasRequiredParents = in_array($parentToken, $requiredParents);
+			}
+			if ($token['id'] === T_IF) {
+				$correctParent = $parentToken === T_ELSE;
+				$correctSpacing = $tokenId - $parentId === 2;
+				$correctWhitespace = $tokens[$tokenId - 1]['id'] === T_WHITESPACE;
+				$isDecoy = $correctParent && $correctSpacing && $correctWhitespace;
+			}
+		}
+		return $hasRequiredParents && !$isDecoy;
+	}
+
 }
 
 ?>

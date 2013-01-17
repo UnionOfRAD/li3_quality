@@ -19,7 +19,7 @@ class HasTabsAsIndentation extends \li3_quality\test\Rule {
 		T_ENCAPSED_AND_WHITESPACE,
 	);
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = "Uses spaces instead of tabs";
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
@@ -27,7 +27,7 @@ class HasTabsAsIndentation extends \li3_quality\test\Rule {
 		foreach ($lines as $number => $line) {
 			$lineNumber = $number + 1;
 			$ignore = false;
-			$key = $this->_findTokenByLine($lineNumber, $tokens);
+			$key = $testable->findTokenByLine($lineNumber);
 			if (isset($tokens[$key])) {
 				$token = $tokens[$key];
 				$ignore = in_array($token['id'], $this->ignoreableTokens);

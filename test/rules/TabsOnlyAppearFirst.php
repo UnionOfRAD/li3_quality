@@ -11,7 +11,8 @@ namespace li3_quality\test\rules;
 class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 
 	/**
-	 * Pattern will match tabs, then any non-tab character until the end of the line
+	 * Pattern will match tabs, then any non-tab character until the end of
+	 * the line
 	 *
 	 * @var string
 	 */
@@ -24,6 +25,9 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 	 */
 	public $ignoreableTokens = array(
 		T_ENCAPSED_AND_WHITESPACE,
+		T_DOC_COMMENT,
+		T_COMMENT,
+		T_START_HEREDOC,
 	);
 
 	/**
@@ -32,21 +36,22 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
+		$message = 'Tabs can only appear at the beginning of the line';
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
 		foreach ($lines as $lineId => $line) {
 			$lineNumber = $lineId + 1;
 			$ignore = false;
-			$key = $this->_findTokenByLine($lineNumber, $tokens);
+			$key = $testable->findTokenByLine($lineNumber);
 			if (isset($tokens[$key])) {
 				$token = $tokens[$key];
 				$ignore = in_array($token['id'], $this->ignoreableTokens);
 			}
-			if (!$ignore && preg_match($this->pattern, $line) == 0) {
-				$token = $tokens[$this->_findTokenByLine($lineNumber, $tokens)];
+			if (!$ignore && preg_match($this->pattern, $line) === 0) {
+				$token = $tokens[$testable->findTokenByLine($lineNumber)];
 				$this->addViolation(array(
-					'message' => 'Tabs can only appear at the beginning of the line',
+					'message' => $message,
 					'line' => $lineNumber,
 				));
 			}

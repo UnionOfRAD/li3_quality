@@ -8,7 +8,6 @@
 
 namespace li3_quality\test\rules;
 
-use li3_quality\test\Testable;
 use lithium\util\String;
 
 class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
@@ -19,6 +18,12 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 	 * @var array
 	 */
 	protected $_tokenMap = array(
+		T_CLASS => array(
+			'message' => 'Unexpected T_CLASS format. Should be: "class Foo {"',
+			'patterns' => array(
+				"/^{:whitespace}(?:abstract )?class [^\s]+ (extends [\S]+ )?(implements .+ )?{\$/",
+			),
+		),
 		T_IF => array(
 			'message' => 'Unexpected T_IF format. Should be: "if (...) {" or "} else if () {"',
 			'patterns' => array(
@@ -53,9 +58,9 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 			),
 		),
 		T_FOR => array(
-			'message' => 'Unexpected T_FOR format. Should be: "for (...) {"',
+			'message' => 'Unexpected T_FOR format. Should be: "for (...; ...; ...) {"',
 			'patterns' => array(
-				"/^{:whitespace}for {:bracket} {\$/",
+				"/^{:whitespace}for {:forBracket} {\$/",
 			),
 		),
 		T_FOREACH => array(
@@ -92,6 +97,7 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 	protected $_regexMap = array(
 		'whitespace' => '(\s+)?',
 		'bracket'    => '\(([^\s].*[^\s]|[^\s]+)\)',
+		'forBracket' => '\((?:(?:[^\s](?:[^;]+)?; )+)?(?:[^\s]([^;]+)?)?[^\s]\)',
 	);
 
 	/**
@@ -103,21 +109,22 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
-		foreach ($tokens as $token) {
-			if (isset($this->_tokenMap[$token['id']])) {
-				$tokenMap = $this->_tokenMap[$token['id']];
-				$line = $lines[$token['line'] - 1];
-				$patterns = $tokenMap['patterns'];
-				$lineNumber = $token['line'];
-				if ($this->_matchPattern($lines, $lineNumber, $patterns, $token['id']) === false) {
-					$this->addViolation(array(
-						'message' => $this->_tokenMap[$token['id']]['message'],
-						'line' => $token['line'],
-					));
-				}
+		$filtered = $testable->findAll(array_keys($this->_tokenMap));
+
+		foreach ($filtered as $tokenId) {
+			$token = $tokens[$tokenId];
+			$tokenMap = $this->_tokenMap[$token['id']];
+			$line = $lines[$token['line'] - 1];
+			$patterns = $tokenMap['patterns'];
+			$lineNumber = $token['line'];
+			if ($this->_matchPattern($lines, $lineNumber, $patterns, $token['id']) === false) {
+				$this->addViolation(array(
+					'message' => $this->_tokenMap[$token['id']]['message'],
+					'line' => $token['line'],
+				));
 			}
 		}
 	}

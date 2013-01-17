@@ -24,15 +24,18 @@ class HasCorrectVariableNames extends \li3_quality\test\Rule {
 		'$_ENV'     => true
 	);
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
+		$filtered = $testable->findAll(array(T_VARIABLE));
 
-		foreach ($tokens as $token) {
-			if ($token['name'] == 'T_VARIABLE' && !isset($this->_superglobals[$token['content']])) {
+		foreach ($filtered as $id) {
+			$token = $tokens[$id];
+			$isntSuperGlobal = !isset($this->_superglobals[$token['content']]);
+			if ($isntSuperGlobal) {
 				$name = preg_replace('/(\$_?|_+$)/', '', $token['content']);
-				if ($name != Inflector::camelize($name, false)) {
+				if ($name !== Inflector::camelize($name, false)) {
 					$this->addViolation(array(
-						'message' => 'Variable "' . $name . '" is not in camelBack style',
+						'message' => "Variable {$name} is not camelBack style",
 						'line' => $token['line']
 					));
 				}

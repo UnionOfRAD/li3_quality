@@ -47,13 +47,15 @@ class HasCorrectInlineHTML extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = 'Inline HTML should be in the following format: "<?=$var; ?>"';
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
+		$lineCache = $testable->lineCache();
 		$matches = array();
 		foreach ($lines as $lineNumber => $line) {
-			if ($this->hasRequiredTokens($tokens, $lineNumber)) {
+			$lineTokens = isset($lineCache[$lineNumber]) ? $lineCache[$lineNumber] : array();
+			if ($this->hasRequiredTokens($tokens, $lineTokens)) {
 				preg_match_all($this->findPattern, $line, $matches);
 				foreach ($matches as $match) {
 					if (isset($match[0]) && preg_match($this->matchPattern, $match[0]) === 0) {
@@ -70,13 +72,13 @@ class HasCorrectInlineHTML extends \li3_quality\test\Rule {
 	/**
 	 * Will let me know if the given $line has one of the $requiredTokens in it
 	 *
-	 * @param  array   $tokens The tokens from $testable->tokens()
-	 * @param  integer $line   The line number to search for
+	 * @param  array $tokens The tokens from $testable->tokens()
+	 * @param  array $tokenIds The ids of tokens for the line to search for
 	 * @return boolean
 	 */
-	public function hasRequiredTokens(array $tokens, $line = 0) {
-		foreach ($tokens as $token) {
-			if ($token['line'] === $line && in_array($token['id'], $this->requiredTokens)) {
+	public function hasRequiredTokens(array $tokens, array $tokenIds) {
+		foreach ($tokenIds as $id) {
+			if (in_array($tokens[$id]['id'], $this->requiredTokens)) {
 				return true;
 			}
 		}

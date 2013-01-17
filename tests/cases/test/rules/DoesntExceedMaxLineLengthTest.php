@@ -31,6 +31,18 @@ class DoesntExceedMaxLineLengthTest extends \li3_quality\test\Unit {
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testHasWarnings() {
+		$code = str_repeat(' ', 81);
+		$this->assertRuleWarning($code, $this->rule);
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testHasNoWarnings() {
+		$code = str_repeat(' ', 80);
+		$this->assertRuleNoWarning($code, $this->rule);
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>

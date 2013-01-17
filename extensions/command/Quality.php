@@ -9,11 +9,11 @@
 namespace li3_quality\extensions\command;
 
 use lithium\core\Libraries;
-use lithium\analysis\Inspector;
 use lithium\test\Dispatcher;
 use lithium\test\Group;
 use li3_quality\test\Rules;
 use li3_quality\test\Testable;
+use li3_quality\analysis\ParserException;
 
 /**
  * The Quality command helps you to run static code analysis on your codebase.
@@ -52,40 +52,55 @@ class Quality extends \lithium\console\command\Test {
 			$this->plain = true;
 			$this->silent = true;
 		}
-		$pass = true;
+		$ruleOptions = array();
 		$testables = $this->_testables(compact('path'));
 		$this->header('Lithium Syntax Check');
-		$this->out(
-			"Performing " . count(Rules::get()) . " rules " .
-				"on " . count($testables) . " classes."
-		);
 
+		$filters = $this->_syntaxFilters();
+		$ruleCount = count(Rules::filterByName($filters));
+		$classCount = count($testables);
+		$this->out("Performing {$ruleCount} rules on {$classCount} classes.");
+		$success = true;
 		foreach ($testables as $count => $path) {
-			$result = Rules::apply(new Testable(compact('path')));
+			try {
+				$result = Rules::apply(new Testable(compact('path')), $filters, $ruleOptions);
+			} catch (ParserException $e) {
+				$this->error("[FAIL] $path", "red");
+				$this->error("Parse error: " . $e->getMessage(), "red");
+				if ($this->verbose) {
+					$this->error(print_r($e->parserData, true), "red");
+				}
+				$success = false;
+				continue;
+			}
 			if ($result['success']) {
 				$this->out("[OK] $path", "green");
-			}
-			if (!$result['success']) {
-				$pass = false;
+			} else {
 				$this->error("[FAIL] $path", "red");
 				$output = array(
 					array("Line", "Position", "Violation"),
 					array("----", "--------", "---------")
 				);
 				foreach ($result['violations'] as $violation) {
-					$defaults = array(
-						'line' => '-',
-						'position' => '-',
-						'message' => 'Unnamed Violation'
-					);
-					$params = $violation + $defaults;
-					extract($params);
-					$output[] = array($line, $position, $message);
+					$params = $violation;
+					$output[] = array($params['line'], $params['position'], $params['message']);
 				}
 				$this->columns($output, array('style' => 'red', 'error' => true));
+				$success = false;
+			}
+			if (count($result['warnings']) > 0) {
+				$output = array(
+					array("Line", "Position", "Warning"),
+					array("----", "--------", "-------")
+				);
+				foreach ($result['warnings'] as $warning) {
+					$params = $warning;
+					$output[] = array($params['line'], $params['position'], $params['message']);
+				}
+				$this->columns($output, array('style' => 'yellow', 'error' => false));
 			}
 		}
-		return (boolean) $pass;
+		return $success;
 	}
 
 	/**
@@ -140,7 +155,7 @@ class Quality extends \lithium\console\command\Test {
 				$color = 'yellow';
 			}
 
-			if ($coverage == null || $coverage <= $this->threshold) {
+			if ($coverage === null || $coverage <= $this->threshold) {
 				$this->out(sprintf(
 					'%10s | %7s | %s',
 					$hasTest ? 'has test' : 'no test',
@@ -160,7 +175,7 @@ class Quality extends \lithium\console\command\Test {
 		$options += $defaults;
 
 		if ($path = $this->_path($options['path'])) {
-			if (pathinfo($options['path'], PATHINFO_EXTENSION) == 'php') {
+			if (pathinfo($options['path'], PATHINFO_EXTENSION) === 'php') {
 				return array($path);
 			}
 			$parts = explode('\\', $path) + array($this->library);
@@ -175,6 +190,33 @@ class Quality extends \lithium\console\command\Test {
 		}
 		return $testables;
 	}
+
+	/**
+	 * Will get the filters either from the filter option or the json ruleset
+	 *
+	 * @return array
+	 */
+	protected function _syntaxFilters() {
+		if (!is_array($this->filters)) {
+			$filters = $this->filters ? array_map('trim', explode(',', $this->filters)) : array();
+			if (count($filters) === 0) {
+				$config = Libraries::get($this->library);
+				$ruleConfig = $config['path'] . '/test/rules.json';
+				if (!file_exists($ruleConfig)) {
+					$config = Libraries::get('li3_quality');
+					$ruleConfig = $config['path'] . '/test/defaultRules.json';
+				}
+				$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
+				$filters = $ruleConfig['rules'];
+				if (isset($ruleConfig['variables'])) {
+					Rules::ruleOptions($ruleConfig['variables']);
+				}
+			}
+			$this->filters = $filters;
+		}
+		return $this->filters;
+	}
+
 }
 
 ?>

@@ -10,11 +10,11 @@ namespace li3_quality\test\rules;
 
 class BeginsWithOpenTag extends \li3_quality\test\Rule {
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = "File does not begin with <?php";
 		$lines = $testable->lines();
 
-		if ($lines[0] != "<?php") {
+		if ($lines[0] !== "<?php") {
 			$this->addViolation(array(
 				'message' => $message,
 				'line' => 1

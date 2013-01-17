@@ -14,28 +14,50 @@ class Testable extends \lithium\core\Object {
 
 	/**
 	 * The source code of the testable class.
+	 *
+	 * @var string
 	 */
 	protected $_source = null;
 
 	/**
 	 * Contains the source code as an array for each line.
+	 *
+	 * @var array
 	 */
 	protected $_lines = null;
 
 	/**
 	 * Contains the class tokens.
+	 *
+	 * @var array
 	 */
 	protected $_tokens = null;
 
 	/**
 	 * Contains the config of the testable class.
+	 *
+	 * @var array
 	 */
 	protected $_config = array();
 
 	/**
+	 * Contains lineCache for tokens.
+	 *
+	 * @var array
+	 */
+	protected $_lineCache = null;
+
+	/**
+	 * Contains typeCache for tokens.
+	 *
+	 * @var array
+	 */
+	protected $_typeCache = null;
+
+	/**
 	 * Locates the file and reads its source code.
 	 */
-	public function __construct($config = array()) {
+	public function __construct(array $config = array()) {
 		$this->_config = $config + array(
 			'wrap' => false,
 		);
@@ -80,23 +102,58 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function tokens() {
 		if ($this->_tokens === null) {
-			$this->_tokens = Parser::tokenize($this->source(), $this->_config);
+			$tokenized = Parser::tokenize($this->source(), $this->_config);
+			$this->_tokens = $tokenized['tokens'];
+			$this->_lineCache = $tokenized['lineCache'];
+			$this->_typeCache = $tokenized['typeCache'];
 		}
 		return $this->_tokens;
 	}
 
 	/**
+	 * Accessor method for the tokens lineCache.
+	 *
+	 * @return  array
+	 */
+	public function lineCache() {
+		if ($this->_lineCache === null) {
+			$this->tokens();
+		}
+		return $this->_lineCache;
+	}
+
+	/**
+	 * Accessor method for the tokens typeCache.
+	 *
+	 * @return  array
+	 */
+	public function typeCache() {
+		if ($this->_typeCache === null) {
+			$this->tokens();
+		}
+		return $this->_typeCache;
+	}
+
+	/**
 	 * Will find the next content
 	 *
-	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
-	 * @param  integer         $start Where you want to start
+	 * @param  array           $types The types you wish to find ('$foo', '{', ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
 	 * @return integer|boolean        The index of the next $type or false if nothing is found
 	 */
-	public function findNextContent(array $types, $start = 0) {
+	public function findNextContent(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		$total = count($tokens);
-		for ($id = $start; $id < $total;$id++) {
-			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
+		if (is_array($range)) {
+			$start = 0;
+			$end = count($range);
+		} else {
+			$start = $range;
+			$end = count($tokens);
+		}
+		for ($idx = $start; $idx < $end; $idx++) {
+			$id = is_array($range) ? $range[$idx] : $idx;
+			$token = isset($tokens[$id]);
+			if ($token && in_array($tokens[$id]['content'], $types)) {
 				return $id;
 			}
 		}
@@ -106,14 +163,21 @@ class Testable extends \lithium\core\Object {
 	/**
 	 * Will find the previous content
 	 *
-	 * @param  array           $types An array of items to search for
-	 * @param  integer         $start Where you want to start
+	 * @param  array           $types The types you wish to find ('$foo', '{', ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
 	 * @return integer|boolean        The index of the next $type or false if nothing is found
 	 */
-	public function findPrevContent(array $types, $start = 0) {
+	public function findPrevContent(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		for ($id = $start; $id >= 0;$id--) {
-			if (isset($tokens[$id]) && in_array($tokens[$id]['content'], $types)) {
+		if (is_array($range)) {
+			$end = count($range) - 1;
+		} else {
+			$end = $range;
+		}
+		for ($idx = $end; $idx >= 0; $idx--) {
+			$id = is_array($range) ? $range[$idx] : $idx;
+			$token = isset($tokens[$id]);
+			if ($token && in_array($tokens[$id]['content'], $types)) {
 				return $id;
 			}
 		}
@@ -123,14 +187,21 @@ class Testable extends \lithium\core\Object {
 	/**
 	 * Will find the next token
 	 *
-	 * @param  array           $types An array of items to search for
-	 * @param  integer         $start Where you want to start
+	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
 	 * @return integer|boolean        The index of the next $type or false if nothing is found
 	 */
-	public function findNext(array $types, $start = 0) {
+	public function findNext(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		$total = count($tokens);
-		for ($id = $start; $id < $total;$id++) {
+		if (is_array($range)) {
+			$start = 0;
+			$end = count($range);
+		} else {
+			$start = $range;
+			$end = count($tokens);
+		}
+		for ($idx = $start; $idx < $end; $idx++) {
+			$id = is_array($range) ? $range[$idx] : $idx;
 			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
 				return $id;
 			}
@@ -142,17 +213,136 @@ class Testable extends \lithium\core\Object {
 	 * Will find the previous token
 	 *
 	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
-	 * @param  integer         $start Where you want to start
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
 	 * @return integer|boolean        The index of the next $type or false if nothing is found
 	 */
-	public function findPrev(array $types, $start = 0) {
+	public function findPrev(array $types, $range = 0) {
 		$tokens = $this->tokens();
-		for ($id = $start; $id >= 0;$id--) {
+		if (is_array($range)) {
+			$end = count($range) - 1;
+		} else {
+			$end = $range;
+		}
+		for ($idx = $end; $idx >= 0; $idx--) {
+			$id = is_array($range) ? $range[$idx] : $idx;
 			if (isset($tokens[$id]) && in_array($tokens[$id]['id'], $types)) {
 				return $id;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Will find all matching tokens
+	 *
+	 * @param  array           $types The types you wish to find (T_VARIABLE, T_FUNCTION, ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
+	 * @return array           An array of found item ids, or an empty array when nothing is found
+	 */
+	public function findAll(array $types, $range = NULL) {
+		$typeCache = $this->typeCache();
+		$ids = array();
+		foreach ($types as $type) {
+			if (isset($typeCache[$type])) {
+				$ids = array_merge($ids, $typeCache[$type]);
+			}
+		}
+
+		if (!is_int($range) && !is_array($range)) {
+			return $ids;
+		}
+
+		$filtered = array();
+		foreach ($ids as $id) {
+			$inRange = is_array($range) && in_array($id, $range);
+			$belowRange = is_int($range) && $id >= $range;
+			if ($inRange || $belowRange) {
+				$filtered[] = $id;
+			}
+		}
+		return $filtered;
+	}
+
+	/**
+	 * Will find all matching content
+	 *
+	 * @param  array           $types The types you wish to find ('$foo', '{', ...)
+	 * @param  integer|array   $range Where you want to start, or an array of items to search
+	 * @return array           An array of found item ids, or an empty array when nothing is found
+	 */
+	public function findAllContent(array $types, $range = 0) {
+		$tokens = $this->tokens();
+		$found = array();
+		if (is_array($range)) {
+			$start = 0;
+			$end = count($range);
+		} else {
+			$start = $range;
+			$end = count($tokens);
+		}
+		for ($idx = $start; $idx < $end; $idx++) {
+			$id = is_array($range) ? $range[$idx] : $idx;
+			$token = isset($tokens[$id]);
+			if ($tokens && in_array($tokens[$id]['content'], $types)) {
+				$found[] = $id;
+			}
+		}
+		return $found;
+	}
+
+	/**
+	 * A helper method which helps finding tokens. If there are no tokens
+	 * on this line, we go backwards assuming a multiline token.
+	 *
+	 * @param  int    $line   The line you are on
+	 * @return int            The token id if found, -1 if not
+	 */
+	public function findTokenByLine($line) {
+		$lineCache = $this->lineCache();
+		for (; $line >= 0; $line--) {
+			if (isset($lineCache[$line])) {
+				return $lineCache[$line][0];
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * A helper method which helps finding tokens. If there are no tokens
+	 * on this line, we go backwards assuming a multiline token.
+	 *
+	 * @param  int    $line   The line you are on
+	 * @return int            The line id if found, -1 if not
+	 */
+	public function findTokensByLine($line) {
+		$lineCache = $this->lineCache();
+		for (; $line >= 0; $line--) {
+			if (isset($lineCache[$line])) {
+				return $line;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Will determine if a set of tokens is on a given line.
+	 *
+	 * @param  int    $line     The line you are on
+	 * @param  array  $tokenIds The tokens you are looking for
+	 * @return int              The token id if found, -1 if not
+	 */
+	public function lineHasToken($line, array $tokenIds = array()) {
+		$lineCache = $this->lineCache();
+		if (!isset($lineCache[$line])) {
+			return -1;
+		}
+		$tokens = $this->tokens();
+		foreach ($lineCache[$line] as $tokenId) {
+			if (in_array($tokens[$tokenId]['id'], $tokenIds)) {
+				return true;
+			}
+		}
+		return -1;
 	}
 
 	/**
@@ -164,12 +354,12 @@ class Testable extends \lithium\core\Object {
 	 */
 	public function tokenIn(array $haystack, $needle) {
 		$tokens = $this->tokens();
-		$self = $tokens[$needle];
-		while (isset($tokens[$self['parent']])) {
-			if (in_array($tokens[$self['parent']]['id'], $haystack)) {
+		$parent = $tokens[$needle]['parent'];
+		while (isset($tokens[$parent])) {
+			if (in_array($tokens[$parent]['id'], $haystack)) {
 				return true;
 			}
-			$self = $tokens[$self['parent']];
+			$parent = $tokens[$parent]['parent'];
 		}
 		return false;
 	}

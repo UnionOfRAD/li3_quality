@@ -7,12 +7,17 @@
  */
 namespace li3_quality\test;
 
-use li3_quality\tests\mocks\test\Testable;
+use li3_quality\tests\mocks\test\MockTestable as Testable;
 
 /**
  * Internal Class for testing rules
  */
-class Unit extends \lithium\test\Unit  {
+class Unit extends \lithium\test\Unit {
+
+	/**
+	 * The rule that is being tested against.
+	 */
+	public $rule = null;
 
 	/**
 	 * Will return true if the rule passed based on the provided source
@@ -45,6 +50,38 @@ class Unit extends \lithium\test\Unit  {
 	}
 
 	/**
+	 * Will return true if the rule passed based on the provided source
+	 *
+	 * @param  string $source  The source to test against
+	 * @param  string $rule    The nonspaced class of the rule
+	 * @param  string $message The error message to throw upon failure
+	 * @return bool
+	 */
+	public function assertRuleWarning($source, $rule, $message = '{:message}') {
+		$this->_mockRuleSuccess($rule, $source);
+		return $this->assert(count($this->rule->warnings()) > 0, $message, array(
+			'expected' => 'pass',
+			'result' => $this->rule->warnings(),
+		));
+	}
+
+	/**
+	 * Will return true if the rule failed based on the provided source
+	 *
+	 * @param  string $source  The source to test against
+	 * @param  string $rule    The nonspaced class of the rule
+	 * @param  string $message The error message to throw upon failure
+	 * @return bool
+	 */
+	public function assertRuleNoWarning($source, $rule, $message = '{:message}') {
+		$this->_mockRuleSuccess($rule, $source);
+		return $this->assert(count($this->rule->warnings()) === 0, $message, array(
+			'expected' => 'fail',
+			'result' => $this->rule->warnings(),
+		));
+	}
+
+	/**
 	 * Will generate a new rule and call apply on it.
 	 *
 	 * @param  string       $rule    The nonspaced class of the rule
@@ -52,7 +89,12 @@ class Unit extends \lithium\test\Unit  {
 	 * @return object
 	 */
 	protected function _mockRuleSuccess($rule, $options = array()) {
-		$rule = $this->_rule($rule);
+		if (!is_array($options)) {
+			$options = array(
+				'source' => $options,
+			);
+		}
+		$rule = $this->_rule($rule, $options);
 		$testable = $this->_testable($options);
 		$rule->apply($testable);
 		return $rule->success();
@@ -61,31 +103,26 @@ class Unit extends \lithium\test\Unit  {
 	/**
 	 * Will generate a new rule and call apply on it.
 	 *
-	 * @param  string       $rule    The nonspaced class of the rule
-	 * @param  string|array $options Source code, or arary of config options
+	 * @param  string $rule    The nonspaced class of the rule
+	 * @param  array  $options Source code, or arary of config options
 	 * @return object
 	 */
-	protected function _rule($rule) {
-		$this->rule = new $rule();
+	protected function _rule($rule, array $options = array()) {
+		$this->rule = new $rule($options);
 		return $this->rule;
 	}
 
 	/**
 	 * Will generate a new Testable object
 	 *
-	 * @param  string|array $options Source code, or arary of config options
-	 * @return li3_quality\tests\mocks\test\Testable
+	 * @param  array $options Source code, or arary of config options
+	 * @return object
 	 */
-	protected function _testable($options) {
-		if (is_string($options)) {
-			$options = array(
-				'source' => $options,
-			);
-		}
+	protected function _testable(array $options = array()) {
 		$options += array(
 			'wrap' => true,
 		);
-		return new Testable($options);;
+		return new Testable($options);
 	}
 
 }

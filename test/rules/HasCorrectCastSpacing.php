@@ -42,21 +42,22 @@ class HasCorrectCastSpacing extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
-		$message = 'Casting should be done in the following format: "(array) $object;"';
+	public function apply($testable, array $config = array()) {
+		$message = 'Casting in the incorrect format, try: "(array) $object;"';
 		$tokens = $testable->tokens();
-		foreach ($tokens as $id => $token) {
-			if (in_array($token['id'], $this->tokens)) {
-				$html = '';
-				foreach (array_slice($tokens, $id, 3) as $t) {
-					$html .= $t['content'];
-				}
-				if (preg_match($this->pattern, $html) === 0) {
-					$this->addViolation(array(
-						'message' => $message,
-						'line' => $token['line'],
-					));
-				}
+		$filtered = $testable->findAll($this->tokens);
+
+		foreach ($filtered as $id) {
+			$token = $tokens[$id];
+			$html = '';
+			foreach (array_slice($tokens, $id, 3) as $t) {
+				$html .= $t['content'];
+			}
+			if (preg_match($this->pattern, $html) === 0) {
+				$this->addViolation(array(
+					'message' => $message,
+					'line' => $token['line'],
+				));
 			}
 		}
 	}

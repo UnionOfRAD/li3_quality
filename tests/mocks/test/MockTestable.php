@@ -5,7 +5,7 @@ namespace li3_quality\tests\mocks\test;
 /**
  * A mock of the Testable object
  */
-class Testable extends \li3_quality\test\Testable {
+class MockTestable extends \li3_quality\test\Testable {
 
 	/**
 	 * Overwrites the default Testable constructor

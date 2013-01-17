@@ -9,39 +9,55 @@
 namespace li3_quality\test\rules;
 
 use lithium\util\Inflector;
+use li3_quality\analysis\Parser;
 
 class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 
+	/**
+	 * The rule can ignore these methods.
+	 *
+	 * @link http://php.net/manual/en/language.oop5.magic.php
+	 * @var array
+	 */
 	protected $_magicMethods = array(
 		'__construct', '__destruct', '__call',
 		'__callStatic', '__get', '__set',
-		'__isset', ' __unset', '__sleep',
+		'__isset', '__unset', '__sleep',
 		'__wakeup', '__toString', '__invoke',
-		'__set_state', '__clone'
+		'__set_state', '__clone', '__init',
 	);
 
-	public function apply($testable) {
+	/**
+	 * Will iterate the tokens looking for functions validating they have the
+	 * correct camelBack naming style.
+	 *
+	 * @param  Testable $testable The testable object
+	 * @return void
+	 */
+	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
+		$filtered = $testable->findAll(array(T_FUNCTION));
 
-		foreach ($tokens as $key => $token) {
-			if ($token['name'] == 'T_FUNCTION') {
-				$this->_checkCamelBack($tokens[$key + 2]);
+		foreach ($filtered as $key) {
+			$token = $tokens[$key];
+			$label = Parser::label($key, $tokens);
+			$modifiers = Parser::modifiers($key, $tokens);
+			$isClosure = Parser::closure($key, $tokens);
+			if (in_array($label, $this->_magicMethods)) {
+				continue;
 			}
-		}
-	}
-
-	protected function _checkCamelBack($lookahead) {
-		$isMagic = in_array($lookahead['content'], $this->_magicMethods);
-		if ($lookahead['name'] == 'T_STRING' && !$isMagic) {
-			$name = preg_replace('/^_+/', '', $lookahead['content']);
-			if ($name != Inflector::camelize($name, false)) {
+			if ($testable->findNext(array(T_PROTECTED), $modifiers) !== false) {
+				$label = preg_replace('/^_/', '', $label);
+			}
+			if (!$isClosure && $label !== Inflector::camelize($label, false)) {
 				$this->addViolation(array(
-					'message' => 'Function "' . $name . '" is not in camelBack style',
-					'line' => $lookahead['line']
+					'message' => 'Function "' . $label . '" is not in camelBack style',
+					'line' => $tokens[$tokens[$key]['parent']]['line'],
 				));
 			}
 		}
 	}
+
 }
 
 ?>
