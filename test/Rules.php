@@ -8,7 +8,6 @@
 namespace li3_quality\test;
 
 use lithium\core\Libraries;
-use li3_quality\test\Rule;
 
 class Rules extends \lithium\core\StaticObject {
 
@@ -42,21 +41,37 @@ class Rules extends \lithium\core\StaticObject {
 	 * @return void
 	 */
 	public static function add($rule, $options = array()) {
-		static::$_rules[] = $rule;
+		$class = get_class($rule);
+		$sep = strrpos($class, '\\');
+		$name = ($sep !== false) ? substr($class, $sep + 1) : $class;
+		static::$_rules[$name] = array(
+			'rule' => $rule,
+			'options' => $options,
+		);
 	}
 
 	/**
 	 * Will iterate over each rule calling apply on them
 	 *
 	 * @param   object $testable The testable object
+	 * @param   array  $filters  Filter rules by name
 	 * @return  array
 	 */
-	public static function apply($testable) {
+	public static function apply($testable, array $filters = array()) {
 		$violations = array();
+		$warnings = array();
 		$success = true;
+		if (count($filters) > 0) {
+			$rules = static::filterByName($filters);
+		} else {
+			$rules = static::$_rules;
+		}
 
-		foreach (static::$_rules as $rule) {
-			$rule->apply($testable);
+		foreach ($rules as $ruleSet) {
+			$rule = $ruleSet['rule'];
+			$options = $ruleSet['options'];
+			$rule->apply($testable, $options);
+			$warnings = array_merge($warnings, $rule->warnings());
 			if (!$rule->success()) {
 				$success = false;
 				$violations = array_merge($violations, $rule->violations());
@@ -64,7 +79,7 @@ class Rules extends \lithium\core\StaticObject {
 			$rule->reset();
 		}
 
-		return compact('violations', 'success');
+		return compact('violations', 'success', 'warnings');
 	}
 
 	/**
@@ -78,6 +93,41 @@ class Rules extends \lithium\core\StaticObject {
 			return static::$_rules;
 		}
 		return isset(static::$_rules[$rule]) ? static::$_rules[$rule] : null;
+	}
+
+	/**
+	 * Will reset the current set of rules
+	 *
+	 * @return void
+	 */
+	public static function reset() {
+		static::$_rules = array();
+	}
+
+	/**
+	 * Will find filtered rules
+	 *
+	 * @param  array $names Rule names to filter for
+	 * @return array        Filtered rules
+	 */
+	public static function filterByName(array $names) {
+		$filter = array_fill_keys($names, NULL);
+		return array_intersect_key(static::$_rules, $filter);
+	}
+
+	/**
+	 * Will remove unnecessary items and add options
+	 *
+	 * @param  array $variables The key is the rule the value is the configs
+	 * @return array            A list of all the current rules
+	 */
+	public static function ruleOptions(array $variables) {
+		foreach (static::$_rules as $key => &$rule) {
+			if (isset($variables[$key]) && is_array($variables[$key])) {
+				$rule['options'] = $variables[$key];
+			}
+		}
+		return static::$_rules;;
 	}
 }
 

@@ -9,6 +9,7 @@
 namespace li3_quality\test\rules;
 
 use lithium\util\String;
+use li3_quality\analysis\Parser;
 
 class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 
@@ -42,83 +43,30 @@ class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = '{:name} has no declared visibility.';
 		$tokens = $testable->tokens();
-		$openBrackets = 0;
-		$insideClass = false;
-		$foundFirstClassBracket = false;
-		$foundClassOnBracket = -1;
-		foreach ($tokens as $tokenId => $token) {
-			$openBrackets += substr_count($token['content'], '{');
-			$openBrackets -= substr_count($token['content'], '}');
-			if ($token['id'] === T_CLASS) {
-				$foundClassOnBracket = $openBrackets;
-				$insideClass = true;
-			} elseif ($insideClass) {
-				$isInspectableToken = $this->isInspectableToken($token, $tokens);
-				$isInspectableLine = $openBrackets === $foundClassOnBracket + 1;
-				$tokenHasVisibility = false;
-				if ($isInspectableLine && $isInspectableToken) {
-					$tokenHasVisibility = $this->tokenHasVisibility($tokenId, $tokens);
+		$classes = $testable->findAll(array(T_CLASS));
+		$filtered = $testable->findAll($this->inspectableTokens);
+
+		foreach ($classes as $classId) {
+			$children = $tokens[$classId]['children'];
+			foreach ($children as $member) {
+				if (!in_array($member, $filtered)) {
+					continue;
 				}
-				if (!$foundFirstClassBracket && $openBrackets >= $foundClassOnBracket + 1) {
-					$foundFirstClassBracket = true;
-				}
-				if ($isInspectableLine && $isInspectableToken && !$tokenHasVisibility) {
+				$modifiers = Parser::modifiers($member, $tokens);
+				$visibility = $testable->findNext($this->findTokens, $modifiers);
+				if ($visibility === false) {
+					$token = $tokens[$member];
 					$this->addViolation(array(
+						'modifiers' => $modifiers,
 						'message' => String::insert($message, $token),
 						'line' => $token['line'],
 					));
-				} elseif ($foundFirstClassBracket && $openBrackets <= 0) {
-					$insideClass = $foundFirstClassBracket = false;
 				}
 			}
 		}
-	}
-
-	/**
-	 * Will determine if the token has visibility
-	 *
-	 * @param  int     $tokenId
-	 * @param  array   $tokens
-	 * @return boolean
-	 */
-	public function tokenHasVisibility($tokenId, $tokens) {
-		$tokenStart = $tokenId - 5;
-		$tokenStart = ($tokenStart < 0) ? 0 : $tokenStart;
-		$length = $tokenId - $tokenStart;
-		$searchableTokens = array_reverse(array_slice($tokens, $tokenStart, $length));
-		foreach ($searchableTokens as $token) {
-			if (in_array($token['id'], $this->findTokens)) {
-				return true;
-			} elseif (in_array($token['id'], $this->inspectableTokens)) {
-				return false;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Will detect if the current tokens is something we should inspect.
-	 *
-	 * @param  array   $token
-	 * @param  array   $tokens
-	 * @return boolean
-	 */
-	public function isInspectableToken($token, $tokens) {
-		if (!in_array($token['id'], $this->inspectableTokens)) {
-			return false;
-		}
-		if ($token['id'] === T_VARIABLE) {
-			$lineTokens = array();
-			foreach ($tokens as $t) {
-				if ($t['line'] === $token['line'] && $t['id'] === T_FUNCTION) {
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 }

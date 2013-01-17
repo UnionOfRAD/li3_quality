@@ -490,7 +490,6 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
-
 	public function testIncorrectDoWhileWithNoLastSpaceOnWhile() {
 		$code = <<<EOD
 do {
@@ -523,6 +522,107 @@ EOD;
 do {
 	return true;
 } while( true );
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testMultilineExpression() {
+		$code = <<<EOD
+if (true
+	&& false) {
+	return false;
+} elseif (true
+	&& false) {
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testGoodClassDef() {
+		$code = <<<EOD
+class Foo {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testGoodAbstractClassDef() {
+		$code = <<<EOD
+abstract class Foo {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testBadClassDef() {
+		$code = <<<EOD
+class Foo  {
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testClassWithExtends() {
+		$code = <<<EOD
+class Foo extends \bar {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIncorrectClassWithExtends() {
+		$code = <<<EOD
+class Foo  extends \bar {
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testMultipleExtends() {
+		$code = <<<EOD
+class FileRecord extends Record implements Iterator, ArrayAccess {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testEmptyExtends() {
+		$code = <<<EOD
+class FileRecord extends Record implements {
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
+	public function testForWithSemicolons() {
+		$code = <<<EOD
+for (1; 2; 3) {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testForShortSemicolonList() {
+		$code = <<<EOD
+for (1; 2) {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testMultiSemicolonFor() {
+		$code = <<<EOD
+for (\$i = 0, \$total = count(\$arr); \$i < 10; \$i++) {
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testForExtraSpacing() {
+		$code = <<<EOD
+for (1;  2; 3) {
+}
 EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}

@@ -38,6 +38,39 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testIgnoreComments() {
+		$code = <<<EOD
+/**
+ * Should ignore my code snippet
+ * {{{
+ * class foo {
+ * 	\$bar = 'baz';
+ * }
+ * }}}
+ */
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIgnoreLineComments() {
+		$code = <<<EOD
+// foo	bar	baz
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIgnoreHeredoc() {
+		$code = <<<EOD
+<<<EOF
+this
+	is
+		a
+			test
+EOF;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>

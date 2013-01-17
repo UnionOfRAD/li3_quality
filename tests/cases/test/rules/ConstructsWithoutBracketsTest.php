@@ -34,58 +34,97 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
-	public function testReturnWithCast() {
+	public function testEchoWithCast() {
 		$code = <<<EOD
-return (bool) \$var;
+echo (bool) \$var;
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
 	public function testCorrectBeginningParntheses() {
 		$code = <<<EOD
-return (!empty(\$name)) ? "{\$path}/{\$name}" : \$path;
+require_once (!empty(\$name)) ? "{\$path}/{\$name}" : \$path;
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-
 	public function testCorrectEndingParntheses() {
 		$code = <<<EOD
-return false ? true : in_array(\$a, \$b);
+exit false ? true : in_array(\$a, \$b);
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
 	public function testCorrectBeginningAndEndingParntheses() {
 		$code = <<<EOD
-return (false) ? (false===false) : (true===true);
+print (false) ? (false===false) : (true===true);
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testEmptyReturn() {
+	public function testEmptyExit() {
 		$code = <<<EOD
-return;
+exit;
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
 	public function testMultilineConstruct() {
 		$code = <<<EOD
-return	array (
+echo array (
 	'foo' => 'bar',
 );
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testConstructsNotOnOwnLine() {
+	public function testDoublEcho() {
 		$code = <<<EOD
-if(!\$this->service(\$service)) return false;
+echo 'foo'; echo 'baz';
 EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testEmptyExist() {
+		$code = <<<EOD
+exit;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testRequireOnceWithWhiteSpace() {
+		$code = <<<EOD
+function foobar() {
+	require_once 'foo.php';
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testEchoWithSingleNumber() {
+		$code = <<<EOD
+function foobar() {
+	echo 1;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testReturnWithParentheses() {
+		$code = <<<EOD
+function foobar() {
+	return (true ? "foo" : "bar");
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testReturnInOneLineFunction() {
+		$code = <<<EOD
+\$foo = function() { return true; };
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>

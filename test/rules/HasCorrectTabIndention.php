@@ -10,25 +10,15 @@ namespace li3_quality\test\rules;
 
 use lithium\util\String;
 
+/**
+ * Tab indention is a tricky subject. Often the next line is based on the
+ * relative indention of the line above it, and if that has a violation it can
+ * often trigger a violation chain because of, what should be, a single
+ * violation. It's also possible to not know when the indention broke and we
+ * trigger an erorr at the end of the file. This is similar behavior to PHP when
+ * you forget a bracket and you get the syntax error at the end of the file.
+ */
 class HasCorrectTabIndention extends \li3_quality\test\Rule {
-
-	/**
-	 * The forceOneMoreLine applies to the next line
-	 * The forceOneLessLine applies to the current line
-	 *
-	 * @var array
-	 */
-	public $patterns = array(
-		'forceOneMoreLine'    => '/({|\()$/',
-		'forceOneLessLine'    => '/^\s*[}\)]+(;$|)?/',
-		'tempOneMoreLine'     => '/\.$/',
-		'optionalOneLessLine' => '/[\(}],$/'
-	);
-
-	public $commentTokens = array(
-		T_COMMENT,
-		T_DOC_COMMENT,
-	);
 
 	/**
 	 * The error message when they have too many tabs.
@@ -42,7 +32,15 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 *
 	 * @var string
 	 */
-	public $negativeMessage = 'This line has {:extraCount} too many tabs.';
+	public $negativeMessage = 'This line is missing {:extraCount} tabs.';
+
+	/**
+	 * Where the current tab count is held. This is a very relative process and a close count
+	 * shoudl be kept.
+	 *
+	 * @var integer
+	 */
+	protected $_currentCount = 0;
 
 	/**
 	 * Will iterate the lines looking for $patterns while keeping track of how many tabs
@@ -51,61 +49,120 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$followerCount = 0;
 		$lines = $testable->lines();
-		$tokens = $testable->tokens();
-		$tempOneMoreLine = false;
-		$optionalOneLessLine = false;
+		$message = 'Incorrect tab indention {:actual} should be {:predicted}.';
 		foreach ($lines as $lineIndex => $line) {
-			if (!$this->_shouldIgnoreLine($lineIndex, $lines, $tokens)) {
-				$leaderCount = $this->_beginningTabCount($line);
-				if (preg_match($this->patterns['forceOneLessLine'], $line) === 1) {
-					$followerCount--;
-				}
-				$leaderShouldBe = array($followerCount);
-				if ($optionalOneLessLine) {
-					$optionalOneLessLine = false;
-					$leaderShouldBe[] = $followerCount - 1;
-				}
-				if (!in_array($leaderCount, $leaderShouldBe)) {
-					$extraCount = $leaderCount - $followerCount;
-					$message = ($extraCount > 0) ? $this->positiveMessage : $this->negativeMessage;
+			if (!$this->_shouldIgnoreLine($lineIndex, $testable)) {
+				$actual = $this->_beginningTabCount($line);
+				$predicted = $this->_beginningTabCountPredicted($lineIndex, $testable);
+				if ($predicted !== $actual) {
 					$this->addViolation(array(
 						'message' => String::insert($message, array(
-							'extraCount' => abs($extraCount),
+							'predicted' => $predicted,
+							'actual' => $actual,
 						)),
 						'line' => $lineIndex + 1,
 					));
-				}
-				if ($tempOneMoreLine) {
-					$tempOneMoreLine = false;
-					$followerCount--;
-				}
-				if (preg_match($this->patterns['forceOneMoreLine'], $line) === 1) {
-					$followerCount++;
-				} elseif (preg_match($this->patterns['tempOneMoreLine'], $line) === 1) {
-					$tempOneMoreLine = true;
-					$followerCount++;
-				} elseif (preg_match($this->patterns['optionalOneLessLine'], $line) === 1) {
-					$optionalOneLessLine = true;
 				}
 			}
 		}
 	}
 
 	/**
-	 * Will determine how many tabs are at the beginning of a line.
+	 * Will determine how many tabs a current line should have.
+	 * This makes use of an instance variable to track relative movements in
+	 * tabs, calling this method out of order will have unexpected results.
 	 *
-	 * @param  string $line The line to look at
+	 * @param  int    $lineIndex The index the current line is on
+	 * @param  array  $testable  The testable object
 	 * @return int
 	 */
-	protected function _beginningTabCount($line) {
-		preg_match_all('/^(\t+)[^\t]/', $line, $matches);
-		if (isset($matches[1][0])) {
-			return strlen($matches[1][0]);
+	protected function _beginningTabCountPredicted($lineIndex, $testable) {
+		$tokens = $testable->tokens();
+		$lines = $testable->lines();
+		$lineCache = $testable->lineCache();
+
+		$line = trim($lines[$lineIndex]);
+		$lineLen = strlen($line);
+		$prevLine = $lineIndex > 0 ? trim($lines[$lineIndex - 1]) : false;
+		$prevLen = strlen($prevLine);
+
+		$currentTokens = $lineCache[$testable->findTokensByLine($lineIndex + 1)];
+		$endingTokens = array(T_ENDFOR, T_ENDFOREACH, T_ENDIF, T_ENDSWITCH, T_ENDWHILE);
+		$switch = false;
+
+		if ($lineLen > 0 && ($line[0] === ")" || $line[0] === "}")) {
+			$ending = $testable->findNextContent(array('}'), $currentTokens);
+			$child = isset($tokens[$ending]) ? $tokens[$ending] : false;
+			$parent = isset($tokens[$child['parent']]) ? $tokens[$child['parent']] : false;
+			if ($parent && $parent['id'] === T_SWITCH && $line[0] === "}") {
+				$this->_currentCount -= 2;
+			} else {
+				$this->_currentCount -= 1;
+			}
 		}
-		return 0;
+		if ($lineLen > 0 && $line[$lineLen - 1] === ":") {
+			$elif = strpos($line, "elseif") !== false || strpos($line, "else if") !== false;
+			$else = $line[$lineLen - 5] . $line[$lineLen - 4];
+			$else .= $line[$lineLen - 3] . $line[$lineLen - 2];
+			if ($elif || $else === "else") {
+				$this->_currentCount -= 1;
+			}
+		}
+
+		$currentCount = $this->_currentCount;
+
+		if ($prevLine && $prevLen > 0 && $prevLine[$prevLen - 1] === ".") {
+			$currentCount += 1;
+		}
+
+		$switch = false;
+		$find = false;
+		$find = $find || substr($line, -6) === "break;";
+		$find = $find || substr($line, -8) === "default:";
+		$find = $find || ($line[$lineLen - 1] === ":" && strpos($line, "case") !== false);
+		if ($find) {
+			$childContent = array('case', 'default', 'break');
+			$child = $tokens[$testable->findNextContent($childContent, $currentTokens)];
+			if (isset($tokens[$child['parent']]) && $tokens[$child['parent']]['id'] === T_SWITCH) {
+				$currentCount -= 1;
+				$switch = true;
+			}
+		}
+
+		$find = !$switch && in_array($line[$lineLen - 1], array("{", ":", "("));
+		$found = false;
+		foreach ($currentTokens as $tokenKey) {
+			if (in_array($tokens[$tokenKey]['id'], $endingTokens, true)) {
+				$currentCount -= 1;
+				$this->_currentCount -= 1;
+			}
+			if ($find && $tokens[$tokenKey]['id'] === T_SWITCH) {
+				$this->_currentCount += 2;
+				$found = true;
+			}
+		}
+		if ($find && !$found) {
+			$this->_currentCount += 1;
+		}
+		return $currentCount;
+	}
+
+	/**
+	 * Will determine how many tabs are at the beginning of a line.
+	 *
+	 * @param  string $line The current line is on
+	 * @return bool
+	 */
+	protected function _beginningTabCount($line) {
+		$count = 0;
+		$end = strlen($line);
+		while (($count < $end) && ($line[$count] === "\t")) {
+			$count++;
+		}
+		return $count;
 	}
 
 	/**
@@ -116,28 +173,31 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 *  * In heredocs
 	 *
 	 * @param  int    $lineIndex The index the current line is on
-	 * @param  array  $lines     The array of lines
-	 * @param  array  $tokens    The array of tokens
+	 * @param  array  $testable  The testable object
 	 * @return bool
 	 */
-	protected function _shouldIgnoreLine($lineIndex, $lines, $tokens) {
-		$start = $this->_findTokenByLine($lineIndex + 1, $tokens);
-		if (!isset($tokens[$start])) {
-			return false;
-		}
-		if (empty($lines[$lineIndex]) || in_array($tokens[$start]['id'], $this->commentTokens)) {
+	protected function _shouldIgnoreLine($lineIndex, $testable) {
+		$lines = $testable->lines();
+		$line = $lines[$lineIndex];
+		$plain = trim($line);
+
+		if (empty($plain)) {
 			return true;
 		}
-		for ($i = $start, $total = count($tokens); $i < $total;$i++) {
-			if (isset($tokens[$i]['id'])) {
-				if ($tokens[$i]['id'] === T_END_HEREDOC) {
-					return true;
-				} else if ($tokens[$i]['id'] === T_START_HEREDOC) {
-					return false;
-				}
-			}
+
+		$length = strlen($plain);
+		if ($length > 1 && ($plain[0] . $plain[1] === "//")) {
+			return true;
+		} else if ($length > 2 && ($plain[0] . $plain[1] . $plain[2] === "/**")) {
+			return true;
+		} else if ($plain[0] === "#" || $plain[0] === "*") {
+			return true;
 		}
-		return false;
+
+		$stringTokens = array(T_ENCAPSED_AND_WHITESPACE, T_END_HEREDOC);
+		$tokens = $testable->tokens();
+		$start = $testable->findTokenByLine($lineIndex + 1);
+		return in_array($tokens[$start]['id'], $stringTokens, true);
 	}
 
 }

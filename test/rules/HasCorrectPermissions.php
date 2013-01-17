@@ -10,11 +10,15 @@ namespace li3_quality\test\rules;
 
 class HasCorrectPermissions extends \li3_quality\test\Rule {
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = "File is executable";
-		if (is_executable($testable->config('path'))) {
+		if ($this->_isExecutable($testable->config('path'))) {
 			$this->addViolation(compact('message'));
 		}
+	}
+
+	protected function _isExecutable($path) {
+		return is_executable($path);
 	}
 
 }

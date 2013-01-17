@@ -20,7 +20,6 @@ class Syntax extends \lithium\test\Filter {
 	 *
 	 */
 	public static function apply($report, $tests, array $options = array()) {
-
 		foreach ($tests->invoke('subject') as $class) {
 			$report->collect(__CLASS__, array(
 				$class => Rules::apply(new Testable(array('path' => $class)))
@@ -38,7 +37,10 @@ class Syntax extends \lithium\test\Filter {
 		$metrics = array();
 		foreach ($results as $result) {
 			foreach ($result as $class => $metric) {
-				$metrics[$class] = $metric['violations'];
+				$metrics[$class] = array(
+					'violations' => $metric['violations'],
+					'warnings' => $metric['warnings'],
+				);
 			}
 		}
 		return $metrics;

@@ -10,10 +10,11 @@ namespace li3_quality\test\rules;
 
 class HasCorrectEncoding extends \li3_quality\test\Rule {
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = "File is not encoded as UTF-8";
 
-		if (mb_detect_encoding($testable->source(), 'UTF-8', true) != 'UTF-8') {
+		$encoding = mb_detect_encoding($testable->source(), 'UTF-8', true);
+		if ($encoding !== 'UTF-8') {
 			$this->addViolation(compact('message'));
 		}
 	}

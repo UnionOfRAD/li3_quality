@@ -39,6 +39,17 @@ EOD;
 		), $this->rule);
 	}
 
+	public function testNonPHPFile() {
+		$code = <<<EOD
+namespace bar/baz;
+class FooBar {}
+EOD;
+		$this->assertRulePass(array(
+			'source' => $code,
+			'path' => '/bar/baz/foo.txt',
+		), $this->rule);
+	}
+
 }
 
 ?>

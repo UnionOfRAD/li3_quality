@@ -12,7 +12,7 @@ use lithium\g11n\Multibyte;
 
 class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 
-	public function apply($testable) {
+	public function apply($testable, array $config = array()) {
 		$message = "Trailing whitespace found";
 		$lines = $testable->lines();
 
@@ -20,7 +20,7 @@ class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 			$name = 'li3_quality';
 			$length = Multibyte::strlen($line, compact('name'));
 			$lengthTrimmed = Multibyte::strlen(rtrim($line), compact('name'));
-			if ($length != $lengthTrimmed) {
+			if ($length !== $lengthTrimmed) {
 				$this->addViolation(array(
 					'message' => $message,
 					'line' => $i + 1,
