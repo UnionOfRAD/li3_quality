@@ -7,7 +7,7 @@
  */
 namespace li3_quality\test;
 
-use li3_quality\tests\mocks\test\MockTestable as Testable;
+use li3_quality\tests\mocks\test\MockTestable;
 
 /**
  * Internal Class for testing rules
@@ -122,7 +122,7 @@ class Unit extends \lithium\test\Unit {
 		$options += array(
 			'wrap' => true,
 		);
-		return new Testable($options);
+		return new MockTestable($options);
 	}
 
 }
