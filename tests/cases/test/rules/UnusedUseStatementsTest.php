@@ -68,6 +68,15 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testOverlappingNames() {
+		$code = <<<EOD
+use foo;
+use foobar;
+new foo();
+new foobar();
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>
