@@ -63,6 +63,7 @@ class UnusedUseStatements extends \li3_quality\test\Rule {
 	 * @return string
 	 */
 	protected function _compileRegex(array $regexArray = array()) {
+		usort($regexArray, function($a, $b) { return strlen($b) - strlen($a); });
 		return '/' . implode('|', $regexArray) . '/i';
 	}
 
