@@ -11,15 +11,13 @@ namespace li3_quality\test\rules;
 class UnusedUseStatements extends \li3_quality\test\Rule {
 
 	/**
-	 * Will iterate over each line checking if tabs are only first
+	 * Iterates over T_USE tokens, gets the aliased name into an array and
+	 * validates it was used within the script.
 	 *
 	 * @param  Testable $testable The testable object
 	 * @return void
 	 */
 	public function apply($testable, array $config = array()) {
-		$useStatements = array();
-		$regexArray = array();
-		$compiledRegex = '/$^/i';
 		$tokens = $testable->tokens();
 		$lines = $testable->lines();
 		$typeCache = $testable->typeCache();
@@ -31,40 +29,23 @@ class UnusedUseStatements extends \li3_quality\test\Rule {
 			$token = $tokens[$tokenId];
 			$line = $lines[$token['line'] - 1];
 			if (preg_match('/^use (?:([^ ]+ as )|(.*\\\))?(.*);$/i', $line, $matches) === 1) {
-				$useStatements[strtolower($matches[3])] = $token['line'];
-				$regexArray[] = "{$matches[3]}";
-			}
-		}
-		$compiledRegex = $this->_compileRegex($regexArray);
-		foreach ($lines as $line) {
-			$foundUse = preg_match('/^use/', $line) === 1;
-			$foundStatement = preg_match_all($compiledRegex, $line, $matches) !== false;
-			if (!$foundUse && $foundStatement) {
-				foreach ($matches[0] as $match) {
-					unset($useStatements[strtolower($match)]);
+				$count = 0;
+				foreach ($typeCache[T_STRING] as $stringId) {
+					if (strcasecmp($tokens[$stringId]['content'], $matches[3]) === 0) {
+						$count++;
+					}
+					if ($count === 2) {
+						break;
+					}
 				}
-				$compiledRegex = $this->_compileRegex($regexArray);
+				if ($count < 2) {
+					$this->addViolation(array(
+						'message' => 'Class ' . $matches[3] . ' was never called',
+						'line' => $token['line'],
+					));
+				}
 			}
 		}
-		foreach ($useStatements as $useStatement => $line) {
-			$this->addViolation(array(
-				'message' => 'Class ' . $useStatement . ' was never called',
-				'line' => $line,
-			));
-		}
-	}
-
-	/**
-	 * Will compile a new regex to search each line for.
-	 *
-	 * The regex is compiled after every potential change to the regex array.
-	 *
-	 * @param  array  $regexArray
-	 * @return string
-	 */
-	protected function _compileRegex(array $regexArray = array()) {
-		usort($regexArray, function($a, $b) { return strlen($b) - strlen($a); });
-		return '/' . implode('|', $regexArray) . '/i';
 	}
 
 }
