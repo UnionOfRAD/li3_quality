@@ -323,6 +323,17 @@ EOD;
 		$code = '$foo = -$bar;';
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	public function testOperatorSpacingWithChaining() {
+		$code = <<<EOD
+\$this->assertTrue(\$chain->called('method1')
+	->called('method2')->with('bar')
+	->called('method1')
+	->success());
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>
