@@ -19,7 +19,6 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 	 */
 	public $inspectableTokens = array(
 		T_ECHO,
-		T_EXIT,
 		T_INCLUDE_ONCE,
 		T_INCLUDE,
 		T_PRINT,

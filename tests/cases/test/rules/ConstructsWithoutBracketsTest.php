@@ -125,6 +125,13 @@ EOD;
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	public function testExitWithParams() {
+		$code = <<<EOD
+exit(1);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>
