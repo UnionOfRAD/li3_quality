@@ -102,6 +102,16 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 			'tokens' => array(
 				T_DOUBLE_COLON,
 				T_PAAMAYIM_NEKUDOTAYIM,
+			),
+		),
+		'objectOperator' => array(
+			'relativeTokens' => array(
+				'before' => 1,
+				'length' => 3,
+			),
+			'regex' => '/([^ ]|^){:content}[^ ]/',
+			'message' => 'Operator `->` must not be be surrounded by 1 space or on its own line.',
+			'tokens' => array(
 				T_OBJECT_OPERATOR,
 			),
 		),
