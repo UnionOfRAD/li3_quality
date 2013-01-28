@@ -85,7 +85,7 @@ Line    Position        Violation
 33      -               Protected Method "foobar" does not start with "_"
 ```
 
-If you have lots of fils to check (for example if you test against the lithium core), you can pass the `--silent` option to only show errors. The `--library` param allows you to run the checks against a different library:
+If you have lots of files to check (for example if you test against the lithium core), you can pass the `--silent` option to only show errors. The `--library` param allows you to run the checks against a different library:
 
 ```bash
 $ li3 quality syntax --silent --library=lithium
@@ -111,6 +111,11 @@ Line    Position        Violation
 379     111             Maximum line length exceeded
 381     110             Maximum line length exceeded
 ```
+
+#### Custom rules set
+
+By default, `li3 quality syntax` command looks for a set of rules to apply, defined in `{checked-library}/test/rules.json`. Otherwise it uses [the default rules set](https://github.com/UnionOfRAD/li3_quality/blob/master/test/defaultRules.json).
+You can customize this configuration file to suit your own quality standards, by removing unwanted rules, or by adding your own rules classes at `{:library}/extensions/test/rules/YourCustomRule.php`.
 
 GIT Pre Commit Hook
 --------------------
