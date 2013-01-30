@@ -57,7 +57,7 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 		$tokens = $testable->tokens();
 		$lines = $testable->lines();
 		$lineCache = $testable->lineCache();
-		$inspectable = array(T_CLASS, T_VARIABLE, T_FUNCTION);
+		$inspectable = array(T_CLASS, T_VARIABLE, T_FUNCTION, T_CONST);
 		foreach ($testable->findAll(array(T_DOC_COMMENT)) as $tokenId) {
 			$token = $tokens[$tokenId];
 			$nextLine = $token['line'] + count(preg_split('/\r\n|\r|\n/', $token['content']));
@@ -88,6 +88,7 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 						$match = 'METHOD';
 					break;
 					case T_VARIABLE:
+					case T_CONST:
 						$match = 'VARIABLE';
 					break;
 				}

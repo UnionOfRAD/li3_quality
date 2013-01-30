@@ -269,6 +269,27 @@ EOD;
 		), $this->rule);
 	}
 
+	public function testClassConstants() {
+		$code = <<<EOD
+<?php
+
+class foo {
+
+	/**
+	 * Foo
+	 *
+	 * @var const
+	 */
+	const FOO = 'bar';
+
+}
+EOD;
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
+	}
+
 }
 
 ?>
