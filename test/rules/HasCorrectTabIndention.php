@@ -114,6 +114,10 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 
 		$currentCount = $this->_currentCount;
 
+		if ($lineLen > 1 && ($line[0] === "-" && $line[1] === ">")) {
+			$currentCount += 1;
+		}
+
 		if ($prevLine && $prevLen > 0 && $prevLine[$prevLen - 1] === ".") {
 			$currentCount += 1;
 		}
