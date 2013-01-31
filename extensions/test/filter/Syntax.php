@@ -12,12 +12,14 @@ use li3_quality\test\Rules;
 use li3_quality\test\Testable;
 
 /**
- *
+ * Syntax filter for testing
  */
 class Syntax extends \lithium\test\Filter {
 
 	/**
+	 * Will apply the filter
 	 *
+	 * @return  array
 	 */
 	public static function apply($report, $tests, array $options = array()) {
 		foreach ($tests->invoke('subject') as $class) {
@@ -25,12 +27,13 @@ class Syntax extends \lithium\test\Filter {
 				$class => Rules::apply(new Testable(array('path' => $class)))
 			));
 		}
-
 		return $tests;
 	}
 
 	/**
+	 * Will analyze the filter
 	 *
+	 * @return  array
 	 */
 	public static function analyze($report, array $options = array()) {
 		$results = $report->results['filters'][__CLASS__];

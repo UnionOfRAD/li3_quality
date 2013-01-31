@@ -10,6 +10,9 @@ namespace li3_quality\test\rules;
 
 use lithium\util\String;
 
+/**
+ * Will ensure all operators have correct spacing before and after itself.
+ */
 class OperatorSpacing extends \li3_quality\test\Rule {
 
 	/**

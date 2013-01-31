@@ -10,6 +10,9 @@ namespace li3_quality\test\rules;
 
 use lithium\util\String;
 
+/**
+ * Validates control structures have correct spacing and indentation.
+ */
 class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 
 	/**

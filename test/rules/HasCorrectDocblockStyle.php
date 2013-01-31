@@ -10,6 +10,9 @@ namespace li3_quality\test\rules;
 
 use lithium\util\String;
 
+/**
+ * Validates the syntax of docblocks
+ */
 class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 
 	/**

@@ -27,12 +27,87 @@
 		"WeakComparisonOperators",
 		"UnusedUseStatements",
 		"MultipleBlankLines"
+		"docblock/Completeness",
+		"docblock/Accurate"
 	],
 	"variables": {
 		"DoesntExceedMaxLineLength": {
 			"softLimit": 80,
 			"hardLimit": 100,
 			"tabWidth": 4
+		},
+		"docblock/Completeness": {
+			"excludeFiles": "/test|mock/i",
+			"page": {
+				"required": true
+			},
+			"class": {
+				"required": true,
+				"sections": [
+					"description"
+				]
+			},
+			"variable": {
+				"required": false
+			},
+			"method": {
+				"required": true,
+				"sections": [
+					"description",
+					"tags"
+				],
+				"tags": [
+					"return"
+				]
+			}
+		},
+		"docblock/Accurate": {
+			"page": {
+				"sections": [
+					"description",
+					"text",
+					"tags"
+				],
+				"tags": [
+					"copyright",
+					"license"
+				]
+			},
+			"class": {
+				"sections": [
+					"description",
+					"text",
+					"tags"
+				],
+				"tags": [
+					"see"
+				]
+			},
+			"variable": {
+				"sections": [
+					"description",
+					"tags"
+				],
+				"tags": [
+					"var"
+				]
+			},
+			"method": {
+				"sections": [
+					"description",
+					"text",
+					"tags"
+				],
+				"tags": [
+					"deprecated",
+					"todo",
+					"link",
+					"param",
+					"return",
+					"throws",
+					"filter"
+				]
+			}
 		}
 	}
 }

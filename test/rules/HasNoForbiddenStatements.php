@@ -8,8 +8,18 @@
 
 namespace li3_quality\test\rules;
 
+/**
+ * Validates that there are no incorrectly used constructs such as eval or short
+ * hand syntax.
+ */
 class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 
+	/**
+	 * The list of items to search for
+	 *
+	 * @todo  apply this in the config file
+	 * @var   array
+	 */
 	protected $_forbidden = array(
 		T_ENDDECLARE => 'enddeclare',
 		T_ENDFOR => 'endfor',
@@ -24,6 +34,13 @@ class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 		T_VAR => 'var'
 	);
 
+	/**
+	 * Iterates searching for the given tokens.
+	 *
+	 * @param  Testable $testable The testable object
+	 * @param  array    $config
+	 * @return void
+	 */
 	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 		$filtered = array_merge(array_keys($this->_forbidden), array(T_STRING));

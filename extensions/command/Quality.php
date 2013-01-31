@@ -22,22 +22,29 @@ class Quality extends \lithium\console\command\Test {
 
 	/**
 	 * The library to run the quality checks on.
+	 *
+	 * @var  int
 	 */
 	public $library = true;
 
 	/**
 	 * If `--slient NUM` is used, only classes below this coverage are shown.
+	 *
+	 * @var  int
 	 */
 	public $threshold = 100;
 
 	/**
 	 * This is the minimum threshold for core tests to be green.
+	 *
+	 * @var  int
 	 */
 	protected $_greenThreshold = 85;
 
 	/**
 	 * Show help on run.
 	 *
+	 * @return boolean
 	 */
 	public function run($path = null) {
 		return $this->_help();
@@ -46,6 +53,8 @@ class Quality extends \lithium\console\command\Test {
 	/**
 	 * Checks the syntax of your class files through static code analysis.
 	 * if GIT_DIR env variable is set, then use plain and silent.
+	 *
+	 * @return  void
 	 */
 	public function syntax($path = null) {
 		if ($this->request->env('GIT_DIR')) {
@@ -105,6 +114,8 @@ class Quality extends \lithium\console\command\Test {
 
 	/**
 	 * Checks for undocumented classes or methods inside the library.
+	 *
+	 * @return  void
 	 */
 	public function documented() {
 		$this->header('Lithium Documentation Check');
@@ -119,6 +130,8 @@ class Quality extends \lithium\console\command\Test {
 
 	/**
 	 * Lists code coverage for a given threshold (100 by default).
+	 *
+	 * @return  void
 	 */
 	public function coverage() {
 		$this->header('Lithium Code Coverage');
@@ -169,6 +182,8 @@ class Quality extends \lithium\console\command\Test {
 
 	/**
 	 * Returns a list of testable classes according to the given library.
+	 *
+	 * @return  array
 	 */
 	protected function _testables($options = array()) {
 		$defaults = array('recursive' => true, 'path' => null);
@@ -215,6 +230,19 @@ class Quality extends \lithium\console\command\Test {
 			$this->filters = $filters;
 		}
 		return $this->filters;
+	}
+
+	/**
+	 * Will decode json string into an object
+	 *
+	 * @param  string $text
+	 * @return array
+	 */
+	protected function _decode($text) {
+		if (($data = json_decode($text, true)) === null) {
+			throw new \Exception('JSON was not decoded correctly.');
+		}
+		return $data;
 	}
 
 }

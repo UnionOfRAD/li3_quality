@@ -10,8 +10,18 @@ namespace li3_quality\test\rules;
 
 use lithium\g11n\Multibyte;
 
+/**
+ * Validates there is no trailing whitespace on a line.
+ */
 class HasNoTrailingWhitespace extends \li3_quality\test\Rule {
 
+	/**
+	 * Iterates lines and testing it against a regex to determine it's success.
+	 *
+	 * @param  Testable $testable The testable object
+	 * @param  array    $config
+	 * @return void
+	 */
 	public function apply($testable, array $config = array()) {
 		$message = "Trailing whitespace found";
 		$lines = $testable->lines();

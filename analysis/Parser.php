@@ -4,6 +4,10 @@ namespace li3_quality\analysis;
 
 use li3_quality\analysis\ParserException;
 
+/**
+ * The parser class uses PHP's tokenizer to provide methods and tools for performing static analysis
+ * on PHP code.
+ */
 class Parser extends \lithium\analysis\Parser {
 
 	/**

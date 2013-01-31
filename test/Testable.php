@@ -10,6 +10,11 @@ namespace li3_quality\test;
 use lithium\core\Libraries;
 use li3_quality\analysis\Parser;
 
+/**
+ * The testable class is the object passed to each of the rules giving the rule
+ * added functionality to tokens, source code, and grouped tokens. This makes it
+ * possible to easily test rules without a ton of complex logic.
+ */
 class Testable extends \lithium\core\Object {
 
 	/**
@@ -56,6 +61,8 @@ class Testable extends \lithium\core\Object {
 
 	/**
 	 * Locates the file and reads its source code.
+	 *
+	 * @return  void
 	 */
 	public function __construct(array $config = array()) {
 		$this->_config = $config + array(

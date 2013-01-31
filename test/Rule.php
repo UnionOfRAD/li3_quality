@@ -7,6 +7,10 @@
  */
 namespace li3_quality\test;
 
+/**
+ * This is the abstract rule all rules should inherit from, it gives extra
+ * functionality to the rules such as adding violations and warnings.
+ */
 abstract class Rule extends \lithium\core\Object {
 
 	/**

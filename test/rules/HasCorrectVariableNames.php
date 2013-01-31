@@ -10,8 +10,15 @@ namespace li3_quality\test\rules;
 
 use lithium\util\Inflector;
 
+/**
+ * Ensures all variables are in the correct camelBack style.
+ */
 class HasCorrectVariableNames extends \li3_quality\test\Rule {
 
+	/**
+	 * Standard php variables we should ignore.
+	 * @var array
+	 */
 	protected $_superglobals = array(
 		'$GLOBALS'  => true,
 		'$_SERVER'  => true,
@@ -24,6 +31,13 @@ class HasCorrectVariableNames extends \li3_quality\test\Rule {
 		'$_ENV'     => true
 	);
 
+	/**
+	 * Iterates tokens looking for for variables and checking their content.
+	 *
+	 * @param  Testable $testable The testable object
+	 * @param  array    $config
+	 * @return void
+	 */
 	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
 		$filtered = $testable->findAll(array(T_VARIABLE));
