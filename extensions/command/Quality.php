@@ -200,12 +200,12 @@ class Quality extends \lithium\console\command\Test {
 		if (!is_array($this->filters)) {
 			$filters = $this->filters ? array_map('trim', explode(',', $this->filters)) : array();
 			if (count($filters) === 0) {
-				$config = Libraries::get($this->library);
-				$ruleConfig = $config['path'] . '/test/rules.json';
-				if (!file_exists($ruleConfig)) {
-					$config = Libraries::get('li3_quality');
-					$ruleConfig = $config['path'] . '/test/defaultRules.json';
-				}
+				list($ruleConfig) = Libraries::locate('ruleSets', null, array(
+					'recursive' => false,
+					'suffix' => '.json',
+					'format' => false,
+					'preFilter' => '/(r|defaultR)ules\.json/',
+				));
 				$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
 				$filters = $ruleConfig['rules'];
 				if (isset($ruleConfig['variables'])) {
