@@ -28,8 +28,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 			'tokens' => array(
 				T_AND_EQUAL,
 				T_AS,
-				T_BOOLEAN_AND,
-				T_BOOLEAN_OR,
 				T_CLONE,
 				T_CONCAT_EQUAL,
 				T_DIV_EQUAL,
@@ -38,9 +36,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				T_IS_NOT_EQUAL,
 				T_IS_NOT_IDENTICAL,
 				T_IS_SMALLER_OR_EQUAL,
-				T_LOGICAL_AND,
-				T_LOGICAL_OR,
-				T_LOGICAL_XOR,
 				T_MINUS_EQUAL,
 				T_MOD_EQUAL,
 				T_MUL_EQUAL,
@@ -59,6 +54,21 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				'/',
 			),
 		),
+		'oneSpaceEOL' => array(
+			'relativeTokens' => array(
+				'before' => 1,
+				'length' => 3,
+			),
+			'regex' => '/^ {:content}([ ]$|\n)/',
+			'message' => 'Operator {:content} must only have one leading and trailing space.',
+			'tokens' => array(
+				T_BOOLEAN_AND,
+				T_BOOLEAN_OR,
+				T_LOGICAL_AND,
+				T_LOGICAL_OR,
+				T_LOGICAL_XOR,
+			),
+		),
 		'equals' => array(
 			'relativeTokens' => array(
 				'before' => 1,
@@ -75,7 +85,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				'before' => 1,
 				'length' => 3,
 			),
-			'regex' => '/^ {:content}( )?$/',
+			'regex' => '/^ {:content}( )?($|\n)/',
 			'message' => 'Operator {:content} must have 1 leading and an optional trailing space.',
 			'content' => array(
 				'.',
@@ -132,7 +142,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				'length' => 7,
 			),
 			'fullLineRegex' => '/^\s+(case|default)(.*):$/',
-			'regex' => '/(([^ ] (\?:|\?|:) [^ ])|(:$))/',
+			'regex' => '/(([^ ] (\?:|\?|:) [^ ])|(:$)|[^:]:\n)/',
 			'message' => 'Operator {:content} must be surrounded by spaces.',
 			'content' => array(
 				':',
@@ -178,8 +188,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 							$html .= $htmlToken['content'];
 						}
 					}
-					$html = preg_split('/\r\n|\r|\n/', $html);
-					if (preg_match($pattern, $html[0]) === 0) {
+					if (preg_match($pattern, $html) === 0) {
 						$this->addViolation(array(
 							'message' => String::insert($inspector['message'], $token),
 							'line' => $token['line'],

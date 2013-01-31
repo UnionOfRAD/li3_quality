@@ -448,6 +448,17 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testMutlilineAssignment() {
+		$code = <<<EOD
+return true ||
+	false &&
+	true AND
+	true OR
+	false;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>
