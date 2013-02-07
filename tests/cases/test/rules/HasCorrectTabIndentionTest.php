@@ -44,6 +44,28 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testCorrectShortArrayTabbing() {
+		$code = <<<EOD
+\$foo = [
+	'bar',
+	'baz',
+	'foobar',
+];
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIncorrectShortArrayTabbing() {
+		$code = <<<EOD
+\$foo = [
+'bar',
+		'baz',
+	'foobar',
+];
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
 	public function testCorrectFunctionTabbing() {
 		$code = <<<EOD
 function foo() {
