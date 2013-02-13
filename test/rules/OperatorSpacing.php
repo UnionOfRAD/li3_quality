@@ -174,7 +174,9 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 			}
 			foreach (array_merge($byToken, $byContent) as $id) {
 				$token = $tokens[$id];
-				if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
+				$isPHP = $testable->isPHP($token['line']);
+				$isntString = $token['id'] !== T_ENCAPSED_AND_WHITESPACE;
+				if ($isPHP && $isntString) {
 					$pattern = String::insert($inspector['regex'], array(
 						'content' => preg_quote($token['content'], "/"),
 					));

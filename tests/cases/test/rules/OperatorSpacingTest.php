@@ -345,6 +345,16 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testIgnoreHTMLContent() {
+		$code = <<<EOD
+Hello, <?=\$foo; ?>.
+EOD;
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
+	}
+
 }
 
 ?>
