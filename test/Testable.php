@@ -339,7 +339,7 @@ class Testable extends \lithium\core\Object {
 		$tokens = $this->tokens();
 		foreach ($lineCache[$line] as $tokenId) {
 			if (in_array($tokens[$tokenId]['id'], $tokenIds)) {
-				return true;
+				return $tokenId;
 			}
 		}
 		return -1;
