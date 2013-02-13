@@ -11,8 +11,10 @@ class MockTestable extends \li3_quality\test\Testable {
 	 * Overwrites the default Testable constructor
 	 */
 	public function __construct($config) {
-		$this->_config = $config;
 		$this->_source = $config['source'];
+		$this->_config = $config + array(
+			'wrap' => false,
+		);
 	}
 }
 

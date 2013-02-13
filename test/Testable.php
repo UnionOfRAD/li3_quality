@@ -381,6 +381,31 @@ class Testable extends \lithium\core\Object {
 		return $this->_lines;
 	}
 
+	/**
+	 * Will determine if the given line is PHP or HTML code.
+	 *
+	 * @param  integer $line Line to inspect.
+	 * @return boolean
+	 */
+	public function isPHP($line) {
+		$lineCache = $this->lineCache();
+		$tokens = $this->tokens();
+		$lineTokens = $lineCache[$this->findTokensByLine($line)];
+		if ($tokens[$lineTokens[0]]['id'] === T_INLINE_HTML) {
+			return false;
+		} else {
+			$tokenId = $lineTokens[0] - 1;
+			if (!isset($tokens[$tokenId])) {
+				return true;
+			}
+			$token = $tokens[$tokenId];
+			$content = trim($token['content']);
+			$endsAt = $token['line'] + preg_match_all('/(\r\n|\r|\n)/', $content, $matches);
+			return $endsAt !== $line;
+		}
+		return true;
+	}
+
 }
 
 ?>

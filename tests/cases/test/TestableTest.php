@@ -369,6 +369,7 @@ EOD;
 
 		$expected = array(
 			'source' => '<?php echo "foobar"; ?>',
+			'wrap' => false,
 		);
 		$result = $testable->config();
 
@@ -397,6 +398,54 @@ EOD;
 		$result = $testable->config('wrap');
 
 		$this->assertIdentical($expected, $result);
+	}
+
+	public function testLineIsPHP() {
+		$code = <<<EOD
+<?php
+class foo {
+	function bar() {
+
+	}
+}
+EOD;
+		$testable = $this->_testable(array(
+			'source' => $code,
+			'wrap' => false,
+		));
+
+		$this->assertIdentical(true, $testable->isPHP(1));
+		$this->assertIdentical(true, $testable->isPHP(2));
+	}
+
+	public function testLineIsNotPHP() {
+		$code = <<<EOD
+<div class="php" id="bar">
+	<p>Lorem ipsum dolor</p>
+</div>
+EOD;
+		$testable = $this->_testable(array(
+			'source' => $code,
+			'wrap' => false,
+		));
+
+		$this->assertIdentical(false, $testable->isPHP(1));
+		$this->assertIdentical(false, $testable->isPHP(2));
+	}
+
+	public function testLineIsNotPHPWithInlinePHP() {
+		$code = <<<EOD
+<div class="php" id="bar">
+	<p>Lorem <?=\$ipsum; ?> dolor</p>
+</div>
+EOD;
+		$testable = $this->_testable(array(
+			'source' => $code,
+			'wrap' => false,
+		));
+
+		$this->assertIdentical(false, $testable->isPHP(1));
+		$this->assertIdentical(false, $testable->isPHP(2));
 	}
 
 }
