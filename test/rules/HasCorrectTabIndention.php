@@ -93,7 +93,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		$endingTokens = array(T_ENDFOR, T_ENDFOREACH, T_ENDIF, T_ENDSWITCH, T_ENDWHILE);
 		$switch = false;
 
-		if ($lineLen > 0 && ($line[0] === ")" || $line[0] === "}")) {
+		if ($lineLen > 0 && ($line[0] === ")" || $line[0] === "}" || $line[0] === "]")) {
 			$ending = $testable->findNextContent(array('}'), $currentTokens);
 			$child = isset($tokens[$ending]) ? $tokens[$ending] : false;
 			$parent = isset($tokens[$child['parent']]) ? $tokens[$child['parent']] : false;
@@ -146,7 +146,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			}
 		}
 
-		$find = !$switch && in_array($line[$lineLen - 1], array("{", ":", "("));
+		$find = !$switch && in_array($line[$lineLen - 1], array("{", ":", "(", "["));
 		$found = false;
 		foreach ($currentTokens as $tokenKey) {
 			if (in_array($tokens[$tokenKey]['id'], $endingTokens, true)) {
