@@ -11,6 +11,10 @@ namespace li3_quality\test\rules;
 use lithium\util\String;
 use li3_quality\analysis\Parser;
 
+/**
+ * Ensures every method and instance variable has declared visibility.
+ * This could possibly be combined with the HasNoPrivateMethods
+ */
 class HasExplicitPropertyAndMethodVisibility extends \li3_quality\test\Rule {
 
 	/**

@@ -8,6 +8,9 @@
 
 namespace li3_quality\test\rules;
 
+/**
+ * Will ensure the file uses tabs as intentions instead of spaces.
+ */
 class HasTabsAsIndentation extends \li3_quality\test\Rule {
 
 	/**
@@ -19,6 +22,14 @@ class HasTabsAsIndentation extends \li3_quality\test\Rule {
 		T_ENCAPSED_AND_WHITESPACE,
 	);
 
+	/**
+	 * Iterates lines validating it with a simple regex and ignoring lines with
+	 * specific tokens.
+	 *
+	 * @param  Testable $testable The testable object
+	 * @param  array    $config
+	 * @return void
+	 */
 	public function apply($testable, array $config = array()) {
 		$message = "Uses spaces instead of tabs";
 		$lines = $testable->lines();

@@ -10,6 +10,9 @@ namespace li3_quality\test\rules;
 
 use li3_quality\analysis\Parser;
 
+/**
+ * Validates that include comments don't appear except within test methods.
+ */
 class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 
 	/**

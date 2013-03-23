@@ -10,6 +10,9 @@ namespace li3_quality\test\rules;
 
 use lithium\util\String;
 
+/**
+ * Will validate no language constructs have brackets around them.
+ */
 class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 
 	/**

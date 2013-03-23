@@ -11,6 +11,10 @@ namespace li3_quality\test\rules;
 use lithium\util\Inflector;
 use li3_quality\analysis\Parser;
 
+/**
+ * Similar to HasCorrectVariableNames but checks that method names are in
+ * the correct camelBack format.
+ */
 class HasCorrectFunctionNames extends \li3_quality\test\Rule {
 
 	/**

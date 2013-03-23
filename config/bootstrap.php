@@ -12,8 +12,11 @@ use lithium\g11n\Multibyte;
 Libraries::paths(array(
 	'rules' => array(
 		'{:library}\extensions\test\rules\{:class}\{:name}',
-		'{:library}\test\rules\{:class}\{:name}' => array('libraries' => 'li3_quality')
-	)
+		'{:library}\test\rules\{:class}\{:name}' => array('libraries' => 'li3_quality'),
+	),
+	'ruleSets' => array(
+		'{:library}\test\*{rules,defaultRules}',
+	),
 ));
 
 if (!Multibyte::config('li3_quality')) {

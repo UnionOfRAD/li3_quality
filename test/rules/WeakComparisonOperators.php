@@ -10,6 +10,11 @@ namespace li3_quality\test\rules;
 
 use lithium\util\String;
 
+/**
+ * Checks for weak comparison operators and throws warnings. Weak comparison
+ * operators include '==' and '!=' which should be replaced, if possible,
+ * by their stronger counterparts '===' and '!=='.
+ */
 class WeakComparisonOperators extends \li3_quality\test\Rule {
 
 	/**

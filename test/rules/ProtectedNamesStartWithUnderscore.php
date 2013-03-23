@@ -11,6 +11,10 @@ namespace li3_quality\test\rules;
 use lithium\util\String;
 use li3_quality\analysis\Parser;
 
+/**
+ * Will determine if all protected names (T_FUNCTION and T_VARIABLE) have names
+ * that start with an underscore '_' character.
+ */
 class ProtectedNamesStartWithUnderscore extends \li3_quality\test\Rule {
 
 	/**
@@ -18,6 +22,7 @@ class ProtectedNamesStartWithUnderscore extends \li3_quality\test\Rule {
 	 * found it will validate the name of it's parent starts with an underscore.
 	 *
 	 * @param  Testable $testable The testable object
+	 * @param  array    $config
 	 * @return void
 	 */
 	public function apply($testable, array $config = array()) {

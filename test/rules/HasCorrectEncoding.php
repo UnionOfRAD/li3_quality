@@ -8,8 +8,18 @@
 
 namespace li3_quality\test\rules;
 
+/**
+ * Ensures the document has the correct UTF-8 encoding.
+ */
 class HasCorrectEncoding extends \li3_quality\test\Rule {
 
+	/**
+	 * Will do a detection on the entire source for UTF-8
+	 *
+	 * @param  Testable $testable The testable object
+	 * @param  array    $config
+	 * @return void
+	 */
 	public function apply($testable, array $config = array()) {
 		$message = "File is not encoded as UTF-8";
 
@@ -19,6 +29,11 @@ class HasCorrectEncoding extends \li3_quality\test\Rule {
 		}
 	}
 
+	/**
+	 * Disables this rule if mb_detect_encoding is not installed.
+	 *
+	 * @return bool
+	 */
 	public function enabled() {
 		return function_exists('mb_detect_encoding');
 	}

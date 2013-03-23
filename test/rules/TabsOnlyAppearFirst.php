@@ -8,6 +8,10 @@
 
 namespace li3_quality\test\rules;
 
+/**
+ * Validates that tabs only appear first on a line since spaces should be used
+ * for formatting data.
+ */
 class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 
 	/**

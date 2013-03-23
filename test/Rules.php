@@ -9,6 +9,9 @@ namespace li3_quality\test;
 
 use lithium\core\Libraries;
 
+/**
+ * The rules class is the collection of Rule classes.
+ */
 class Rules extends \lithium\core\StaticObject {
 
 	/**
@@ -42,8 +45,15 @@ class Rules extends \lithium\core\StaticObject {
 	 */
 	public static function add($rule, $options = array()) {
 		$class = get_class($rule);
-		$sep = strrpos($class, '\\');
-		$name = ($sep !== false) ? substr($class, $sep + 1) : $class;
+		$sep = strrpos($class, 'rules\\');
+		if ($sep === false) {
+			$sep = strrpos($class, '\\');
+			$distance = $sep + 1;
+		} else {
+			$distance = $sep + 6;
+		}
+		$name = ($sep !== false) ? substr($class, $distance) : $class;
+		$name = str_replace('\\', '/', $name);
 		static::$_rules[$name] = array(
 			'rule' => $rule,
 			'options' => $options,
@@ -69,8 +79,7 @@ class Rules extends \lithium\core\StaticObject {
 
 		foreach ($rules as $ruleSet) {
 			$rule = $ruleSet['rule'];
-			$options = $ruleSet['options'];
-			$rule->apply($testable, $options);
+			$rule->apply($testable, $ruleSet['options']);
 			$warnings = array_merge($warnings, $rule->warnings());
 			if (!$rule->success()) {
 				$success = false;
@@ -127,7 +136,7 @@ class Rules extends \lithium\core\StaticObject {
 				$rule['options'] = $variables[$key];
 			}
 		}
-		return static::$_rules;;
+		return static::$_rules;
 	}
 }
 
