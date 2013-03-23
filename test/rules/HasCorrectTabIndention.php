@@ -36,7 +36,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 
 	/**
 	 * Where the current tab count is held. This is a very relative process and a close count
-	 * shoudl be kept.
+	 * should be kept.
 	 *
 	 * @var integer
 	 */
@@ -65,6 +65,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 						)),
 						'line' => $lineIndex + 1,
 					));
+					$this->_currentCount = $actual;
 				}
 			}
 		}
