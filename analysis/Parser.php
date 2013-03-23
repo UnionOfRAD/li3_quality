@@ -4,6 +4,8 @@ namespace li3_quality\analysis;
 
 use li3_quality\analysis\ParserException;
 
+define('T_DOLLAR_CURLY_BRACES', 500);
+
 class Parser extends \lithium\analysis\Parser {
 
 	/**
@@ -15,79 +17,84 @@ class Parser extends \lithium\analysis\Parser {
 		T_CLASS => array(
 			'endingTokens' => array(),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_IF => array(
 			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_ELSE => array(
 			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_ELSEIF => array(
 			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_FOR => array(
 			'endingTokens' => array(T_ENDFOR),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_FOREACH => array(
 			'endingTokens' => array(T_ENDFOREACH),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_FUNCTION => array(
 			'endingTokens' => array(),
 			'endingContent' => array('}', ';'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_INTERFACE => array(
 			'endingTokens' => array(),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_SWITCH => array(
 			'endingTokens' => array(),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_TRY => array(
 			'endingTokens' => array(),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_CATCH => array(
 			'endingTokens' => array(),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_WHILE => array(
 			'endingTokens' => array(T_ENDWHILE),
 			'endingContent' => array('}', ';'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_DO => array(
 			'endingTokens' => array(),
 			'endingContent' => array('}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_DECLARE => array(
 			'endingTokens' => array(),
 			'endingContent' => array(';', '}'),
-			'parents' => array(),
+			'parents' => array()
 		),
 		T_VARIABLE => array(
 			'endingTokens' => array(),
 			'endingContent' => array(';'),
 			'parents' => array(
 				T_CLASS,
-			),
+			)
+		),
+		T_DOLLAR_CURLY_BRACES => array(
+			'endingTokens' => array(),
+			'endingContent' => array('}'),
+			'parents' => array()
 		),
 	);
 
@@ -235,7 +242,18 @@ class Parser extends \lithium\analysis\Parser {
 		$currentParent = -1;
 		$brackets = $curlyBrackets = $level = 0;
 		$lineCache = $typeCache = array();
+
 		foreach ($tokens as $tokenId => $token) {
+			$isCurlyBrace = (
+				$token['content'] === '$' &&
+				isset($tokens[$tokenId + 1]) &&
+				$tokens[$tokenId + 1]['content'] === '{'
+			);
+			if ($isCurlyBrace) {
+				$tokens[$tokenId]['id'] = T_DOLLAR_CURLY_BRACES;
+				$tokens[$tokenId]['name'] = 'T_DOLLAR_CURLY_BRACES';
+			}
+
 			if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
 				if ($token['content'] === '{') {
 					$curlyBrackets++;
@@ -263,6 +281,7 @@ class Parser extends \lithium\analysis\Parser {
 			$tokens[$tokenId]['curlyBrackets'] = $curlyBrackets;
 			$tokens[$tokenId]['parent'] = $currentParent;
 			$tokens[$tokenId]['children'] = array();
+
 			if (isset($tokens[$currentParent])) {
 				$tokens[$currentParent]['children'][] = $tokenId;
 			}
