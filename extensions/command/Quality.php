@@ -31,6 +31,11 @@ class Quality extends \lithium\console\command\Test {
 	public $threshold = 100;
 
 	/**
+	 * A regular experssion to filter testable files.
+	 */
+	public $exclude = 'resources|webroot|vendor|libraries';
+
+	/**
 	 * This is the minimum threshold for core tests to be green.
 	 */
 	protected $_greenThreshold = 85;
@@ -123,9 +128,8 @@ class Quality extends \lithium\console\command\Test {
 	public function coverage() {
 		$this->header('Lithium Code Coverage');
 
-		$testables = $this->_testables(array(
-			'exclude' => '/tests|resources|webroot|index$|^app\\\\config|^app\\\\views|Exception$/'
-		));
+		$exclude = 'tests|index$|^app\\\\config|^app\\\\views|Exception$';
+		$testables = $this->_testables(compact('exclude'));
 
 		$this->out("Checking coverage on " . count($testables) . " classes.");
 
@@ -171,8 +175,17 @@ class Quality extends \lithium\console\command\Test {
 	 * Returns a list of testable classes according to the given library.
 	 */
 	protected function _testables($options = array()) {
-		$defaults = array('recursive' => true, 'path' => null);
+		$defaults = array(
+			'recursive' => true, 'path' => null, 'exclude' => null
+		);
 		$options += $defaults;
+
+		$exclude = array($this->exclude, $options['exclude']);
+		if ($exclude = array_filter($exclude)) {
+			$options['exclude'] = '/' . join('|', $exclude) . '/';
+		} else {
+			unset($options['exclude']);
+		}
 
 		if ($path = $this->_path($options['path'])) {
 			if (pathinfo($options['path'], PATHINFO_EXTENSION) === 'php') {
