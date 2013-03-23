@@ -481,6 +481,18 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testFailingTabIndentPropagation() {
+		$code = <<<EOD
+\$array = array(
+	'level1' => array(
+		'level2' => array(
+			'level3' => array(
+))));
+echo 'foo';
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+		$this->assertCount(1, $this->rule->violations());
+	}
 }
 
 ?>
