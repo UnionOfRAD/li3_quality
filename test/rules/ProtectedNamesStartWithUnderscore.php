@@ -14,6 +14,14 @@ use li3_quality\analysis\Parser;
 class ProtectedNamesStartWithUnderscore extends \li3_quality\test\Rule {
 
 	/**
+	 * List of exceptions (in regex format). If a class name matches one of this
+	 * exception list regex, the rule will produce a warnings instead of errors.
+	 */
+	protected $_exceptions = array(
+		'Exception$'
+	);
+
+	/**
 	 * Will iterate the tokens looking for protected methods and variables, once
 	 * found it will validate the name of it's parent starts with an underscore.
 	 *
@@ -30,14 +38,36 @@ class ProtectedNamesStartWithUnderscore extends \li3_quality\test\Rule {
 			$parent = $testable->findNext(array(T_FUNCTION, T_VARIABLE), $tokenId);
 			$parentLabel = Parser::label($parent, $tokens);
 			if (substr($parentLabel, 0, 1) !== '_') {
-				$this->addViolation(array(
+				$classTokenId = $testable->findNext(array(T_STRING), $token['parent']);
+				$classname = $tokens[$classTokenId]['content'];
+				$params = array(
 					'message' => String::insert($message, array(
 						'name' => $parentLabel,
 					)),
 					'line' => $token['line']
-				));
+				);
+				if ($this->_strictMode($classname)) {
+					$this->addViolation($params);
+				} else {
+					$this->addWarning($params);
+				}
 			}
 		}
+	}
+
+	/**
+	 * Will iterate over exceptions regex to see if the rule need to be strictly applied.
+	 *
+	 * @param  string $classname A class name
+	 * @return boolean
+	 */
+	protected function _strictMode($classname) {
+		foreach ($this->_exceptions as $regex) {
+			if (preg_match("/{$regex}/", $classname)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

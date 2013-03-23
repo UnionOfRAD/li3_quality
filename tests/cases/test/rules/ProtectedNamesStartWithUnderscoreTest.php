@@ -42,6 +42,17 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testUnderscoreIsNotRequiredForException() {
+		$code = <<<EOD
+class FooBarException extend Exception {
+	protected string \$message ;
+	protected int \$code ;
+	protected string \$file ;
+	protected int \$line ;
+}
+EOD;
+		$this->assertRuleWarning($code, $this->rule);
+	}
 }
 
 ?>
