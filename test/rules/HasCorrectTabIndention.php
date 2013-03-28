@@ -94,50 +94,49 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		$endingTokens = array(T_ENDFOR, T_ENDFOREACH, T_ENDIF, T_ENDSWITCH, T_ENDWHILE);
 		$switch = false;
 
-		if ($lineLen > 0 && ($line[0] === ")" || $line[0] === "}" || $line[0] === "]")) {
+		if ($lineLen > 0 && ($line[0] === ')' || $line[0] === '}' || $line[0] === ']')) {
 			$ending = $testable->findNextContent(array('}'), $currentTokens);
 			$child = isset($tokens[$ending]) ? $tokens[$ending] : false;
 			$parent = isset($tokens[$child['parent']]) ? $tokens[$child['parent']] : false;
-			if ($parent && $parent['id'] === T_SWITCH && $line[0] === "}") {
+			if ($parent && $parent['id'] === T_SWITCH && $line[0] === '}') {
 				$this->_currentCount -= 2;
 			} else {
 				$this->_currentCount -= 1;
 			}
 		}
-		if ($lineLen > 0 && $line[$lineLen - 1] === ":") {
-			$elif = strpos($line, "elseif") !== false || strpos($line, "else if") !== false;
+		if ($lineLen > 0 && $line[$lineLen - 1] === ':') {
+			$elif = strpos($line, 'elseif') !== false || strpos($line, 'else if') !== false;
 			$else = $line[$lineLen - 5] . $line[$lineLen - 4];
 			$else .= $line[$lineLen - 3] . $line[$lineLen - 2];
-			if ($elif || $else === "else") {
+			if ($elif || $else === 'else') {
 				$this->_currentCount -= 1;
 			}
 		}
 
 		$currentCount = $this->_currentCount;
 
-		$termOp = $lineLen > 1 && $line[0] === "-" && $line[1] === ">";
-		$boolAnd = $boolOr = $logAnd = $logOr = false;
-		$decimal = $prevLen > 0 && $prevLine[$prevLen - 1] === ".";
-		if ($prevLen > 2) {
-			$last = $prevLine[$prevLen - 3] . $prevLine[$prevLen - 2] . $prevLine[$prevLen - 1];
-			$logAnd = strtolower($last) === 'and';
+		$logicOp = false;
+		foreach (array('&&', '||', 'and', 'or', 'xor', 'AND', 'OR', 'XOR') as $op) {
+			$op = preg_quote($op);
+			if (preg_match("/\s+$op$/", $prevLine)) {
+				$logicOp = true;
+			}
 		}
-		if ($prevLen > 1) {
-			$last = $prevLine[$prevLen - 2] . $prevLine[$prevLen - 1];
-			$boolAnd = $last === '&&';
-			$boolOr = $last === '||';
-			$logOr = strtolower($last) === 'or';
+		$termOp = false;
+		if (preg_match('/^->/', $line)) {
+			$termOp = true;
 		}
 
-		if ($termOp || $boolAnd || $boolOr || $logAnd || $logOr || $decimal) {
+		if ($logicOp || $termOp) {
+			if (!$tokens[reset($currentTokens)]['brackets']) {
+				$currentCount += 1;
+			}
+		} elseif (substr($prevLine, -1) === '.') {
 			$currentCount += 1;
 		}
 
 		$switch = false;
-		$find = false;
-		$find = $find || substr($line, -6) === "break;";
-		$find = $find || substr($line, -8) === "default:";
-		$find = $find || ($line[$lineLen - 1] === ":" && strpos($line, "case") !== false);
+		$find = preg_match('/(break;|default:|case\s(.*?):)$/', $line);
 		if ($find) {
 			$childContent = array('case', 'default', 'break');
 			$child = $tokens[$testable->findNextContent($childContent, $currentTokens)];
@@ -147,19 +146,29 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			}
 		}
 
-		$find = !$switch && in_array($line[$lineLen - 1], array("{", ":", "(", "["));
+		$find = !$switch && in_array($line[$lineLen - 1], array('{', ':'));
 		$found = false;
+		$inBrace = 0;
 		foreach ($currentTokens as $tokenKey) {
-			if (in_array($tokens[$tokenKey]['id'], $endingTokens, true)) {
+			$id = $tokens[$tokenKey]['id'];
+			if (in_array($id, $endingTokens, true)) {
 				$currentCount -= 1;
 				$this->_currentCount -= 1;
 			}
-			if ($find && $tokens[$tokenKey]['id'] === T_SWITCH) {
+			if ($find && $id === T_SWITCH) {
 				$this->_currentCount += 2;
 				$found = true;
 			}
+			$content = $tokens[$tokenKey]['content'];
+			if ($content === '(' || $content === '[') {
+				$inBrace++;
+			} elseif ($content === ')' || $content === ']') {
+				$inBrace--;
+			}
 		}
 		if ($find && !$found) {
+			$this->_currentCount += 1;
+		} elseif ($inBrace > 0) {
 			$this->_currentCount += 1;
 		}
 		return $currentCount;
