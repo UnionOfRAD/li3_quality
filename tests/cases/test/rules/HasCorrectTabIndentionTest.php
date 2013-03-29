@@ -493,6 +493,45 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 		$this->assertCount(1, $this->rule->violations());
 	}
+
+	public function testIgnoreBracesInString() {
+		$code = <<<EOD
+\$code = 'hello(';
+echo bob;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testClosureAsParameter() {
+		$code = <<<EOD
+return \$this->_filter(__METHOD__, \$args, function(\$self, \$args) {
+	\$variable = \$this->_protected;
+	if (isset(\$this->_path[\$variable])) {
+		return \$this->path[\$variable];
+	}
+});
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testMutlilineConditions() {
+		$code = <<<EOD
+\$expression = (isset(\$variable[\$key]) && (
+	\$class instanceof static::\$_classes['item'] ||
+	\$condtions
+));
+EOD;
+		$this->assertRulePass($code, $this->rule);
+
+		$code = <<<EOD
+\$expression = (
+	\$var1 &&
+	\$var2 ||
+	\$var3
+);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>
