@@ -238,12 +238,19 @@ EOD;
 \$bar = false;
 EOD;
 		$this->assertRulePass($code, $this->rule);
-	}
 
-	public function testIncorrectMultiLineString() {
 		$code = <<<EOD
 \$demo = 'abcdef' .
-		'ghi';
+	     'ghi';
+\$bar = false;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIncorrectMultiLineStringWithTwoTabs() {
+		$code = <<<EOD
+\$demo = 'abcdef' .
+		 'ghi';
 \$bar = false;
 EOD;
 		$this->assertRuleFail($code, $this->rule);
@@ -546,6 +553,49 @@ echo 'bar';
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	public function testMultilineIndentInArrayWithContact() {
+		$code = <<<EOD
+\$data = array(
+	'key'           => 'value',
+	'very long key' => 'hello world',
+	'multiline'     => 'qjfkqfkqslkfqjfjqsdfklsmqflksjfsdfsqdkfksqfl' .
+	                   'kfjklqsjflkqskjfklqsfsqkdfjkqlsjfklsqkfsk' .
+	                   'kfjklqsjflkqskjfklqsfsqkdfjkqlsjfklsqkfsk'.
+	                   'kfjklqsjflkqskjfklqsfsqkdfjkqlsjfklsqkfsk'
+	'last'          => 'end',
+	'mult => line2' => 'qjfkqfkqslfjqsdfklsmqflksjfsdfsqdkfksqfl' .
+	                   'kfjklqsjqlsjfklsqkfsk',
+	'multline3'     => 'qjfkqfkqslf => jqsdfklsmqflksjfsdfsqdkfksqfl' .
+	                   'kfjklqsjqlsjfklsqkfsk'
+);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testMultilineIndentInArrayWithOr() {
+		$code = <<<EOD
+\$data = array(
+	'key'           => 'value',
+	'very long key' => (\$variable && \$variable2 && \$variable2) ||
+	                   (\$variable3 && \$variable4 && \$variable5)
+);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIncorrectIndentationInArray() {
+		$code = <<<EOD
+\$data = array(
+	'key'           => 'value',
+	'very long key' => 'hello world',
+	'multiline'     => 'qjfkqfkqslkfqjfjqsdfklsmqflksjfsdfsqdkfksqfl' .
+		'kfjklqsjflkqskjfklqsfsqkdfjkqlsjfklsqkfsk'
+);
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+	}
+
 }
 
 ?>

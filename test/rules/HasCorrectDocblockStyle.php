@@ -68,7 +68,7 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 			if ($parentId === false && $token['line'] !== 2) {
 				$this->addViolation(array(
 					'message' => 'Docblocks should only be at the beginning of the page or ' .
-						'before a class/function.',
+					             'before a class/function.',
 					'line' => $token['line'],
 				));
 				continue;
