@@ -486,6 +486,25 @@ EOD;
 		$this->assertIdentical(29, count($tokens));
 	}
 
+	public function testStaticDynamicVariableInsideExpression() {
+		$code = <<<EOD
+switch (\$case) {
+	case 'case 1':
+		if (static::\${\$var}) {
+			echo 'hello';
+		}
+	break;
+}
+echo 'bar';
+EOD;
+		$tokenized = Parser::tokenize($code);
+		$tokens = $tokenized['tokens'];
+		$this->assertIdentical(42, count($tokens));
+		$this->assertIdentical(18, count($tokens[0]['children']));
+		$this->assertIdentical(15, count($tokens[13]['children']));
+		$this->assertIdentical(3, count($tokens[18]['children']));
+	}
+
 	public function testModifiers() {
 		$code = <<<EOD
 class Inflector {

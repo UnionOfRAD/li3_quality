@@ -532,6 +532,20 @@ EOD;
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	public function testCurlyBraceSyntax() {
+		$code = <<<EOD
+switch (\$case) {
+	case 'case 1':
+		if (static::\${\$var}) {
+			echo 'hello';
+		}
+	break;
+}
+echo 'bar';
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>
