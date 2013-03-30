@@ -5,6 +5,8 @@ namespace li3_quality\analysis;
 use li3_quality\analysis\ParserException;
 
 define('T_DOLLAR_CURLY_BRACES', 500);
+define('T_ARRAY_OPEN', 501);
+define('T_SHORT_ARRAY_OPEN', 502);
 
 class Parser extends \lithium\analysis\Parser {
 
@@ -96,6 +98,16 @@ class Parser extends \lithium\analysis\Parser {
 			'endingContent' => array('}'),
 			'parents' => array()
 		),
+		T_ARRAY_OPEN => array(
+			'endingTokens' => array(),
+			'endingContent' => array(')'),
+			'parents' => array()
+		),
+		T_SHORT_ARRAY_OPEN => array(
+			'endingTokens' => array(),
+			'endingContent' => array(']'),
+			'parents' => array()
+		)
 	);
 
 	/**
@@ -240,8 +252,11 @@ class Parser extends \lithium\analysis\Parser {
 	public static function tokenize($code, array $options = array()) {
 		$tokens = parent::tokenize($code, $options);
 		$currentParent = -1;
-		$brackets = $curlyBrackets = $level = 0;
+		$brackets = $curlyBrackets = $squareBrackets = $level = 0;
 		$lineCache = $typeCache = array();
+
+		$inClass = $inFunction = $inArray = $inControl = false;
+		$previousTokenId = null;
 
 		foreach ($tokens as $tokenId => $token) {
 			$isCurlyBrace = (
@@ -254,8 +269,34 @@ class Parser extends \lithium\analysis\Parser {
 				$tokens[$tokenId]['name'] = 'T_DOLLAR_CURLY_BRACES';
 			}
 
+			$isArray = (
+				$token['content'] === '(' &&
+				$previousTokenId !== null &&
+				$tokens[$previousTokenId]['id'] === T_ARRAY
+			);
+			if ($isArray) {
+				$tokens[$tokenId]['id'] = T_ARRAY_OPEN;
+				$tokens[$tokenId]['name'] = 'T_ARRAY_OPEN';
+			}
+
+			$isShortArray = (
+				$token['content'] === '[' &&
+				$previousTokenId !== null && (
+					$tokens[$previousTokenId]['id'] !== T_VARIABLE &&
+					$tokens[$previousTokenId]['id'] !== T_ENCAPSED_AND_WHITESPACE
+				)
+			);
+			if ($isShortArray) {
+				$tokens[$tokenId]['id'] = T_SHORT_ARRAY_OPEN;
+				$tokens[$tokenId]['name'] = 'T_SHORT_ARRAY_OPEN';
+			}
+
 			if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
-				if ($token['content'] === '{') {
+				if ($token['content'] === '[') {
+					$squareBrackets++;
+				} elseif ($token['content'] === ']') {
+					$squareBrackets--;
+				} elseif ($token['content'] === '{') {
 					$curlyBrackets++;
 				} elseif ($token['content'] === '}') {
 					$curlyBrackets--;
@@ -279,6 +320,9 @@ class Parser extends \lithium\analysis\Parser {
 			$tokens[$tokenId]['level'] = $level;
 			$tokens[$tokenId]['brackets'] = $brackets;
 			$tokens[$tokenId]['curlyBrackets'] = $curlyBrackets;
+			$tokens[$tokenId]['squareBrackets'] = $squareBrackets;
+			$tokens[$tokenId]['totalBrackets'] = $brackets + $curlyBrackets + $squareBrackets;
+			$tokens[$tokenId]['totalBrackets'] -= (integer) $isArray || $isShortArray;
 			$tokens[$tokenId]['parent'] = $currentParent;
 			$tokens[$tokenId]['children'] = array();
 
@@ -289,13 +333,18 @@ class Parser extends \lithium\analysis\Parser {
 			$parent = static::_isEndOfParent($tokenId, $currentParent, $tokens);
 			if ($parent !== false) {
 				$level--;
+				$tokens[$tokenId]['level'] = $level;
 				$currentParent = $parent;
 			} elseif (static::_isParent($tokenId, $tokens)) {
 				$level++;
 				$currentParent = $tokenId;
 			}
+
+			if ($token['id'] !== T_WHITESPACE) {
+				$previousTokenId = $tokenId;
+			}
 		}
-		if ($level !== 0 || $curlyBrackets !== 0 || $brackets !== 0) {
+		if ($level !== 0 || $squareBrackets !== 0 || $curlyBrackets !== 0 || $brackets !== 0) {
 			$smallTokens = array_slice($tokens, 0, 20);
 			$exception = new ParserException('A parse error has been encountered.');
 			$exception->parserData = compact('level', 'curlyBrackets', 'brackets', 'tokens');
@@ -318,9 +367,11 @@ class Parser extends \lithium\analysis\Parser {
 		}
 		$token = $tokens[$tokenId];
 		$parent = $tokens[$parentId];
-		if ($tokens[$tokenId]['curlyBrackets'] !== $tokens[$parentId]['curlyBrackets']) {
+
+		if ($tokens[$tokenId]['totalBrackets'] !== $tokens[$parentId]['totalBrackets']) {
 			return false;
 		}
+
 		$endingTokens = static::$_parentTokens[$parent['id']]['endingTokens'];
 		$endingContent = static::$_parentTokens[$parent['id']]['endingContent'];
 		$hasEndingTokens = in_array($token['id'], $endingTokens);

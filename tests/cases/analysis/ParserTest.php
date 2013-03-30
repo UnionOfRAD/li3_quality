@@ -670,6 +670,47 @@ EOD;
 		$this->assertEqual(9, count($tokens));
 	}
 
+	public function testArrayChildren() {
+		$code = <<<EOD
+\$hello = \$foo ['bar'];
+\$foo = array(
+	array(
+		'key1' => (\$variable1 && \$variable2),
+		'key2' => \$var['hello']
+	)
+);
+EOD;
+		$tokenized = Parser::tokenize($code);
+		$tokens = $tokenized['tokens'];
+
+		$this->assertIdentical(T_ARRAY_OPEN, $tokens[16]['id']);
+		$this->assertTrue(in_array(19, $tokens[16]['children']));
+		$this->assertCount(5, $tokens[16]['children']);
+
+		$this->assertIdentical(T_ARRAY_OPEN, $tokens[19]['id']);
+		$this->assertCount(24, $tokens[19]['children']);
+	}
+
+	public function testPhp54ArrayChildren() {
+		$code = <<<EOD
+\$hello = \$foo ['bar'];
+\$foo = [
+	[
+		'key1' => (\$variable1 && \$variable2),
+		'key2' => \$var ['hello']
+	]
+];
+EOD;
+		$tokenized = Parser::tokenize($code);
+		$tokens = $tokenized['tokens'];
+
+		$this->assertIdentical(T_SHORT_ARRAY_OPEN, $tokens[15]['id']);
+		$this->assertTrue(in_array(17, $tokens[15]['children']));
+		$this->assertCount(4, $tokens[15]['children']);
+
+		$this->assertIdentical(T_SHORT_ARRAY_OPEN, $tokens[17]['id']);
+		$this->assertCount(25, $tokens[17]['children']);
+	}
 }
 
 ?>

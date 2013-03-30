@@ -554,7 +554,7 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testMultilineIndentInArrayWithContact() {
+	public function testIndentInArrayWithContact() {
 		$code = <<<EOD
 \$data = array(
 	'key'           => 'value',
@@ -573,7 +573,7 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testMultilineIndentInArrayWithOr() {
+	public function testIndentInArrayWithOr() {
 		$code = <<<EOD
 \$data = array(
 	'key'           => 'value',
