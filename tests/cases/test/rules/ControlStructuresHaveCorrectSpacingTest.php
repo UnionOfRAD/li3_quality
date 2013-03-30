@@ -373,7 +373,7 @@ if (true) {
 	return true;
 }
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRuleFail($code, $this->rule);
 	}
 
 	public function testIncorrectElseIfWithNoSpaceNoFirstLineSpacing() {

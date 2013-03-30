@@ -9,7 +9,16 @@ define('T_ARRAY_OPEN', 501);
 define('T_SHORT_ARRAY_OPEN', 502);
 define('T_START_DOUBLE_QUOTE', 503);
 define('T_END_DOUBLE_QUOTE', 504);
+define('T_START_BRACKET', 505);
+
 class Parser extends \lithium\analysis\Parser {
+
+	/**
+	 * The bracket checksum value for tokenization.
+	 *
+	 * @var array
+	 */
+	protected static $_bracketsChecksum = 0;
 
 	/**
 	 * Tokens that can be parent tokens.
@@ -18,107 +27,129 @@ class Parser extends \lithium\analysis\Parser {
 	 */
 	protected static $_parentTokens = array(
 		T_CLASS => array(
-			'endingTokens' => array(),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array('}' => '{'),
+			'nestOn' => array('{')
 		),
 		T_IF => array(
-			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array(
+				'T_ENDIF' => ':',
+				'T_ELSE' => true,
+				'T_ELSEIF' => true,
+				'}' => '{'
+			),
+			'nestOn' => array('{', ':')
 		),
 		T_ELSE => array(
-			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array(
+				'T_ENDIF' => ':',
+				'T_ELSE' => true,
+				'T_ELSEIF' => true,
+				'}' => '{'
+			),
+			'nestOn' => array('{', ':')
 		),
 		T_ELSEIF => array(
-			'endingTokens' => array(T_ENDIF, T_ELSE, T_ELSEIF),
+			'endingTokens' => array(
+				'T_ENDIF' => ':',
+				'T_ELSE' => true,
+				'T_ELSEIF' => true,
+				'}' => '{'
+			),
 			'endingContent' => array('}'),
-			'parents' => array()
+			'nestOn' => array('{', ':')
 		),
 		T_FOR => array(
-			'endingTokens' => array(T_ENDFOR),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array(
+				'T_ENDFOR' => ':',
+				'}' => '{'
+			),
+			'nestOn' => array('{', ':')
 		),
 		T_FOREACH => array(
-			'endingTokens' => array(T_ENDFOREACH),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array(
+				'T_ENDFOREACH' => ':',
+				'}' => '{'
+			),
+			'nestOn' => array('{', ':')
 		),
 		T_FUNCTION => array(
-			'endingTokens' => array(),
-			'endingContent' => array('}', ';'),
-			'parents' => array()
+			'endingTokens' => array('}' => '{', ';' => true),
+			'nestOn' => array('{')
 		),
 		T_INTERFACE => array(
-			'endingTokens' => array(),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array('}' => '{'),
+			'nestOn' => array('{')
 		),
 		T_SWITCH => array(
-			'endingTokens' => array(),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array('}' => '{'),
+			'nestOn' => array('{', ':')
+		),
+		T_CASE => array(
+			'endingTokens' => array(
+				'T_CASE' => ':',
+				'T_BREAK' => ':',
+				'T_DEFAULT' => ':'
+			),
+			'nestOn' => array(':')
+		),
+		T_DEFAULT => array(
+			'endingTokens' => array(
+				'T_BREAK' => ':'
+			),
+			'nestOn' => array(':')
 		),
 		T_TRY => array(
-			'endingTokens' => array(),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array('}' => '{'),
+			'nestOn' => array('{')
 		),
 		T_CATCH => array(
-			'endingTokens' => array(),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array('}' => '{'),
+			'nestOn' => array('{')
 		),
 		T_WHILE => array(
-			'endingTokens' => array(T_ENDWHILE),
-			'endingContent' => array('}', ';'),
-			'parents' => array()
+			'endingTokens' => array(
+				'T_ENDWHILE' => ':',
+				'}' => '{',
+				';' => true
+			),
+			'nestOn' => array('{')
 		),
 		T_DO => array(
-			'endingTokens' => array(),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array('}' => '{'),
+			'nestOn' => array('{')
 		),
 		T_DECLARE => array(
-			'endingTokens' => array(),
-			'endingContent' => array(';', '}'),
-			'parents' => array()
-		),
-		T_VARIABLE => array(
-			'endingTokens' => array(),
-			'endingContent' => array(';'),
-			'parents' => array(
-				T_CLASS,
-			)
-		),
-		T_DOLLAR_CURLY_BRACES => array(
-			'endingTokens' => array(),
-			'endingContent' => array('}'),
-			'parents' => array()
+			'endingTokens' => array(
+				'T_ENDDECLARE' => ':',
+				'}' => '{',
+				';' => true
+			),
+			'nestOn' => array('{', ':')
 		),
 		T_ARRAY_OPEN => array(
-			'endingTokens' => array(),
-			'endingContent' => array(')'),
-			'parents' => array()
+			'endingTokens' => array(')' => 'T_ARRAY_OPEN'),
+			'nestOn' => true
 		),
 		T_SHORT_ARRAY_OPEN => array(
-			'endingTokens' => array(),
-			'endingContent' => array(']'),
-			'parents' => array()
+			'endingTokens' => array(']' => 'T_SHORT_ARRAY_OPEN'),
+			'nestOn' => true
+		),
+		T_START_BRACKET => array(
+			'endingTokens' => array(')' => 'T_START_BRACKET'),
+			'nestOn' => true
+		),
+		T_DOLLAR_CURLY_BRACES => array(
+			'endingTokens' => array('}' => 'T_DOLLAR_CURLY_BRACES'),
+			'nestOn' => false
 		),
 		T_START_HEREDOC => array(
-			'endingTokens' => array(T_END_HEREDOC),
-			'endingContent' => array(),
-			'parents' => array()
+			'endingTokens' => array('T_END_HEREDOC' => 'T_START_HEREDOC'),
+			'nestOn' => false
 		),
 		T_START_DOUBLE_QUOTE => array(
-			'endingTokens' => array(),
-			'endingContent' => array('"'),
-			'parents' => array()
-		)
+			'endingTokens' => array('T_END_DOUBLE_QUOTE' => 'T_START_DOUBLE_QUOTE'),
+			'nestOn' => false
+		),
 	);
 
 	/**
@@ -261,69 +292,82 @@ class Parser extends \lithium\analysis\Parser {
 	 *         - relationships: parent and child relations (token ids) indexed by token id
 	 */
 	public static function tokenize($code, array $options = array()) {
+		$options += array('wrap' => true);
 		$tokens = static::_tokenize(parent::tokenize($code, $options));
-		$currentParent = -1;
-		$brackets = $curlyBrackets = $squareBrackets = $level = 0;
-		$charCache = $lineCache = $typeCache = array();
-
-		$inClass = $inFunction = $inArray = $inControl = false;
-		$previousTokenId = null;
+		static::$_bracketsChecksum = 0;
+		$curParent = -1;
+		$brackets = $curlyBrackets = $squareBrackets = 0;
+		$level = $needNestUp = $nestLine = $nestLevel = 0;
+		$nestLog = $charCache = $lineCache = $typeCache = array();
+		$inPhp = $options['wrap'] ? true : false;
 
 		foreach ($tokens as $tokenId => $token) {
-			if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
-				if ($token['content'] === '[') {
-					$squareBrackets++;
-				} elseif ($token['content'] === ']') {
-					$squareBrackets--;
-				} elseif ($token['content'] === '{') {
-					$curlyBrackets++;
-				} elseif ($token['content'] === '}') {
-					$curlyBrackets--;
-				} elseif ($token['content'] === '(') {
-					$brackets++;
-				} elseif ($token['content'] === ')') {
-					$brackets--;
+
+			$lineCache[$token['line']][] = $tokenId;
+			$typeCache[$token['id']][] = $tokenId;
+
+			if ($token['id'] === T_CLOSE_TAG) {
+				$needNestUp = 0;
+				$nestLevel = 0;
+				$inPhp = false;
+			}
+
+			if ($token['id'] === T_OPEN_TAG) {
+				$inPhp = true;
+			}
+
+			if (!$inPhp) {
+				continue;
+			}
+
+			if ($needNestUp > 0) {
+				$status = $nestLog[$needNestUp];
+				if (!$status['applied'] && in_array($token['content'], $status['nestOn'])) {
+					$nestLog[$needNestUp]['applied'] = true;
+				}
+				if ($token['line'] > $nestLine && $status['applied']) {
+					$nestLevel++;
+					$needNestUp = 0;
 				}
 			}
 
-			if (!isset($lineCache[$token['line']])) {
-				$lineCache[$token['line']] = array();
-			}
-			$lineCache[$token['line']][] = $tokenId;
-
-			if (!isset($typeCache[$token['id']])) {
-				$typeCache[$token['id']] = array();
-			}
-			$typeCache[$token['id']][] = $tokenId;
-
+			$tokens[$tokenId] = static::_updateChecksum($tokens[$tokenId], $tokens);
 			$tokens[$tokenId]['level'] = $level;
-			$tokens[$tokenId]['brackets'] = $brackets;
-			$tokens[$tokenId]['curlyBrackets'] = $curlyBrackets;
-			$tokens[$tokenId]['squareBrackets'] = $squareBrackets;
-			$tokens[$tokenId]['totalBrackets'] = $brackets + $curlyBrackets + $squareBrackets;
-			$isArray = ($token['id'] === T_SHORT_ARRAY_OPEN || $token['id'] === T_ARRAY_OPEN);
-			$tokens[$tokenId]['totalBrackets'] -= (integer) $isArray;
-			$tokens[$tokenId]['parent'] = $currentParent;
+			$tokens[$tokenId]['parent'] = $curParent;
 			$tokens[$tokenId]['children'] = array();
-
-			if (isset($tokens[$currentParent])) {
-				$tokens[$currentParent]['children'][] = $tokenId;
+			if (isset($tokens[$curParent])) {
+				$tokens[$curParent]['children'][] = $tokenId;
 			}
 
 			$len = strlen($token['content']);
 			$line = $token['line'];
 			for ($i = 0; $i < $len; $i++) {
-				$charCache[$line][$i]['parent'] = $currentParent;
+				$charCache[$line][$i]['parent'] = $curParent;
 			}
 
-			$parent = static::_isEndOfParent($tokenId, $currentParent, $tokens);
-			if ($parent !== false) {
+			while (($parent = static::_isEndOfParent($tokenId, $curParent, $tokens)) !== false) {
+				if (static::$_parentTokens[$tokens[$curParent]['id']]['nestOn']) {
+					$needNestUp === 0 ?: $needNestUp--;
+					$nestLevel = $tokens[$curParent]['nestLevel'];
+				}
 				$level--;
-				$tokens[$tokenId]['level'] = $level;
-				$currentParent = $parent;
-			} elseif (static::_isParent($tokenId, $tokens)) {
+				$curParent = $parent;
+			}
+
+			$tokens[$tokenId]['nestLevel'] = $nestLevel;
+
+			if (static::_isParent($tokenId, $tokens)) {
+				$tokens[$tokenId]['parent'] = $curParent;
+				if ($nestOn = static::$_parentTokens[$token['id']]['nestOn']) {
+					$nestLine = $token['line'];
+					$needNestUp++;
+					$nestLog[$needNestUp] = array(
+						'nestOn' => $nestOn,
+						'applied' => $nestOn === true ? true : false
+					);
+				}
+				$curParent = $tokenId;
 				$level++;
-				$currentParent = $tokenId;
 			}
 		}
 		if ($level !== 0 || $squareBrackets !== 0 || $curlyBrackets !== 0 || $brackets !== 0) {
@@ -336,31 +380,51 @@ class Parser extends \lithium\analysis\Parser {
 	}
 
 	/**
+	 * Update the bracket checksum values for a token.
+	 *
+	 * @param  array $token    The token
+	 * @param  array $tokens   The array of the currently created tokens
+	 */
+	protected static function _updateChecksum(array $token, array $tokens) {
+		$token['checksum'] = static::$_bracketsChecksum;
+
+		if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
+			$char = $token['content'];
+			if ($char === ')' || $char === ']' || $char === '}') {
+				$token['checksum'] = --static::$_bracketsChecksum;
+			} elseif ($char === '(' || $char === '[' || $char === '{') {
+				static::$_bracketsChecksum++;
+			}
+		}
+		return $token;
+	}
+
+	/**
 	 * Will determine if this is the end of the current parent.
 	 *
 	 * @param  int   $tokenId  The tokenId you are analyzing
-	 * @param  int   $parentId The tokenId of the currentParent
+	 * @param  int   $parentId The tokenId of the curParent
 	 * @param  array $tokens   The array of the currently created tokens
-	 * @return int|bool        Will either return `false` or the id of the new currentParent.
+	 * @return int|bool        Will either return `false` or the id of the new curParent.
 	 */
 	protected static function _isEndOfParent($tokenId, $parentId, array $tokens) {
 		if (!isset($tokens[$parentId])) {
 			return false;
 		}
-		$token = $tokens[$tokenId];
-		$parent = $tokens[$parentId];
 
-		if ($tokens[$tokenId]['totalBrackets'] !== $tokens[$parentId]['totalBrackets']) {
+		$diff = $tokens[$tokenId]['checksum'] - $tokens[$parentId]['checksum'];
+
+		if ($diff > 0) {
 			return false;
 		}
 
+		$token = $tokens[$tokenId];
+		$parent = $tokens[$parentId];
 		$endingTokens = static::$_parentTokens[$parent['id']]['endingTokens'];
-		$endingContent = static::$_parentTokens[$parent['id']]['endingContent'];
-		$hasEndingTokens = in_array($token['id'], $endingTokens);
-		$hasEndingContent = in_array($token['content'], $endingContent);
-		if ($hasEndingTokens || $hasEndingContent) {
+		if (isset($endingTokens[$token['name']]) || ($diff < 0 && $token['name'] === '}')) {
 			return $tokens[$parentId]['parent'];
 		}
+
 		return false;
 	}
 
@@ -377,52 +441,42 @@ class Parser extends \lithium\analysis\Parser {
 		if (!isset(static::$_parentTokens[$token['id']])) {
 			return false;
 		}
-		$requiredParents = static::$_parentTokens[$token['id']]['parents'];
-		$parentId = $tokens[$tokenId]['parent'];
-		$isDecoy = false;
-		$hasRequiredParents = empty($requiredParents);
-		if (isset($tokens[$parentId])) {
-			$parentToken = $tokens[$parentId]['id'];
-			if (!$hasRequiredParents) {
-				$hasRequiredParents = in_array($parentToken, $requiredParents);
-			}
-			if ($token['id'] === T_IF) {
-				$correctParent = $parentToken === T_ELSE;
-				$correctSpacing = $tokenId - $parentId === 2;
-				$correctWhitespace = $tokens[$tokenId - 1]['id'] === T_WHITESPACE;
-				$isDecoy = $correctParent && $correctSpacing && $correctWhitespace;
-			}
-		}
-		return $hasRequiredParents && !$isDecoy;
+		return true;
 	}
 
 	/**
-	 * Adding extra tokens for quality rules;
+	 * Adding extra tokens for quality rules
+	 *
+	 * - Add some new token IDs
+	 * - Merge T_ELSE + T_WHITESPACE(s) + T_IF to an unique T_ELSEIF token
 	 *
 	 * @param  array $tokens The array of tokens
 	 * @return array The array of extended tokens
 	 */
 	protected static function _tokenize(array $tokens) {
 		$doubleQuote = false;
+		$results = array();
+		$cpt = 0;
 		foreach ($tokens as $tokenId => $token) {
 			if ($token['content'] === '"') {
 				if (!$doubleQuote) {
-					$tokens[$tokenId]['id'] = T_START_DOUBLE_QUOTE;
-					$tokens[$tokenId]['name'] = 'T_START_DOUBLE_QUOTE';
+					$token['id'] = T_START_DOUBLE_QUOTE;
+					$token['name'] = 'T_START_DOUBLE_QUOTE';
 				} else {
-					$tokens[$tokenId]['id'] = T_END_DOUBLE_QUOTE;
-					$tokens[$tokenId]['name'] = 'T_END_DOUBLE_QUOTE';
+					$token['id'] = T_END_DOUBLE_QUOTE;
+					$token['name'] = 'T_END_DOUBLE_QUOTE';
 				}
 				$doubleQuote = !$doubleQuote;
 			}
+
 			$isCurlyBrace = (
 				$token['content'] === '$' &&
 				isset($tokens[$tokenId + 1]) &&
 				$tokens[$tokenId + 1]['content'] === '{'
 			);
 			if ($isCurlyBrace) {
-				$tokens[$tokenId]['id'] = T_DOLLAR_CURLY_BRACES;
-				$tokens[$tokenId]['name'] = 'T_DOLLAR_CURLY_BRACES';
+				$token['id'] = T_DOLLAR_CURLY_BRACES;
+				$token['name'] = 'T_DOLLAR_CURLY_BRACES';
 			}
 
 			$isArray = (
@@ -431,8 +485,8 @@ class Parser extends \lithium\analysis\Parser {
 				$tokens[$previousTokenId]['id'] === T_ARRAY
 			);
 			if ($isArray) {
-				$tokens[$tokenId]['id'] = T_ARRAY_OPEN;
-				$tokens[$tokenId]['name'] = 'T_ARRAY_OPEN';
+				$token['id'] = T_ARRAY_OPEN;
+				$token['name'] = 'T_ARRAY_OPEN';
 			}
 
 			$isShortArray = (
@@ -443,16 +497,38 @@ class Parser extends \lithium\analysis\Parser {
 				)
 			);
 			if ($isShortArray) {
-				$tokens[$tokenId]['id'] = T_SHORT_ARRAY_OPEN;
-				$tokens[$tokenId]['name'] = 'T_SHORT_ARRAY_OPEN';
+				$token['id'] = T_SHORT_ARRAY_OPEN;
+				$token['name'] = 'T_SHORT_ARRAY_OPEN';
+			}
+
+			if ($token['content'] === '(' && !$token['id']) {
+				$token['id'] = T_START_BRACKET;
+				$token['name'] = 'T_START_BRACKET';
 			}
 
 			if ($token['id'] !== T_WHITESPACE) {
 				$previousTokenId = $tokenId;
 			}
+
+			if ($token['id'] === T_IF) {
+				$i = $cpt;
+				$spaces = '';
+				while ($i-- > 0 && $results[$i - 1]['id'] === T_WHITESPACE) {
+					$spaces = $results[$i - 1]['content'] . $spaces;
+				}
+				if (--$i >= 0 && $results[$i]['id'] === T_ELSE) {
+					$token['id'] = T_ELSEIF;
+					$token['name'] = 'T_ELSEIF';
+					$token['content'] = $results[$i]['content'] . $spaces . $token['content'];
+					$cpt = $i;
+				}
+			}
+
+			$results[$cpt++] = $token;
 		}
-		return $tokens;
-	} 
+
+		return $results;
+	}
 }
 
 ?>

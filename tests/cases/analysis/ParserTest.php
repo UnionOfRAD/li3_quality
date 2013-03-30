@@ -296,7 +296,7 @@ EOD;
 
 	public function testNoParents() {
 		$code = <<<EOD
-return (!empty(\$name)) ? '{\$path}/{\$name}' : \$path;
+return \$name ? '{\$path}/{\$name}' : \$path;
 EOD;
 		$tokenized = Parser::tokenize($code);
 		$tokens = $tokenized['tokens'];
@@ -331,7 +331,7 @@ if (true) {
 EOD;
 		$tokenized = Parser::tokenize($code);
 		$tokens = $tokenized['tokens'];
-		$this->assertIdentical(39, count($tokens));
+		$this->assertIdentical(37, count($tokens));
 	}
 	public function testDocBlockTooFarHasNoParent() {
 		$code = <<<EOD
@@ -500,8 +500,13 @@ EOD;
 		$tokenized = Parser::tokenize($code);
 		$tokens = $tokenized['tokens'];
 		$this->assertIdentical(42, count($tokens));
-		$this->assertIdentical(18, count($tokens[0]['children']));
-		$this->assertIdentical(15, count($tokens[13]['children']));
+		$this->assertIdentical(T_SWITCH, $tokens[0]['id']);
+		$this->assertIdentical(9, count($tokens[0]['children']));
+		$this->assertIdentical(T_CASE, $tokens[8]['id']);
+		$this->assertIdentical(7, count($tokens[8]['children']));
+		$this->assertIdentical(T_IF, $tokens[13]['id']);
+		$this->assertIdentical(11, count($tokens[13]['children']));
+		$this->assertIdentical(T_DOLLAR_CURLY_BRACES, $tokens[18]['id']);
 		$this->assertIdentical(3, count($tokens[18]['children']));
 	}
 
@@ -688,7 +693,7 @@ EOD;
 		$this->assertCount(5, $tokens[16]['children']);
 
 		$this->assertIdentical(T_ARRAY_OPEN, $tokens[19]['id']);
-		$this->assertCount(24, $tokens[19]['children']);
+		$this->assertCount(18, $tokens[19]['children']);
 	}
 
 	public function testPhp54ArrayChildren() {
@@ -709,7 +714,7 @@ EOD;
 		$this->assertCount(4, $tokens[15]['children']);
 
 		$this->assertIdentical(T_SHORT_ARRAY_OPEN, $tokens[17]['id']);
-		$this->assertCount(25, $tokens[17]['children']);
+		$this->assertCount(19, $tokens[17]['children']);
 	}
 
 	public function testParseHeredoc() {
@@ -743,6 +748,23 @@ EOD;
 		$this->assertIdentical(T_START_DOUBLE_QUOTE, $tokens[4]['id']);
 		$this->assertCount(4, $tokens[4]['children']);
 		$this->assertIdentical(T_END_DOUBLE_QUOTE, $tokens[8]['id']);
+	}
+
+	public function testParseSwitchWithoutBreak() {
+		$code = <<<EOD
+switch (true) {
+	case \$a:
+		return \$value1;
+	case \$b:
+		return \$value2;
+}
+return false;
+EOD;
+		$tokenized = Parser::tokenize($code);
+		$tokens = $tokenized['tokens'];
+		$this->assertCount(34, $tokens);
+		$this->assertIdentical('}', $tokens[28]['content']);
+		$this->assertIdentical(0, $tokens[28]['nestLevel']);
 	}
 }
 

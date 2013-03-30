@@ -66,7 +66,6 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 						)),
 						'line' => $lineIndex + 1,
 					));
-					$this->_depthLevel = $actual['tab'];
 				}
 				if ($actual['space'] < $predicted['minSpace']) {
 					$this->addViolation(array(
@@ -101,30 +100,13 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		$prevLen = strlen($prevLine);
 
 		$currentTokens = $lineCache[$testable->findTokensByLine($lineIndex + 1)];
-		$endingTokens = array(T_ENDFOR, T_ENDFOREACH, T_ENDIF, T_ENDSWITCH, T_ENDWHILE);
-		$switch = false;
+		$firstToken = $tokens[reset($currentTokens)];
 
-		if ($lineLen > 0 && ($line[0] === ')' || $line[0] === '}' || $line[0] === ']')) {
-			$ending = $testable->findNextContent(array('}'), $currentTokens);
-			$child = isset($tokens[$ending]) ? $tokens[$ending] : false;
-			$parent = isset($tokens[$child['parent']]) ? $tokens[$child['parent']] : false;
-			if ($parent && $parent['id'] === T_SWITCH && $line[0] === '}') {
-				$this->_depthLevel -= 2;
-			} else {
-				$this->_depthLevel -= 1;
-			}
+		if (!isset($firstToken['level'])) {
+			return array('minSpace' => 0,'tab' => 0);
 		}
-		if ($lineLen > 0 && $line[$lineLen - 1] === ':') {
-			$elif = strpos($line, 'elseif') !== false || strpos($line, 'else if') !== false;
-			$else = $line[$lineLen - 5] . $line[$lineLen - 4];
-			$else .= $line[$lineLen - 3] . $line[$lineLen - 2];
-			if ($elif || $else === 'else') {
-				$this->_depthLevel -= 1;
-			}
-		}
-
-		$minExpectedSpace = 0;
-		$expectedTab = $this->_depthLevel;
+		$parent = ($firstToken['parent'] > 0) ? $tokens[$firstToken['parent']] : null;
+		$expectedTab = $firstToken['nestLevel'];
 
 		$breaked = false;
 		foreach (array('&&', '||', 'and', 'or', 'xor', 'AND', 'OR', 'XOR', '.') as $op) {
@@ -134,7 +116,11 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			}
 		}
 
-		$inBrace = $tokens[reset($currentTokens)]['brackets'];
+		$minExpectedSpace = 0;
+
+		$inBrace = ($parent !== null && (
+			$parent['content'] === '(' || $parent['content'] === '['
+		));
 		if ($breaked) {
 			$minExpectedSpace = $this->_getSpaceAlignmentInArray($lineIndex, $testable);
 			if (!$minExpectedSpace && !$inBrace) {
@@ -146,42 +132,6 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			$expectedTab += 1;
 		}
 
-		$switch = false;
-		$find = preg_match('/(break;|default:|case\s(.*?):)$/', $line);
-		if ($find) {
-			$childContent = array('case', 'default', 'break');
-			$child = $tokens[$testable->findNextContent($childContent, $currentTokens)];
-			if (isset($tokens[$child['parent']]) && $tokens[$child['parent']]['id'] === T_SWITCH) {
-				$expectedTab -= 1;
-				$switch = true;
-			}
-		}
-
-		$find = !$switch && in_array($line[$lineLen - 1], array('{', ':'));
-		$found = false;
-		$inBrace = 0;
-		foreach ($currentTokens as $tokenKey) {
-			$id = $tokens[$tokenKey]['id'];
-			if (in_array($id, $endingTokens, true)) {
-				$expectedTab -= 1;
-				$this->_depthLevel -= 1;
-			}
-			if ($find && $id === T_SWITCH) {
-				$this->_depthLevel += 2;
-				$found = true;
-			}
-			$content = $tokens[$tokenKey]['content'];
-			if ($content === '(' || $content === '[') {
-				$inBrace++;
-			} elseif ($content === ')' || $content === ']') {
-				$inBrace--;
-			}
-		}
-		if ($find && !$found) {
-			$this->_depthLevel += 1;
-		} elseif ($inBrace > 0) {
-			$this->_depthLevel += 1;
-		}
 		return array(
 			'minSpace' => $minExpectedSpace,
 			'tab' => $expectedTab
@@ -270,9 +220,9 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		$length = strlen($plain);
 		if ($length > 1 && ($plain[0] . $plain[1] === "//")) {
 			return true;
-		} else if ($length > 2 && ($plain[0] . $plain[1] . $plain[2] === "/**")) {
+		} elseif ($length > 2 && ($plain[0] . $plain[1] . $plain[2] === "/**")) {
 			return true;
-		} else if ($plain[0] === "#" || $plain[0] === "*") {
+		} elseif ($plain[0] === "#" || $plain[0] === "*") {
 			return true;
 		}
 
