@@ -40,7 +40,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 *
 	 * @var integer
 	 */
-	protected $_currentCount = 0;
+	protected $_depthLevel = 0;
 
 	/**
 	 * Will iterate the lines looking for $patterns while keeping track of how many tabs
@@ -52,20 +52,30 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	public function apply($testable, array $config = array()) {
 		$followerCount = 0;
 		$lines = $testable->lines();
-		$message = 'Incorrect tab indention {:actual} should be {:predicted}.';
+		$tabMessage = 'Incorrect tab indention {:actual} should be {:predicted}.';
+		$spaceMessage = 'Incorrect space indention {:actual} should be >= {:predicted}.';
 		foreach ($lines as $lineIndex => $line) {
 			if (!$this->_shouldIgnoreLine($lineIndex, $testable)) {
-				$actual = $this->_beginningTabCount($line);
-				$predicted = $this->_beginningTabCountPredicted($lineIndex, $testable);
-				if ($predicted !== $actual) {
+				$actual = $this->_getIndent($line);
+				$predicted = $this->_getPredictedIndent($lineIndex, $testable);
+				if ($actual['tab'] !== $predicted['tab']) {
 					$this->addViolation(array(
-						'message' => String::insert($message, array(
-							'predicted' => $predicted,
-							'actual' => $actual,
+						'message' => String::insert($tabMessage, array(
+							'predicted' => $predicted['tab'],
+							'actual' => $actual['tab'],
 						)),
 						'line' => $lineIndex + 1,
 					));
-					$this->_currentCount = $actual;
+					$this->_depthLevel = $actual['tab'];
+				}
+				if ($actual['space'] < $predicted['minSpace']) {
+					$this->addViolation(array(
+						'message' => String::insert($spaceMessage, array(
+							'predicted' => $predicted['minSpace'],
+							'actual' => $actual['space'],
+						)),
+						'line' => $lineIndex + 1,
+					));
 				}
 			}
 		}
@@ -80,7 +90,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @param  array  $testable  The testable object
 	 * @return int
 	 */
-	protected function _beginningTabCountPredicted($lineIndex, $testable) {
+	protected function _getPredictedIndent($lineIndex, $testable) {
 		$tokens = $testable->tokens();
 		$lines = $testable->lines();
 		$lineCache = $testable->lineCache();
@@ -99,9 +109,9 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			$child = isset($tokens[$ending]) ? $tokens[$ending] : false;
 			$parent = isset($tokens[$child['parent']]) ? $tokens[$child['parent']] : false;
 			if ($parent && $parent['id'] === T_SWITCH && $line[0] === '}') {
-				$this->_currentCount -= 2;
+				$this->_depthLevel -= 2;
 			} else {
-				$this->_currentCount -= 1;
+				$this->_depthLevel -= 1;
 			}
 		}
 		if ($lineLen > 0 && $line[$lineLen - 1] === ':') {
@@ -109,30 +119,31 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			$else = $line[$lineLen - 5] . $line[$lineLen - 4];
 			$else .= $line[$lineLen - 3] . $line[$lineLen - 2];
 			if ($elif || $else === 'else') {
-				$this->_currentCount -= 1;
+				$this->_depthLevel -= 1;
 			}
 		}
 
-		$currentCount = $this->_currentCount;
+		$minExpectedSpace = 0;
+		$expectedTab = $this->_depthLevel;
 
-		$logicOp = false;
-		foreach (array('&&', '||', 'and', 'or', 'xor', 'AND', 'OR', 'XOR') as $op) {
+		$breaked = false;
+		foreach (array('&&', '||', 'and', 'or', 'xor', 'AND', 'OR', 'XOR', '.') as $op) {
 			$op = preg_quote($op);
 			if (preg_match("/\s+$op$/", $prevLine)) {
-				$logicOp = true;
+				$breaked = true;
 			}
-		}
-		$termOp = false;
-		if (preg_match('/^->/', $line)) {
-			$termOp = true;
 		}
 
-		if ($logicOp || $termOp) {
-			if (!$tokens[reset($currentTokens)]['brackets']) {
-				$currentCount += 1;
+		$inBrace = $tokens[reset($currentTokens)]['brackets'];
+		if ($breaked) {
+			$minExpectedSpace = $this->_getSpaceAlignmentInArray($lineIndex, $testable);
+			if (!$minExpectedSpace && !$inBrace) {
+				$expectedTab += 1;
 			}
-		} elseif (substr($prevLine, -1) === '.') {
-			$currentCount += 1;
+		}
+
+		if (preg_match('/^->/', $line) && !$inBrace) {
+			$expectedTab += 1;
 		}
 
 		$switch = false;
@@ -141,7 +152,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			$childContent = array('case', 'default', 'break');
 			$child = $tokens[$testable->findNextContent($childContent, $currentTokens)];
 			if (isset($tokens[$child['parent']]) && $tokens[$child['parent']]['id'] === T_SWITCH) {
-				$currentCount -= 1;
+				$expectedTab -= 1;
 				$switch = true;
 			}
 		}
@@ -152,11 +163,11 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		foreach ($currentTokens as $tokenKey) {
 			$id = $tokens[$tokenKey]['id'];
 			if (in_array($id, $endingTokens, true)) {
-				$currentCount -= 1;
-				$this->_currentCount -= 1;
+				$expectedTab -= 1;
+				$this->_depthLevel -= 1;
 			}
 			if ($find && $id === T_SWITCH) {
-				$this->_currentCount += 2;
+				$this->_depthLevel += 2;
 				$found = true;
 			}
 			$content = $tokens[$tokenKey]['content'];
@@ -167,11 +178,50 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			}
 		}
 		if ($find && !$found) {
-			$this->_currentCount += 1;
+			$this->_depthLevel += 1;
 		} elseif ($inBrace > 0) {
-			$this->_currentCount += 1;
+			$this->_depthLevel += 1;
 		}
-		return $currentCount;
+		return array(
+			'minSpace' => $minExpectedSpace,
+			'tab' => $expectedTab
+		);
+	}
+
+	/**
+	 * Return the minimal space required for a multilined expression in an array definition.
+	 *
+	 * @param  int    $lineIndex The index the current line is on
+	 * @param  array  $testable  The testable object
+	 * @return int
+	 */
+	protected function _getSpaceAlignmentInArray($lineIndex, $testable) {
+		if (!$lineIndex) {
+			return;
+		}
+
+		$tokens = $testable->tokens();
+		$lines = $testable->lines();
+		$lineCache = $testable->lineCache();
+
+		$prevLine = $lines[$lineIndex - 1];
+		$previousTokens = $lineCache[$testable->findTokensByLine($lineIndex)];
+		$alignTo = 0;
+		$len = 0;
+		foreach ($previousTokens as $tokenId) {
+			$len += strlen($tokens[$tokenId]['content']);
+			if ($tokens[$tokenId]['content'] === '=>') {
+				$max = strlen($prevLine);
+				while ($len + 1 < $max) {
+					if ($prevLine[$len + 1] !== ' ') {
+						break;
+					}
+					$len++;
+				}
+				$alignTo = $len;
+			}
+		}
+		return $alignTo === null ? $alignTo = 0 : $alignTo;
 	}
 
 	/**
@@ -180,13 +230,21 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @param  string $line The current line is on
 	 * @return bool
 	 */
-	protected function _beginningTabCount($line) {
-		$count = 0;
+	protected function _getIndent($line) {
+		$count = $space = $tab = 0;
 		$end = strlen($line);
 		while (($count < $end) && ($line[$count] === "\t")) {
+			$tab++;
 			$count++;
 		}
-		return $count;
+		while (($count < $end) && ($line[$count] === ' ')) {
+			$space++;
+			$count++;
+		}
+		return array(
+			'space' => $space,
+			'tab' => $tab
+		);
 	}
 
 	/**
