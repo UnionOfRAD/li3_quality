@@ -296,7 +296,7 @@ EOD;
 
 	public function testNoParents() {
 		$code = <<<EOD
-return (!empty(\$name)) ? "{\$path}/{\$name}" : \$path;
+return (!empty(\$name)) ? '{\$path}/{\$name}' : \$path;
 EOD;
 		$tokenized = Parser::tokenize($code);
 		$tokens = $tokenized['tokens'];
@@ -710,6 +710,39 @@ EOD;
 
 		$this->assertIdentical(T_SHORT_ARRAY_OPEN, $tokens[17]['id']);
 		$this->assertCount(25, $tokens[17]['children']);
+	}
+
+	public function testParseHeredoc() {
+		$code = <<<EOD
+\$code = <<<EOT
+hello {
+	\$world
+->	}
+qsdf
+EOT;
+
+EOD;
+		$tokenized = Parser::tokenize($code);
+		$tokens = $tokenized['tokens'];
+		$this->assertIdentical(T_START_HEREDOC, $tokens[4]['id']);
+		$this->assertCount(4, $tokens[4]['children']);
+		$this->assertIdentical(T_END_HEREDOC, $tokens[8]['id']);
+	}
+
+	public function testParseDoubleQuotedString() {
+		$code = <<<EOD
+\$code = "
+hello { \"
+	\$world \"
+->	}
+qsdf
+";
+EOD;
+		$tokenized = Parser::tokenize($code);
+		$tokens = $tokenized['tokens'];
+		$this->assertIdentical(T_START_DOUBLE_QUOTE, $tokens[4]['id']);
+		$this->assertCount(4, $tokens[4]['children']);
+		$this->assertIdentical(T_END_DOUBLE_QUOTE, $tokens[8]['id']);
 	}
 }
 

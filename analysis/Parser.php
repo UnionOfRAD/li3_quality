@@ -7,7 +7,8 @@ use li3_quality\analysis\ParserException;
 define('T_DOLLAR_CURLY_BRACES', 500);
 define('T_ARRAY_OPEN', 501);
 define('T_SHORT_ARRAY_OPEN', 502);
-
+define('T_START_DOUBLE_QUOTE', 503);
+define('T_END_DOUBLE_QUOTE', 504);
 class Parser extends \lithium\analysis\Parser {
 
 	/**
@@ -106,6 +107,16 @@ class Parser extends \lithium\analysis\Parser {
 		T_SHORT_ARRAY_OPEN => array(
 			'endingTokens' => array(),
 			'endingContent' => array(']'),
+			'parents' => array()
+		),
+		T_START_HEREDOC => array(
+			'endingTokens' => array(T_END_HEREDOC),
+			'endingContent' => array(),
+			'parents' => array()
+		),
+		T_START_DOUBLE_QUOTE => array(
+			'endingTokens' => array(),
+			'endingContent' => array('"'),
 			'parents' => array()
 		)
 	);
@@ -250,47 +261,15 @@ class Parser extends \lithium\analysis\Parser {
 	 *         - relationships: parent and child relations (token ids) indexed by token id
 	 */
 	public static function tokenize($code, array $options = array()) {
-		$tokens = parent::tokenize($code, $options);
+		$tokens = static::_tokenize(parent::tokenize($code, $options));
 		$currentParent = -1;
 		$brackets = $curlyBrackets = $squareBrackets = $level = 0;
-		$lineCache = $typeCache = array();
+		$charCache = $lineCache = $typeCache = array();
 
 		$inClass = $inFunction = $inArray = $inControl = false;
 		$previousTokenId = null;
 
 		foreach ($tokens as $tokenId => $token) {
-			$isCurlyBrace = (
-				$token['content'] === '$' &&
-				isset($tokens[$tokenId + 1]) &&
-				$tokens[$tokenId + 1]['content'] === '{'
-			);
-			if ($isCurlyBrace) {
-				$tokens[$tokenId]['id'] = T_DOLLAR_CURLY_BRACES;
-				$tokens[$tokenId]['name'] = 'T_DOLLAR_CURLY_BRACES';
-			}
-
-			$isArray = (
-				$token['content'] === '(' &&
-				$previousTokenId !== null &&
-				$tokens[$previousTokenId]['id'] === T_ARRAY
-			);
-			if ($isArray) {
-				$tokens[$tokenId]['id'] = T_ARRAY_OPEN;
-				$tokens[$tokenId]['name'] = 'T_ARRAY_OPEN';
-			}
-
-			$isShortArray = (
-				$token['content'] === '[' &&
-				$previousTokenId !== null && (
-					$tokens[$previousTokenId]['id'] !== T_VARIABLE &&
-					$tokens[$previousTokenId]['id'] !== T_ENCAPSED_AND_WHITESPACE
-				)
-			);
-			if ($isShortArray) {
-				$tokens[$tokenId]['id'] = T_SHORT_ARRAY_OPEN;
-				$tokens[$tokenId]['name'] = 'T_SHORT_ARRAY_OPEN';
-			}
-
 			if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
 				if ($token['content'] === '[') {
 					$squareBrackets++;
@@ -322,12 +301,19 @@ class Parser extends \lithium\analysis\Parser {
 			$tokens[$tokenId]['curlyBrackets'] = $curlyBrackets;
 			$tokens[$tokenId]['squareBrackets'] = $squareBrackets;
 			$tokens[$tokenId]['totalBrackets'] = $brackets + $curlyBrackets + $squareBrackets;
-			$tokens[$tokenId]['totalBrackets'] -= (integer) $isArray || $isShortArray;
+			$isArray = ($token['id'] === T_SHORT_ARRAY_OPEN || $token['id'] === T_ARRAY_OPEN);
+			$tokens[$tokenId]['totalBrackets'] -= (integer) $isArray;
 			$tokens[$tokenId]['parent'] = $currentParent;
 			$tokens[$tokenId]['children'] = array();
 
 			if (isset($tokens[$currentParent])) {
 				$tokens[$currentParent]['children'][] = $tokenId;
+			}
+
+			$len = strlen($token['content']);
+			$line = $token['line'];
+			for ($i = 0; $i < $len; $i++) {
+				$charCache[$line][$i]['parent'] = $currentParent;
 			}
 
 			$parent = static::_isEndOfParent($tokenId, $currentParent, $tokens);
@@ -339,10 +325,6 @@ class Parser extends \lithium\analysis\Parser {
 				$level++;
 				$currentParent = $tokenId;
 			}
-
-			if ($token['id'] !== T_WHITESPACE) {
-				$previousTokenId = $tokenId;
-			}
 		}
 		if ($level !== 0 || $squareBrackets !== 0 || $curlyBrackets !== 0 || $brackets !== 0) {
 			$smallTokens = array_slice($tokens, 0, 20);
@@ -350,7 +332,7 @@ class Parser extends \lithium\analysis\Parser {
 			$exception->parserData = compact('level', 'curlyBrackets', 'brackets', 'tokens');
 			throw $exception;
 		}
-		return compact('tokens', 'lineCache', 'typeCache');
+		return compact('tokens', 'lineCache', 'typeCache', 'charCache');
 	}
 
 	/**
@@ -414,6 +396,63 @@ class Parser extends \lithium\analysis\Parser {
 		return $hasRequiredParents && !$isDecoy;
 	}
 
+	/**
+	 * Adding extra tokens for quality rules;
+	 *
+	 * @param  array $tokens The array of tokens
+	 * @return array The array of extended tokens
+	 */
+	protected static function _tokenize(array $tokens) {
+		$doubleQuote = false;
+		foreach ($tokens as $tokenId => $token) {
+			if ($token['content'] === '"') {
+				if (!$doubleQuote) {
+					$tokens[$tokenId]['id'] = T_START_DOUBLE_QUOTE;
+					$tokens[$tokenId]['name'] = 'T_START_DOUBLE_QUOTE';
+				} else {
+					$tokens[$tokenId]['id'] = T_END_DOUBLE_QUOTE;
+					$tokens[$tokenId]['name'] = 'T_END_DOUBLE_QUOTE';
+				}
+				$doubleQuote = !$doubleQuote;
+			}
+			$isCurlyBrace = (
+				$token['content'] === '$' &&
+				isset($tokens[$tokenId + 1]) &&
+				$tokens[$tokenId + 1]['content'] === '{'
+			);
+			if ($isCurlyBrace) {
+				$tokens[$tokenId]['id'] = T_DOLLAR_CURLY_BRACES;
+				$tokens[$tokenId]['name'] = 'T_DOLLAR_CURLY_BRACES';
+			}
+
+			$isArray = (
+				$token['content'] === '(' &&
+				$previousTokenId !== null &&
+				$tokens[$previousTokenId]['id'] === T_ARRAY
+			);
+			if ($isArray) {
+				$tokens[$tokenId]['id'] = T_ARRAY_OPEN;
+				$tokens[$tokenId]['name'] = 'T_ARRAY_OPEN';
+			}
+
+			$isShortArray = (
+				$token['content'] === '[' &&
+				$previousTokenId !== null && (
+					$tokens[$previousTokenId]['id'] !== T_VARIABLE &&
+					$tokens[$previousTokenId]['id'] !== T_ENCAPSED_AND_WHITESPACE
+				)
+			);
+			if ($isShortArray) {
+				$tokens[$tokenId]['id'] = T_SHORT_ARRAY_OPEN;
+				$tokens[$tokenId]['name'] = 'T_SHORT_ARRAY_OPEN';
+			}
+
+			if ($token['id'] !== T_WHITESPACE) {
+				$previousTokenId = $tokenId;
+			}
+		}
+		return $tokens;
+	} 
 }
 
 ?>

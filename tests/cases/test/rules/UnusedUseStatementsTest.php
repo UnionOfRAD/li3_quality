@@ -64,6 +64,7 @@ EOD;
 <<<EOT
 use foo\bar\baz\MockTestable as Testable;
 EOT;
+
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
