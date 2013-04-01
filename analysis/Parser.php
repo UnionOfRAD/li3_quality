@@ -322,16 +322,16 @@ class Parser extends \lithium\analysis\Parser {
 
 			if ($needNestUp > 0) {
 				$status = $nestLog[$needNestUp];
-				if (!$status['applied'] && in_array($token['content'], $status['nestOn'])) {
-					$nestLog[$needNestUp]['applied'] = true;
+				if (!$status['founded'] && in_array($token['content'], $status['nestOn'])) {
+					$nestLog[$needNestUp]['founded'] = true;
 				}
-				if ($token['line'] > $nestLine && $status['applied']) {
+				if ($token['line'] > $nestLine && $status['founded'] && !$status['applied']) {
 					$nestLevel++;
-					$needNestUp = 0;
+					$nestLog[$needNestUp]['applied'] = true;
 				}
 			}
 
-			$tokens[$tokenId] = static::_updateChecksum($tokens[$tokenId], $tokens);
+			$tokens[$tokenId] = static::_checksum($tokens[$tokenId], $tokens);
 			$tokens[$tokenId]['level'] = $level;
 			$tokens[$tokenId]['parent'] = $curParent;
 			$tokens[$tokenId]['children'] = array();
@@ -360,10 +360,10 @@ class Parser extends \lithium\analysis\Parser {
 				$tokens[$tokenId]['parent'] = $curParent;
 				if ($nestOn = static::$_parentTokens[$token['id']]['nestOn']) {
 					$nestLine = $token['line'];
-					$needNestUp++;
-					$nestLog[$needNestUp] = array(
+					$nestLog[++$needNestUp] = array(
 						'nestOn' => $nestOn,
-						'applied' => $nestOn === true ? true : false
+						'founded' => $nestOn === true ? true : false,
+						'applied' => false
 					);
 				}
 				$curParent = $tokenId;
@@ -385,7 +385,7 @@ class Parser extends \lithium\analysis\Parser {
 	 * @param  array $token    The token
 	 * @param  array $tokens   The array of the currently created tokens
 	 */
-	protected static function _updateChecksum(array $token, array $tokens) {
+	protected static function _checksum(array $token, array $tokens) {
 		$token['checksum'] = static::$_bracketsChecksum;
 
 		if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
