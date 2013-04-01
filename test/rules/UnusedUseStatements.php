@@ -11,6 +11,18 @@ namespace li3_quality\test\rules;
 class UnusedUseStatements extends \li3_quality\test\Rule {
 
 	/**
+	 * Use statements to ignore if declared but not used.
+	 */
+	protected $_ignored = array(
+		'ArrayAccess',
+		'Closure',
+		'Iterator',
+		'IteratorAggregate',
+		'Serializable',
+		'Traversable'
+	);
+
+	/**
 	 * Iterates over T_USE tokens, gets the aliased name into an array and
 	 * validates it was used within the script.
 	 *
@@ -30,6 +42,9 @@ class UnusedUseStatements extends \li3_quality\test\Rule {
 			$line = $lines[$token['line'] - 1];
 			if (preg_match('/^use (?:([^ ]+ as )|(.*\\\))?(.*);$/i', $line, $matches) === 1) {
 				$count = 0;
+				if (in_array($matches[3], $this->_ignored)) {
+					continue;
+				}
 				foreach ($typeCache[T_STRING] as $stringId) {
 					if (strcasecmp($tokens[$stringId]['content'], $matches[3]) === 0) {
 						$count++;
