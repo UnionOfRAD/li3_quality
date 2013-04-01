@@ -132,6 +132,14 @@ exit(1);
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	public function testIncludeWithReturnValue() {
+		$code = <<<EOD
+\$config = include 'config.php';
+EOD;
+
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>

@@ -526,13 +526,42 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
-	public function testMultilineExpression() {
+	public function testCorrectMultilineExpression() {
 		$code = <<<EOD
-if (true
-	&& false) {
+if (true && (
+	false || null
+)) {
 	return false;
-} elseif (true
-	&& false) {
+}
+
+if (
+	true &&
+	false ||
+	null
+) {
+	return false;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIncorrectMultilineExpression() {
+		$code = <<<EOD
+if (true && (
+	false || null))
+{
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+
+		$code = <<<EOD
+if (
+	true &&
+	false ||
+	null
+)
+{
 	return false;
 }
 EOD;

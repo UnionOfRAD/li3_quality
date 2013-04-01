@@ -78,6 +78,21 @@ new foobar();
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	/**
+	 * IDE Concern #869
+	 */
+	public function testIgnoreUnusedSplInterfaces() {
+		$code = <<<EOD
+use ArrayAccess;
+use Closure;
+use Iterator;
+use IteratorAggregate;
+use Serializable;
+use Traversable;
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>
