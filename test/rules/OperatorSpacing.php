@@ -49,7 +49,6 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				T_INSTANCEOF,
 			),
 			'content' => array(
-				'+',
 				'*',
 				'/',
 			),
@@ -91,14 +90,15 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				'.',
 			),
 		),
-		'negativeNumber' => array(
+		'plusAndMinus' => array(
 			'relativeTokens' => array(
 				'before' => 2,
 				'length' => 5,
 			),
-			'regex' => '/(( {:content} )|([^\d]{:content}(\d+|\$)))/',
+			'regex' => '/(( {:content} )|([^\d]{:content}(.|\d+|\$)))/',
 			'message' => 'Operator {:content} must have 1 leading and an optional trailing space.',
 			'content' => array(
+				'+',
 				'-',
 			),
 		),
@@ -175,8 +175,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 			foreach (array_merge($byToken, $byContent) as $id) {
 				$token = $tokens[$id];
 				$isPHP = $testable->isPHP($token['line']);
-				$isntString = $token['id'] !== T_ENCAPSED_AND_WHITESPACE;
-				if ($isPHP && $isntString) {
+				if ($isPHP && !$token['isString']) {
 					$pattern = String::insert($inspector['regex'], array(
 						'content' => preg_quote($token['content'], "/"),
 					));
