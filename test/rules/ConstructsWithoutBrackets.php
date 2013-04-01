@@ -28,11 +28,22 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 	);
 
 	/**
+	 * Language construct which should be on it's own line
+	 *
+	 * @var array
+	 */
+	public $ownLineTokens = array(
+		T_ECHO,
+		T_PRINT,
+		T_THROW,
+	);
+
+	/**
 	 * Tokens to skip after finding $inspectableTokens
 	 *
 	 * @var array
 	 */
-	public $pattern = "/^\s*[a-z_]+((\s(([^(][^;]*)|(\([^)]+\)[^;]+))(;|$))|;)$/";
+	public $pattern = "\s*[a-z_]+((\s(([^(][^;]*)|(\([^)]+\)[^;]+))(;|$))|;)";
 
 	/**
 	 * Will iterate the tokens for $inspectableTokens, once found it'll find
@@ -54,7 +65,12 @@ class ConstructsWithoutBrackets extends \li3_quality\test\Rule {
 			if (isset($lines[$lineIndex])) {
 				$line = $lines[$lineIndex];
 				$next = $key + 1;
-				if (preg_match($this->pattern, $line) === 0) {
+				if (in_array($token['id'], $this->ownLineTokens)) {
+					$pattern = '/^' . $this->pattern . '$/';
+				} else {
+					$pattern = '/' . $this->pattern . '$/';
+				}
+				if (preg_match($pattern, $line) === 0) {
 					$this->addViolation(array(
 						'message' => String::insert($message, array(
 							'name' => $token['name'],
