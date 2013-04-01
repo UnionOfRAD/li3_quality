@@ -35,14 +35,6 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	public $negativeMessage = 'This line is missing {:extraCount} tabs.';
 
 	/**
-	 * Where the current tab count is held. This is a very relative process and a close count
-	 * should be kept.
-	 *
-	 * @var integer
-	 */
-	protected $_depthLevel = 0;
-
-	/**
 	 * Will iterate the lines looking for $patterns while keeping track of how many tabs
 	 * the current line should have.
 	 *
@@ -58,7 +50,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			if (!$this->_shouldIgnoreLine($lineIndex, $testable)) {
 				$actual = $this->_getIndent($line);
 				$predicted = $this->_getPredictedIndent($lineIndex, $testable);
-				if ($actual['tab'] !== $predicted['tab']) {
+				if ($predicted['tab'] !== null && $actual['tab'] !== $predicted['tab']) {
 					$this->addViolation(array(
 						'message' => String::insert($tabMessage, array(
 							'predicted' => $predicted['tab'],
@@ -67,7 +59,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 						'line' => $lineIndex + 1,
 					));
 				}
-				if ($actual['space'] < $predicted['minSpace']) {
+				if ($predicted['minSpace'] !== null && $actual['space'] < $predicted['minSpace']) {
 					$this->addViolation(array(
 						'message' => String::insert($spaceMessage, array(
 							'predicted' => $predicted['minSpace'],
@@ -90,6 +82,7 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 	 * @return int
 	 */
 	protected function _getPredictedIndent($lineIndex, $testable) {
+		$result = array('minSpace' => null,'tab' => null);
 		$tokens = $testable->tokens();
 		$lines = $testable->lines();
 		$lineCache = $testable->lineCache();
@@ -103,10 +96,16 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		$firstToken = $tokens[reset($currentTokens)];
 
 		if (!isset($firstToken['level'])) {
-			return array('minSpace' => 0,'tab' => 0);
+			return $result;
 		}
-		$parent = ($firstToken['parent'] > 0) ? $tokens[$firstToken['parent']] : null;
+
+		$parentId = $firstToken['parent'];
+		$parent = isset($tokens[$parentId]) ? $tokens[$parentId] : null;
 		$expectedTab = $firstToken['nestLevel'];
+
+		if ($expectedTab === null || ($firstToken['line'] !== $lineIndex + 1)) {
+			return $result;
+		}
 
 		$breaked = false;
 		foreach (array('&&', '||', 'and', 'or', 'xor', 'AND', 'OR', 'XOR', '.') as $op) {

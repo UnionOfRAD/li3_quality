@@ -298,12 +298,24 @@ class Parser extends \lithium\analysis\Parser {
 		$curParent = -1;
 		$brackets = $curlyBrackets = $squareBrackets = 0;
 		$level = $needNestUp = $nestLine = $nestLevel = 0;
-		$nestLog = $charCache = $lineCache = $typeCache = array();
+		$nestLog = $lineCache = $typeCache = array();
+		$inString = false;
 		$inPhp = $options['wrap'] ? true : false;
 
 		foreach ($tokens as $tokenId => $token) {
 
+			$isString = (
+				$token['id'] === T_CONSTANT_ENCAPSED_STRING ||
+				$token['id'] === T_ENCAPSED_AND_WHITESPACE
+			);
+
 			$lineCache[$token['line']][] = $tokenId;
+			if ($isString) {
+				$carriageReturn = substr_count($token['content'], "\n");
+				for ($i = 1; $i <= $carriageReturn; $i++) {
+					$lineCache[$token['line'] + $i][] = $tokenId;
+				}
+			}
 			$typeCache[$token['id']][] = $tokenId;
 
 			if ($token['id'] === T_CLOSE_TAG) {
@@ -320,6 +332,10 @@ class Parser extends \lithium\analysis\Parser {
 				continue;
 			}
 
+			if ($token['id'] === T_END_DOUBLE_QUOTE || $token['id'] === T_END_HEREDOC) {
+				$inString = false;
+			}
+
 			if ($needNestUp > 0) {
 				$status = $nestLog[$needNestUp];
 				if (!$status['founded'] && in_array($token['content'], $status['nestOn'])) {
@@ -331,7 +347,7 @@ class Parser extends \lithium\analysis\Parser {
 				}
 			}
 
-			$tokens[$tokenId] = static::_checksum($tokens[$tokenId], $tokens);
+			$tokens[$tokenId] = static::_checksum($tokens[$tokenId], $isString || $inString);
 			$tokens[$tokenId]['level'] = $level;
 			$tokens[$tokenId]['parent'] = $curParent;
 			$tokens[$tokenId]['children'] = array();
@@ -339,14 +355,8 @@ class Parser extends \lithium\analysis\Parser {
 				$tokens[$curParent]['children'][] = $tokenId;
 			}
 
-			$len = strlen($token['content']);
-			$line = $token['line'];
-			for ($i = 0; $i < $len; $i++) {
-				$charCache[$line][$i]['parent'] = $curParent;
-			}
-
 			while (($parent = static::_isEndOfParent($tokenId, $curParent, $tokens)) !== false) {
-				if (static::$_parentTokens[$tokens[$curParent]['id']]['nestOn']) {
+				if (!$inString && static::$_parentTokens[$tokens[$curParent]['id']]['nestOn']) {
 					$needNestUp === 0 ?: $needNestUp--;
 					$nestLevel = $tokens[$curParent]['nestLevel'];
 				}
@@ -354,11 +364,16 @@ class Parser extends \lithium\analysis\Parser {
 				$curParent = $parent;
 			}
 
-			$tokens[$tokenId]['nestLevel'] = $nestLevel;
+			$tokens[$tokenId]['nestLevel'] = $inString ? null : $nestLevel;
+			$tokens[$tokenId]['isString'] = $isString;
+
+			if ($token['id'] === T_START_DOUBLE_QUOTE || $token['id'] === T_START_HEREDOC) {
+				$inString = true;
+			}
 
 			if (static::_isParent($tokenId, $tokens)) {
 				$tokens[$tokenId]['parent'] = $curParent;
-				if ($nestOn = static::$_parentTokens[$token['id']]['nestOn']) {
+				if (!$inString && $nestOn = static::$_parentTokens[$token['id']]['nestOn']) {
 					$nestLine = $token['line'];
 					$nestLog[++$needNestUp] = array(
 						'nestOn' => $nestOn,
@@ -376,25 +391,26 @@ class Parser extends \lithium\analysis\Parser {
 			$exception->parserData = compact('level', 'curlyBrackets', 'brackets', 'tokens');
 			throw $exception;
 		}
-		return compact('tokens', 'lineCache', 'typeCache', 'charCache');
+		return compact('tokens', 'lineCache', 'typeCache');
 	}
 
 	/**
 	 * Update the bracket checksum values for a token.
 	 *
-	 * @param  array $token    The token
-	 * @param  array $tokens   The array of the currently created tokens
+	 * @param  array   $token    The token.
+	 * @param  boolean $isString A Flag indicating if the token is a string part.
+	 * @return array The token with a valid checksum.
 	 */
-	protected static function _checksum(array $token, array $tokens) {
+	protected static function _checksum(array $token, $isString) {
 		$token['checksum'] = static::$_bracketsChecksum;
-
-		if ($token['id'] !== T_ENCAPSED_AND_WHITESPACE) {
-			$char = $token['content'];
-			if ($char === ')' || $char === ']' || $char === '}') {
-				$token['checksum'] = --static::$_bracketsChecksum;
-			} elseif ($char === '(' || $char === '[' || $char === '{') {
-				static::$_bracketsChecksum++;
-			}
+		if ($isString) {
+			return $token;
+		}
+		$char = $token['content'];
+		if ($char === ')' || $char === ']' || $char === '}') {
+			$token['checksum'] = --static::$_bracketsChecksum;
+		} elseif ($char === '(' || $char === '[' || $char === '{') {
+			static::$_bracketsChecksum++;
 		}
 		return $token;
 	}

@@ -596,7 +596,7 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
-	public function testIgnoreIndentInStrings() {
+	public function testIgnoreIndentInConstantStrings() {
 		$code = <<<EOD
 file_put_contents("filename", "
 	<?php echo 'this is content'; ?" . ">
@@ -604,6 +604,20 @@ file_put_contents("filename", "
 		indented content
 		that breaks over
 		several lines
+	'; ?>
+");
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIgnoreIndentInEncapsedStrings() {
+		$code = <<<EOD
+file_put_contents("filename", "
+	<?php echo 'this is content'; ?" . ">
+	<?='This is
+		indented \$content
+		that breaks over
+		\$several lines
 	'; ?>
 ");
 EOD;
@@ -690,6 +704,19 @@ $key
 EOD;
 		}
 
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testBracketsInStringsIsIgnored() {
+		$code = <<<EOD
+if (true) {
+	\$pattern = ":{\$this->_subPatterns[\$key]}";
+
+	if (true) {
+		continue;
+	}
+}
+EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 }
