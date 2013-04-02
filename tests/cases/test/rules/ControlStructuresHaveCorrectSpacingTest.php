@@ -656,6 +656,13 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testCorrectControlStructureWithBracketsInExpression() {
+		$code = <<<EOD
+if (\$data->{\$key}) {
+	return false;
 }
-
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+}
 ?>

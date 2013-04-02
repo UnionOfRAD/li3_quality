@@ -166,17 +166,18 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 	 * @param  array  $tokens  The tokens from $testable->tokens()
 	 * @return string          The extracted content
 	 */
-	protected function _controlContent($tokenId, $tokens) {
+	protected function _controlContent($tokenId, $tokens, $root = true) {
 		$token = $tokens[$tokenId];
 		$body = $token['content'];
+
 		foreach ($token['children'] as $childrenId) {
-			if ($tokens[$childrenId]['children']) {
-				$body .= $this->_controlContent($childrenId, $tokens);
-			} else {
+			if (!$tokens[$childrenId]['children']) {
 				$body .= $tokens[$childrenId]['content'];
-				if ($tokens[$childrenId]['content'] === '{') {
-					break;
-				}
+			} elseif ($root && $tokens[$childrenId]['content'] === '{') {
+				$body .= $tokens[$childrenId]['content'];
+				break;
+			} else {
+				$body .= $this->_controlContent($childrenId, $tokens, false);
 			}
 		}
 		return $body;
