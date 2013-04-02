@@ -95,6 +95,10 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 		$currentTokens = $lineCache[$testable->findTokensByLine($lineIndex + 1)];
 		$firstToken = $tokens[reset($currentTokens)];
 
+		if ($firstToken['id'] === T_WHITESPACE) {
+			$firstToken = $tokens[next($currentTokens)];
+		}
+
 		if (!isset($firstToken['level'])) {
 			return $result;
 		}

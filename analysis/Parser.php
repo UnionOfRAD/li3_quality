@@ -385,6 +385,7 @@ class Parser extends \lithium\analysis\Parser {
 				$level++;
 			}
 		}
+
 		if ($level !== 0 || $squareBrackets !== 0 || $curlyBrackets !== 0 || $brackets !== 0) {
 			$smallTokens = array_slice($tokens, 0, 20);
 			$exception = new ParserException('A parse error has been encountered.');
@@ -470,19 +471,19 @@ class Parser extends \lithium\analysis\Parser {
 	 * @return array The array of extended tokens
 	 */
 	protected static function _tokenize(array $tokens) {
-		$doubleQuote = false;
+		$inString = false;
 		$results = array();
 		$cpt = 0;
 		foreach ($tokens as $tokenId => $token) {
 			if ($token['content'] === '"') {
-				if (!$doubleQuote) {
+				if (!$inString) {
 					$token['id'] = T_START_DOUBLE_QUOTE;
 					$token['name'] = 'T_START_DOUBLE_QUOTE';
 				} else {
 					$token['id'] = T_END_DOUBLE_QUOTE;
 					$token['name'] = 'T_END_DOUBLE_QUOTE';
 				}
-				$doubleQuote = !$doubleQuote;
+				$inString = !$inString;
 			}
 
 			$isCurlyBrace = (
@@ -496,6 +497,7 @@ class Parser extends \lithium\analysis\Parser {
 			}
 
 			$isArray = (
+				!$token['id'] &&
 				$token['content'] === '(' &&
 				$previousTokenId !== null &&
 				$tokens[$previousTokenId]['id'] === T_ARRAY
@@ -506,6 +508,7 @@ class Parser extends \lithium\analysis\Parser {
 			}
 
 			$isShortArray = (
+				!$token['id'] &&
 				$token['content'] === '[' &&
 				$previousTokenId !== null && (
 					$tokens[$previousTokenId]['id'] !== T_VARIABLE &&
@@ -529,10 +532,10 @@ class Parser extends \lithium\analysis\Parser {
 			if ($token['id'] === T_IF) {
 				$i = $cpt;
 				$spaces = '';
-				while ($i-- > 0 && $results[$i - 1]['id'] === T_WHITESPACE) {
-					$spaces = $results[$i - 1]['content'] . $spaces;
+				while ($i-- > 0 && $results[$i]['id'] === T_WHITESPACE) {
+					$spaces = $results[$i]['content'] . $spaces;
 				}
-				if (--$i >= 0 && $results[$i]['id'] === T_ELSE) {
+				if ($i >= 0 && $results[$i]['id'] === T_ELSE) {
 					$token['id'] = T_ELSEIF;
 					$token['name'] = 'T_ELSEIF';
 					$token['content'] = $results[$i]['content'] . $spaces . $token['content'];

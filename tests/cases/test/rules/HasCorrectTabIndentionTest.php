@@ -719,6 +719,30 @@ if (true) {
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	public function testEndingCommentOnLine() {
+		$code = <<<EOD
+class MyClass {
+	if(true) {
+		break; //default
+	}
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testBracketsAreNotParentsInStrings() {
+		$code = <<<EOD
+if (true) {
+	\$hello = "{\$trace}[{\$key}]";
+	\$world = \$result[\$key];
+	if (true) {
+		break;
+	}
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>
