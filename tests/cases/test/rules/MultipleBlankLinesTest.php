@@ -69,6 +69,7 @@ EOD;
 
 
 EOT;
+
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}

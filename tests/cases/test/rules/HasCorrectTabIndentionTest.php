@@ -554,7 +554,7 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testMultilineIndentInArrayWithContact() {
+	public function testIndentInArrayWithContact() {
 		$code = <<<EOD
 \$data = array(
 	'key'           => 'value',
@@ -573,7 +573,7 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testMultilineIndentInArrayWithOr() {
+	public function testIndentInArrayWithOr() {
 		$code = <<<EOD
 \$data = array(
 	'key'           => 'value',
@@ -596,6 +596,153 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testIgnoreIndentInConstantStrings() {
+		$code = <<<EOD
+file_put_contents("filename", "
+	<?php echo 'this is content'; ?" . ">
+	<?='This is
+		indented content
+		that breaks over
+		several lines
+	'; ?>
+");
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIgnoreIndentInEncapsedStrings() {
+		$code = <<<EOD
+file_put_contents("filename", "
+	<?php echo 'this is content'; ?" . ">
+	<?='This is
+		indented \$content
+		that breaks over
+		\$several lines
+	'; ?>
+");
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIgnoreIndentInHeredoc() {
+		$code = <<<EOD
+if (true) {
+	\$data = <<<EOT
+\$hello = 'world !';
+EOT;
+}
+
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIgnoreBracketsInStrings() {
+		$code = <<<EOD
+if (true) {
+	\$result = "(\$var) ";
+	return false;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIndentWithSpacesInArrays() {
+		$code = <<<EOD
+\$headers = array(
+	'X-Wf-Protocol-1' => 'http://meta.wildfirehq.org/Protocol/JsonStream/0.2',
+	'X-Wf-1-Plugin-1' =>
+	    'http://meta.firephp.org/Wildfire/Plugin/FirePHP/Library-FirePHPCore/0.3',
+	'X-Wf-1-Structure-1' =>
+	    'http://meta.firephp.org/Wildfire/Structure/FirePHP/FirebugConsole/0.1'
+);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testCorrectMixedControlStructureTabIndent() {
+
+		$controls = array(
+			'if' => 'true',
+			'while' => '$variable',
+			'for' => '$i=0; $i++; $i<10',
+			'foreach' => '$array as $key => $value'
+		);
+
+		foreach ($controls as $key => $value) {
+			$code = <<<EOD
+$key ($value) { \$count++; }
+
+$key ($value) {
+	\$count++;
+}
+
+$key ($value)
+{
+	\$count++;
+}
+
+$key (
+	$value
+) {
+	\$count++;
+}
+
+$key
+(
+	$value
+) {
+	\$count++;
+}
+
+$key
+(
+	$value
+)
+{
+	\$count++;
+}
+EOD;
+		}
+
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testBracketsInStringsIsIgnored() {
+		$code = <<<EOD
+if (true) {
+	\$pattern = ":{\$this->_subPatterns[\$key]}";
+
+	if (true) {
+		continue;
+	}
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testEndingCommentOnLine() {
+		$code = <<<EOD
+class MyClass {
+	if(true) {
+		break; //default
+	}
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testBracketsAreNotParentsInStrings() {
+		$code = <<<EOD
+if (true) {
+	\$hello = "{\$trace}[{\$key}]";
+	\$world = \$result[\$key];
+	if (true) {
+		break;
+	}
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>

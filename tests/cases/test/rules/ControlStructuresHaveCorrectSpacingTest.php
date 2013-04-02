@@ -365,7 +365,7 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testCorrectElseIfWithSpace() {
+	public function testIncorrectElseIfWithSpace() {
 		$code = <<<EOD
 if (true) {
 	return false;
@@ -373,7 +373,7 @@ if (true) {
 	return true;
 }
 EOD;
-		$this->assertRulePass($code, $this->rule);
+		$this->assertRuleFail($code, $this->rule);
 	}
 
 	public function testIncorrectElseIfWithNoSpaceNoFirstLineSpacing() {
@@ -526,13 +526,42 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
-	public function testMultilineExpression() {
+	public function testAcceptableMultilineExpression() {
 		$code = <<<EOD
-if (true
-	&& false) {
+if (true && (
+	false || null
+)) {
 	return false;
-} elseif (true
-	&& false) {
+}
+
+if (
+	true &&
+	false ||
+	null
+) {
+	return false;
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIncorrectMultilineExpression() {
+		$code = <<<EOD
+if (true && (
+	false || null))
+{
+	return false;
+}
+EOD;
+		$this->assertRuleFail($code, $this->rule);
+
+		$code = <<<EOD
+if (
+	true &&
+	false ||
+	null
+)
+{
 	return false;
 }
 EOD;
@@ -627,6 +656,13 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
+	public function testCorrectControlStructureWithBracketsInExpression() {
+		$code = <<<EOD
+if (\$data->{\$key}) {
+	return false;
 }
-
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+}
 ?>
