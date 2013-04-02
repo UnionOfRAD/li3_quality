@@ -61,12 +61,13 @@ EOD;
 
 	public function testIgnoreHeredoc() {
 		$code = <<<EOD
-<<<EOF
+<<<EOT
 this
 	is
 		a
 			test
-EOF;
+EOT;
+
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}

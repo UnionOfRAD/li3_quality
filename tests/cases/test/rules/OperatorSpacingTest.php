@@ -355,6 +355,17 @@ EOD;
 		), $this->rule);
 	}
 
+	public function testDecimal() {
+		$code = <<<EOD
+		Validator::isDecimal(.27);
+		Validator::isDecimal(-.27);
+		Validator::isDecimal(+.27);
+		Validator::isDecimal(1234.5678);
+		Validator::isDecimal(-1234.5678);
+		Validator::isDecimal(+1234.5678);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>
