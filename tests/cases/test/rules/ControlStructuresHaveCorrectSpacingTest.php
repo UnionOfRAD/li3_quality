@@ -365,7 +365,7 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testCorrectElseIfWithSpace() {
+	public function testIncorrectElseIfWithSpace() {
 		$code = <<<EOD
 if (true) {
 	return false;
@@ -526,7 +526,7 @@ EOD;
 		$this->assertRuleFail($code, $this->rule);
 	}
 
-	public function testCorrectMultilineExpression() {
+	public function testAcceptableMultilineExpression() {
 		$code = <<<EOD
 if (true && (
 	false || null
