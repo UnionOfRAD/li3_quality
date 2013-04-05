@@ -6,8 +6,13 @@ class HasNoForbiddenStatementsTest extends \li3_quality\test\Unit {
 
 	public $rule = 'li3_quality\test\rules\HasNoForbiddenStatements';
 
+	public function testUnsafeStatement() {
+		$code = '$variable = eval("return true;");';
+		$this->assertRuleWarning($code, $this->rule);
+	}
+
 	public function testForbiddenStatement() {
-		$code = 'eval("ls");';
+		$code = 'print "hello";';
 		$this->assertRuleFail($code, $this->rule);
 	}
 
@@ -16,7 +21,7 @@ class HasNoForbiddenStatementsTest extends \li3_quality\test\Unit {
 		$this->assertRulePass($code, $this->rule);
 	}
 
-	public function testvardump() {
+	public function testVardump() {
 		$code = "var_dump(\$foo);";
 		$this->assertRuleFail($code, $this->rule);
 	}
