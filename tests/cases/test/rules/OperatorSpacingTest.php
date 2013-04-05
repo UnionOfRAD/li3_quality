@@ -366,6 +366,20 @@ EOD;
 EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
+
+	public function testBracket() {
+		$code = <<<EOD
+\$array = array(
+	'key' => (true && false)
+)
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testIncorrectBracket() {
+		$code = '( true && false )';
+		$this->assertRuleFail($code, $this->rule);
+	}
 }
 
 ?>
