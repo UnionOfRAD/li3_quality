@@ -72,6 +72,41 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testIgnoreString() {
+		$code = <<<EOD
+\$array = array(
+	'	hello worl!'
+);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testWhitespaceWithEndLineAndTab() {
+		$code = <<<EOD
+class MyClass {
+	/**
+	 * Overwrites the default Testable constructor
+	 */
+	public function super() {
+		return true;
+	}
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
+	public function testWhitespaceWithEndLineAndTabFollowedBySpace() {
+		$code = <<<EOD
+if (true) {
+	\$array = array(
+		'message' => 'Docblocks should only be at the beginning of the page or ' .
+		             'before a class/function.'
+	));
+}
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 }
 
 ?>

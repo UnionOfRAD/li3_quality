@@ -11,14 +11,6 @@ namespace li3_quality\test\rules;
 class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 
 	/**
-	 * Pattern will match tabs, then any non-tab character until the end of
-	 * the line
-	 *
-	 * @var string
-	 */
-	public $pattern = '/^((\t+)?([^\t]+))?$/';
-
-	/**
 	 * Tokens to ignore
 	 *
 	 * @var array
@@ -40,19 +32,33 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 		$message = 'Tabs can only appear at the beginning of the line';
 		$lines = $testable->lines();
 		$tokens = $testable->tokens();
-		foreach ($lines as $lineId => $line) {
-			$lineNumber = $lineId + 1;
-			$ignore = false;
-			$key = $testable->findTokenByLine($lineNumber);
-			if (isset($tokens[$key])) {
-				$token = $tokens[$key];
-				$ignore = in_array($token['id'], $this->ignoreableTokens);
+		$currLine = 1;
+		$allowTabs = true;
+		foreach ($tokens as $token) {
+			$content = $token['content'];
+
+			$isNewLine = ($token['line'] > $currLine || (
+				$token['id'] === T_WHITESPACE && preg_match('/\n/', $content)
+			));
+			if ($isNewLine) {
+				$currLine = $token['line'];
+				$allowTabs = true;
 			}
-			if (!$ignore && preg_match($this->pattern, $line) === 0) {
-				$token = $tokens[$testable->findTokenByLine($lineNumber)];
+
+			if ($token['id'] !== T_WHITESPACE) {
+				$allowTabs = false;
+				continue;
+			}
+
+			if ($allowTabs) {
+				$isInvalidTab = !preg_match('/^(\n?\t?)+ *$/', $content);
+			} else {
+				$isInvalidTab = preg_match('/\t/', $content);
+			}
+			if ($isInvalidTab) {
 				$this->addViolation(array(
 					'message' => $message,
-					'line' => $lineNumber,
+					'line' => $token['line'],
 				));
 			}
 		}
