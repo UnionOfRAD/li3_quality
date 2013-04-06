@@ -474,6 +474,7 @@ class Parser extends \lithium\analysis\Parser {
 		$inString = false;
 		$results = array();
 		$cpt = 0;
+		$previousTokenId = null;
 		foreach ($tokens as $tokenId => $token) {
 			if ($token['content'] === '"') {
 				if (!$inString) {

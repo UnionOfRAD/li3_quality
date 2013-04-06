@@ -68,6 +68,30 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 				T_LOGICAL_XOR,
 			),
 		),
+		'noSpaceAfter' => array(
+			'relativeTokens' => array(
+				'before' => 0,
+				'length' => 2,
+			),
+			'regex' => '/{:content}[^ ]/',
+			'message' => 'Operator {:content} must not be followed by a space.',
+			'content' => array(
+				'[',
+				'('
+			),
+		),
+		'noSpaceBefore' => array(
+			'relativeTokens' => array(
+				'before' => 1,
+				'length' => 2,
+			),
+			'regex' => '/[^ ]{:content}/',
+			'message' => 'Operator {:content} must not be preceded by a space.',
+			'content' => array(
+				')',
+				']'
+			),
+		),
 		'equals' => array(
 			'relativeTokens' => array(
 				'before' => 1,
@@ -185,9 +209,7 @@ class OperatorSpacing extends \li3_quality\test\Rule {
 					$inspectTokens = array_slice($tokens, $firstId, $length);
 					$html = null;
 					foreach ($inspectTokens as $htmlToken) {
-						if ($htmlToken['line'] === $token['line']) {
-							$html .= $htmlToken['content'];
-						}
+						$html .= $htmlToken['content'];
 					}
 					if (preg_match($pattern, $html) === 0) {
 						$this->addViolation(array(
