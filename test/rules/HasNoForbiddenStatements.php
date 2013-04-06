@@ -10,6 +10,10 @@ namespace li3_quality\test\rules;
 
 class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 
+	protected $_unsafe = array(
+		T_EVAL => 'eval'
+	);
+
 	protected $_forbidden = array(
 		T_ENDDECLARE => 'enddeclare',
 		T_ENDFOR => 'endfor',
@@ -19,14 +23,13 @@ class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 		T_ENDWHILE => 'endwhile',
 		T_PRINT => 'print',
 		T_GOTO => 'goto',
-		T_EVAL => 'eval',
 		T_GLOBAL => 'global',
 		T_VAR => 'var'
 	);
 
 	public function apply($testable, array $config = array()) {
 		$tokens = $testable->tokens();
-		$filtered = array_merge(array_keys($this->_forbidden), array(T_STRING));
+		$filtered = array_merge(array_keys($this->_forbidden + $this->_unsafe), array(T_STRING));
 		$filtered = $testable->findAll($filtered);
 
 		foreach ($filtered as $id) {
@@ -35,6 +38,14 @@ class HasNoForbiddenStatements extends \li3_quality\test\Rule {
 				$tokenName = $this->_forbidden[$token['id']];
 				$this->addViolation(array(
 					'message' => "Forbidden {$tokenName} statement found",
+					'line' => $token['line']
+				));
+			}
+
+			if (isset($this->_unsafe[$token['id']])) {
+				$tokenName = $this->_unsafe[$token['id']];
+				$this->addWarning(array(
+					'message' => "Unsafe {$tokenName} statement found",
 					'line' => $token['line']
 				));
 			}
