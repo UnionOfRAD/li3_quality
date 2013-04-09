@@ -8,11 +8,6 @@
 
 namespace li3_quality\extensions\command;
 
-use lithium\core\Libraries;
-use lithium\test\Dispatcher;
-use lithium\test\Group;
-use li3_quality\test\Rules;
-use li3_quality\test\Testable;
 use li3_quality\analysis\ParserException;
 
 /**
@@ -31,9 +26,28 @@ class Quality extends \lithium\console\command\Test {
 	public $threshold = 100;
 
 	/**
+	 * A regular experssion to filter testable files.
+	 */
+	public $exclude = 'resources|webroot|vendor|libraries';
+
+	/**
 	 * This is the minimum threshold for core tests to be green.
 	 */
 	protected $_greenThreshold = 85;
+
+	/**
+	 * Dynamic dependencies.
+	 *
+	 * @var array
+	 */
+	protected $_classes = array(
+		'response' => 'lithium\console\Response',
+		'libraries' => 'lithium\core\Libraries',
+		'dispatcher' => 'lithium\test\Dispatcher',
+		'group' => 'lithium\test\Group',
+		'rules' => 'li3_quality\test\Rules',
+		'testable' => 'li3_quality\test\Testable'
+	);
 
 	/**
 	 * Show help on run.
@@ -52,18 +66,20 @@ class Quality extends \lithium\console\command\Test {
 			$this->plain = true;
 			$this->silent = true;
 		}
+		$rules = $this->_classes['rules'];
 		$ruleOptions = array();
 		$testables = $this->_testables(compact('path'));
 		$this->header('Lithium Syntax Check');
 
 		$filters = $this->_syntaxFilters();
-		$ruleCount = count(Rules::filterByName($filters));
+		$ruleCount = count($rules::filterByName($filters));
 		$classCount = count($testables);
 		$this->out("Performing {$ruleCount} rules on {$classCount} classes.");
 		$success = true;
 		foreach ($testables as $count => $path) {
 			try {
-				$result = Rules::apply(new Testable(compact('path')), $filters, $ruleOptions);
+				$testable = $this->_instance('testable', compact('path'));
+				$result = $rules::apply($testable, $filters, $ruleOptions);
 			} catch (ParserException $e) {
 				$this->error("[FAIL] $path", "red");
 				$this->error("Parse error: " . $e->getMessage(), "red");
@@ -83,9 +99,15 @@ class Quality extends \lithium\console\command\Test {
 				);
 				foreach ($result['violations'] as $violation) {
 					$params = $violation;
-					$output[] = array($params['line'], $params['position'], $params['message']);
+					$output[] = array(
+						$params['line'],
+						$params['position'],
+						$params['message']
+					);
 				}
-				$this->columns($output, array('style' => 'red', 'error' => true));
+				$this->columns($output, array(
+					'style' => 'red', 'error' => true
+				));
 				$success = false;
 			}
 			if (count($result['warnings']) > 0) {
@@ -95,9 +117,15 @@ class Quality extends \lithium\console\command\Test {
 				);
 				foreach ($result['warnings'] as $warning) {
 					$params = $warning;
-					$output[] = array($params['line'], $params['position'], $params['message']);
+					$output[] = array(
+						$params['line'],
+						$params['position'],
+						$params['message']
+					);
 				}
-				$this->columns($output, array('style' => 'yellow', 'error' => false));
+				$this->columns($output, array(
+					'style' => 'yellow', 'error' => false
+				));
 			}
 		}
 		return $success;
@@ -110,8 +138,8 @@ class Quality extends \lithium\console\command\Test {
 		$this->header('Lithium Documentation Check');
 
 		$testables = $this->_testables();
-
-		$this->out("Checking documentation on " . count($testables) . " classes.");
+		$count = count($testables);
+		$this->out("Checking documentation on {$count} classes.");
 
 		foreach ($testables as $count => $path) {
 		}
@@ -123,28 +151,32 @@ class Quality extends \lithium\console\command\Test {
 	public function coverage() {
 		$this->header('Lithium Code Coverage');
 
-		$testables = $this->_testables(array(
-			'exclude' => '/tests|resources|webroot|index$|^app\\\\config|^app\\\\views|Exception$/'
-		));
+		$exclude = 'tests|index$|^app\\\\config|^app\\\\views|Exception$';
+		$testables = $this->_testables(compact('exclude'));
 
 		$this->out("Checking coverage on " . count($testables) . " classes.");
 
 		$tests = array();
-		foreach (Group::all() as $test) {
+		$group = $this->_classes['group'];
+		foreach ($group::all() as $test) {
 			$class = preg_replace('/(tests\\\[a-z]+\\\|Test$)/', null, $test);
 			$tests[$class] = $test;
 		}
 
+		$dispatcher = $this->_classes['dispatcher'];
 		foreach ($testables as $count => $path) {
 			$coverage = null;
 
 			if ($hasTest = isset($tests[$path])) {
-				$report = Dispatcher::run($tests[$path], array(
+				$report = $dispatcher::run($tests[$path], array(
 					'format' => 'txt',
 					'filters' => array('Coverage')
 				));
-				$coverage = $report->results['filters']['lithium\test\filter\Coverage'];
-				$coverage = isset($coverage[$path]) ? $coverage[$path]['percentage'] : null;
+				$filter = 'lithium\test\filter\Coverage';
+				$collected = $report->results['filters'][$filter];
+				if (isset($collected[$path])) {
+					$coverage = $collected[$path]['percentage'];
+				}
 			}
 
 			if ($coverage >= $this->_greenThreshold) {
@@ -156,12 +188,13 @@ class Quality extends \lithium\console\command\Test {
 			}
 
 			if ($coverage === null || $coverage <= $this->threshold) {
-				$this->out(sprintf(
-					'%10s | %7s | %s',
-					$hasTest ? 'has test' : 'no test',
-					is_numeric($coverage) ? sprintf('%.2f%%', $coverage) : 'n/a',
-					$path
-				), $color);
+				$label = $hasTest ? 'has test' : 'no test';
+				$cov = 'n/a';
+				if (is_numeric($coverage)) {
+					$cov = sprintf('%.2f%%', $coverage);
+				}
+				$output = sprintf('%10s | %7s | %s', $label, $cov, $path);
+				$this->out($output, $color);
 			}
 		}
 
@@ -171,8 +204,17 @@ class Quality extends \lithium\console\command\Test {
 	 * Returns a list of testable classes according to the given library.
 	 */
 	protected function _testables($options = array()) {
-		$defaults = array('recursive' => true, 'path' => null);
+		$defaults = array(
+			'recursive' => true, 'path' => null, 'exclude' => null
+		);
 		$options += $defaults;
+
+		$exclude = array($this->exclude, $options['exclude']);
+		if ($exclude = array_filter($exclude)) {
+			$options['exclude'] = '/' . join('|', $exclude) . '/';
+		} else {
+			unset($options['exclude']);
+		}
 
 		if ($path = $this->_path($options['path'])) {
 			if (pathinfo($options['path'], PATHINFO_EXTENSION) === 'php') {
@@ -182,7 +224,8 @@ class Quality extends \lithium\console\command\Test {
 			$this->library = array_shift($parts);
 			$options['path'] = '/' . join('/', $parts);
 		}
-		$testables = Libraries::find($this->library, $options);
+		$libraries = $this->_classes['libraries'];
+		$testables = $libraries::find($this->library, $options);
 
 		if (!$testables) {
 			$library = $path ? $path : $this->library;
@@ -198,18 +241,23 @@ class Quality extends \lithium\console\command\Test {
 	 */
 	protected function _syntaxFilters() {
 		if (!is_array($this->filters)) {
-			$filters = $this->filters ? array_map('trim', explode(',', $this->filters)) : array();
+			$filters = array();
+			if ($this->filters) {
+				$filters = array_map('trim', explode(',', $this->filters));
+			}
 			if (count($filters) === 0) {
-				$config = Libraries::get($this->library);
+				$libraries = $this->_classes['libraries'];
+				$config = $libraries::get($this->library);
 				$ruleConfig = $config['path'] . '/test/rules.json';
 				if (!file_exists($ruleConfig)) {
-					$config = Libraries::get('li3_quality');
+					$config = $libraries::get('li3_quality');
 					$ruleConfig = $config['path'] . '/test/defaultRules.json';
 				}
 				$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
 				$filters = $ruleConfig['rules'];
 				if (isset($ruleConfig['variables'])) {
-					Rules::ruleOptions($ruleConfig['variables']);
+					$rules = $this->_classes['rules'];
+					$rules::ruleOptions($ruleConfig['variables']);
 				}
 			}
 			$this->filters = $filters;
