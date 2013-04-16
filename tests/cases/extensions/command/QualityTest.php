@@ -351,7 +351,7 @@ class QualityTest extends \li3_quality\test\Unit {
 		$call = $libraries::$invocations[0];
 		list($library, $options) = $call['args'];
 		$this->assertEqual("lib2", $library);
-		$this->assertEqual("/path-response", $options['path']);
+		$this->assertEqual("path-response", $options['path']);
 	}
 
 	public function testTestablesSinglePath() {

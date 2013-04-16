@@ -222,7 +222,7 @@ class Quality extends \lithium\console\command\Test {
 			}
 			$parts = explode('\\', $path) + array($this->library);
 			$this->library = array_shift($parts);
-			$options['path'] = '/' . join('/', $parts);
+			$options['path'] = join('/', $parts);
 		}
 		$libraries = $this->_classes['libraries'];
 		$testables = $libraries::find($this->library, $options);
