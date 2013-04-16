@@ -121,12 +121,17 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 
 		$minExpectedSpace = 0;
 
+		$inArray = ($parent !== null && (
+			$parent['id'] === T_ARRAY_OPEN || $parent['id'] === T_SHORT_ARRAY_OPEN
+		));
 		$inBrace = ($parent !== null && (
 			$parent['content'] === '(' || $parent['content'] === '['
 		));
 		if ($breaked) {
-			$minExpectedSpace = $this->_getSpaceAlignmentInArray($lineIndex, $testable);
-			if (!$minExpectedSpace && !$inBrace) {
+			if ($inArray) {
+				$minExpectedSpace = $this->_getSpaceAlignmentInArray($lineIndex, $testable);
+			}
+			if (!$inBrace) {
 				$expectedTab += 1;
 			}
 		}

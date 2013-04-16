@@ -540,6 +540,16 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testMutlilineConditionsWithArrays() {
+		$code = <<<EOD
+\$isAvailable = (
+	Connections::get('test', array('config' => true)) &&
+	Connections::get('test')->isConnected(array('autoConnect' => true))
+);
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 	public function testCurlyBraceSyntax() {
 		$code = <<<EOD
 switch (\$case) {
