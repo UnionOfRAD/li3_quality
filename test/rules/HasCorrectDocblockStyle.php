@@ -31,8 +31,8 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 			'(({:wlinet} \* @(.*)))',
 			'(({:wlinet} \* (@|[ ]{5})(.*))+)?',
 			'{:wlinet} \*\/',
-			'/',
-		),
+			'/'
+		)
 	);
 
 	/**
@@ -57,7 +57,7 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 		$tokens = $testable->tokens();
 		$lines = $testable->lines();
 		$lineCache = $testable->lineCache();
-		$inspectable = array(T_CLASS, T_VARIABLE, T_FUNCTION, T_CONST);
+		$inspectable = array(T_CLASS, T_VARIABLE, T_FUNCTION, T_CONST, T_DOUBLE_COLON);
 		foreach ($testable->findAll(array(T_DOC_COMMENT)) as $tokenId) {
 			$token = $tokens[$tokenId];
 			$nextLine = $token['line'] + count(preg_split('/\r\n|\r|\n/', $token['content']));
@@ -68,7 +68,7 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 			if ($parentId === false && $token['line'] !== 2) {
 				$this->addViolation(array(
 					'message' => 'Docblocks should only be at the beginning of the page or ' .
-					             'before a class/function.',
+					             'before a class/function or static call.',
 					'line' => $token['line'],
 				));
 				continue;
@@ -84,6 +84,7 @@ class HasCorrectDocblockStyle extends \li3_quality\test\Rule {
 					case T_CLASS:
 						$match = 'CLASS';
 					break;
+					case T_DOUBLE_COLON:
 					case T_FUNCTION:
 						$match = 'METHOD';
 					break;

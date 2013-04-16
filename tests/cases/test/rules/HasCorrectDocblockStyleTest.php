@@ -290,6 +290,23 @@ EOD;
 		), $this->rule);
 	}
 
+	public function testStaticCallComments() {
+		$code = <<<EOD
+<?php
+
+class foo {
+}
+
+/**
+ * Static call
+ */
+foo::config();
+EOD;
+		$this->assertRulePass(array(
+			'source' => $code,
+			'wrap' => false,
+		), $this->rule);
+	}
 }
 
 ?>
