@@ -30,7 +30,7 @@ class DoesntExceedMaxLineLength extends \li3_quality\test\Rule {
 					'line' => $i + 1,
 					'position' => $length
 				));
-			} elseif ($totalLength > $softLimit) {
+			} elseif ($softLimit && $totalLength > $softLimit) {
 				$this->addWarning(array(
 					'message' => "Soft line length of {$softLimit} exceeded",
 					'line' => $i + 1,

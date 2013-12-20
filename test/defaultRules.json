@@ -30,7 +30,7 @@
 	],
 	"variables": {
 		"DoesntExceedMaxLineLength": {
-			"softLimit": 80,
+			"softLimit": false,
 			"hardLimit": 100,
 			"tabWidth": 4
 		}
