@@ -23,7 +23,7 @@ class Rules extends \lithium\core\StaticObject {
 	 *
 	 * @return  void
 	 */
-	public static function __init() {
+	public static function init() {
 		$rulePaths = Libraries::locate('rules');
 		foreach ($rulePaths as $rulePath) {
 			$rule = new $rulePath();
@@ -131,4 +131,5 @@ class Rules extends \lithium\core\StaticObject {
 	}
 }
 
+Rules::init();
 ?>
