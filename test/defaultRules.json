@@ -2,6 +2,7 @@
 	"name": "Default RuleSet",
 	"rules": [
 		"BeginsWithOpenTag",
+		"ClassesDoNotUseSuperglobalsDirectly",
 		"ConstructsWithoutBrackets",
 		"ControlStructuresHaveCorrectSpacing",
 		"DoesntExceedMaxLineLength",
@@ -30,8 +31,8 @@
 	],
 	"variables": {
 		"DoesntExceedMaxLineLength": {
-			"softLimit": 100,
-			"hardLimit": 120,
+			"softLimit": 80,
+			"hardLimit": 100,
 			"tabWidth": 4
 		}
 	}
