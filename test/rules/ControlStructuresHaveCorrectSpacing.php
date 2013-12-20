@@ -25,7 +25,7 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 			),
 		),
 		T_IF => array(
-			'message' => 'Unexpected T_IF format. Should be: "if (...) {" or "} else if () {"',
+			'message' => 'Unexpected T_IF format. Should be: "if (...) {" or "} elseif () {"',
 			'patterns' => array(
 				"/^{:whitespace}if {:bracket} \{/",
 				"/^{:whitespace}\} elseif {:bracket} \{/",
