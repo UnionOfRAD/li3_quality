@@ -8,6 +8,7 @@
 
 namespace li3_quality\extensions\test\filter;
 
+use lithium\core\Libraries;
 use li3_quality\test\Rules;
 use li3_quality\test\Testable;
 
@@ -20,12 +21,22 @@ class Syntax extends \lithium\test\Filter {
 	 *
 	 */
 	public static function apply($report, $tests, array $options = array()) {
-		foreach ($tests->invoke('subject') as $class) {
-			$report->collect(__CLASS__, array(
-				$class => Rules::apply(new Testable(array('path' => $class)))
-			));
+		$config = Libraries::get('li3_quality');
+
+		$ruleConfig = $config['path'] . '/test/defaultRules.json';
+		$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
+
+		$filters = $ruleConfig['rules'];
+
+		if (isset($ruleConfig['variables'])) {
+			Rules::ruleOptions($ruleConfig['variables']);
 		}
 
+		foreach ($tests->invoke('subject') as $class) {
+			$report->collect(__CLASS__, array(
+				$class => Rules::apply(new Testable(array('path' => $class)), $filters)
+			));
+		}
 		return $tests;
 	}
 
