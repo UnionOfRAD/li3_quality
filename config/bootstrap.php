@@ -17,9 +17,7 @@ Libraries::paths(array(
 	)
 ));
 
-if (!Multibyte::config('li3_quality')) {
-	Multibyte::config(array('li3_quality' => array('adapter' => 'Mbstring')));
-}
+Multibyte::config(array('li3_quality' => array('adapter' => 'Mbstring')));
 
 Rules::init();
 
