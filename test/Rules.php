@@ -131,4 +131,5 @@ class Rules extends \lithium\core\StaticObject {
 	}
 }
 
+Rules::init();
 ?>
