@@ -35,7 +35,7 @@ class TabsOnlyAppearFirst extends \li3_quality\test\Rule {
 		$currLine = 1;
 		$allowTabs = true;
 		foreach ($tokens as $token) {
-			$content = $token['content'];
+			$content = str_replace("\r\n", "\n", $token['content']);
 
 			$isNewLine = ($token['line'] > $currLine || (
 				$token['id'] === T_WHITESPACE && preg_match('/\n/', $content)

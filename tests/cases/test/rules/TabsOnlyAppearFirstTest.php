@@ -107,6 +107,15 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testWindowsStyleLineEndings() {
+		$code = implode(null, array(
+			"\$arr = array(",
+			"\r\n\t'foo' => 'bar',",
+			"\r\n);",
+		));
+
+		$this->assertRulePass($code, $this->rule);
+	}
 }
 
 ?>
