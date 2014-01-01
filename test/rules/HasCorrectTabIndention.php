@@ -140,6 +140,17 @@ class HasCorrectTabIndention extends \li3_quality\test\Rule {
 			$expectedTab += 1;
 		}
 
+		if ($inArray) {
+			$grandParent = $parent['parent'] > -1 ? $tokens[$parent['parent']] : null;
+			if ($grandParent !== null) {
+				$grandParentLine = trim($lines[$grandParent['line'] - 1]);
+
+				if (preg_match('/^->/', $grandParentLine)) {
+					$expectedTab += 1;
+				}
+			}
+		}
+
 		return array(
 			'minSpace' => $minExpectedSpace,
 			'tab' => $expectedTab

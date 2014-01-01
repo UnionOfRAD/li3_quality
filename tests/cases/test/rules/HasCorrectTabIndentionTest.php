@@ -477,6 +477,18 @@ EOD;
 		$this->assertRulePass($code, $this->rule);
 	}
 
+	public function testMultiLineChainingWithArrays() {
+		$code = <<<EOD
+\$result = \$chain->called('method1')
+	->called('method2')
+	->with('first', array(
+		'id' => 100
+	))
+	->success();
+EOD;
+		$this->assertRulePass($code, $this->rule);
+	}
+
 	public function testMutlilineAssignment() {
 		$code = <<<EOD
 return true ||
