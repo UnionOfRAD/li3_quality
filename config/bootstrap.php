@@ -8,6 +8,7 @@
 
 use lithium\core\Libraries;
 use lithium\g11n\Multibyte;
+use li3_quality\test\Rules;
 
 Libraries::paths(array(
 	'rules' => array(
@@ -19,5 +20,7 @@ Libraries::paths(array(
 if (!Multibyte::config('li3_quality')) {
 	Multibyte::config(array('li3_quality' => array('adapter' => 'Mbstring')));
 }
+
+Rules::init();
 
 ?>
