@@ -185,3 +185,15 @@ This command needs to be implemented.
 Planned
 -------
 See the issue tracker for all tickets that are currently marked as "enhancement".
+
+Troubleshooting
+===============
+
+Can't find files
+----------------
+
+Please make sure you are supplying the library parameter to match the root namespace of your project, e.g.:
+
+```bash
+libraries/lithium/console/li3 quality syntax --library=myapp
+```

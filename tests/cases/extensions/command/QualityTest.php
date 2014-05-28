@@ -21,8 +21,6 @@ class QualityTest extends \li3_quality\test\Unit {
 
 	public function setUp() {
 		$this->_backup['cwd'] = getcwd();
-		$this->_backup['_SERVER'] = $_SERVER;
-		$_SERVER['argv'] = array();
 	}
 
 	public function tearDown() {
@@ -31,7 +29,6 @@ class QualityTest extends \li3_quality\test\Unit {
 			$class = $this->_classes[$type];
 			$class::reset();
 		}
-		$_SERVER = $this->_backup['_SERVER'];
 		chdir($this->_backup['cwd']);
 	}
 
