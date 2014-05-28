@@ -21,12 +21,12 @@ class Quality extends \lithium\console\command\Test {
 	public $library = true;
 
 	/**
-	 * If `--slient NUM` is used, only classes below this coverage are shown.
+	 * If `--silent NUM` is used, only classes below this coverage are shown.
 	 */
 	public $threshold = 100;
 
 	/**
-	 * A regular experssion to filter testable files.
+	 * A regular expression to filter testable files.
 	 */
 	public $exclude = 'resources|webroot|vendor|libraries';
 
