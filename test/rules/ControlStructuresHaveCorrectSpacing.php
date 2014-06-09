@@ -135,7 +135,7 @@ class ControlStructuresHaveCorrectSpacing extends \li3_quality\test\Rule {
 				));
 			} elseif (!$singleLine) {
 				$this->addWarning(array(
-					'message' => $this->_tokenMap[$token['id']]['message'] . ' on a signle line.',
+					'message' => $this->_tokenMap[$token['id']]['message'] . ' on a single line.',
 					'line' => $token['line'],
 				));
 			}
