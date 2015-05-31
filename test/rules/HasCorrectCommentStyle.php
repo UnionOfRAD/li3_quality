@@ -26,6 +26,7 @@ class HasCorrectCommentStyle extends \li3_quality\test\Rule {
 		foreach ($comments as $tokenId) {
 			$token = $tokens[$tokenId];
 			$parentId = $tokens[$tokenId]['parent'];
+
 			if ($parentId === -1 || $tokens[$parentId]['id'] !== T_FUNCTION) {
 				$this->addViolation(array(
 					'message' => 'Inline comments should never appear.',

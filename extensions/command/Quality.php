@@ -90,7 +90,7 @@ class Quality extends \lithium\console\command\Test {
 				continue;
 			}
 			if ($result['success']) {
-				$this->out("[OK] $path", "green");
+				$this->out("[OK  ] $path", "green");
 			} else {
 				$this->error("[FAIL] $path", "red");
 				$output = array(
