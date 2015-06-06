@@ -12,18 +12,12 @@ use lithium\core\Libraries;
 use li3_quality\test\Rules;
 use li3_quality\test\Testable;
 
-/**
- *
- */
 class Syntax extends \lithium\test\Filter {
 
-	/**
-	 *
-	 */
 	public static function apply($report, $tests, array $options = array()) {
 		$config = Libraries::get('li3_quality');
 
-		$ruleConfig = $config['path'] . '/test/defaultRules.json';
+		$ruleConfig = $config['path'] . '/config/syntax.json';
 		$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
 
 		$filters = $ruleConfig['rules'];
@@ -34,15 +28,12 @@ class Syntax extends \lithium\test\Filter {
 
 		foreach ($tests->invoke('subject') as $class) {
 			$report->collect(__CLASS__, array(
-				$class => Rules::apply(new Testable(array('path' => $class)), $filters)
+				$class => Rules::apply(new Testable(array('path' => Libraries::path($class))), $filters)
 			));
 		}
 		return $tests;
 	}
 
-	/**
-	 *
-	 */
 	public static function analyze($report, array $options = array()) {
 		$results = $report->results['filters'][__CLASS__];
 		$metrics = array();
@@ -56,7 +47,6 @@ class Syntax extends \lithium\test\Filter {
 		}
 		return $metrics;
 	}
-
 }
 
 ?>
