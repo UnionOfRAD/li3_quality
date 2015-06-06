@@ -2,17 +2,19 @@
 
 namespace li3_quality\tests\mocks\extensions\command;
 
-class MockQuality extends \li3_quality\extensions\command\Quality {
+class MockSyntax extends \li3_quality\extensions\command\Syntax {
+
 	public $outputWithStyle = array();
+
 	public $errorWithStyle = array();
-	public $mockTestables = array('testables');
+
+	public $mockSubjects = array('subjects');
+
 	public $stops = array();
+
 	public $pathResponse = false;
 
 	public function out($output = null, $options = array('nl' => 1)) {
-		if ($this->silent) {
-			return;
-		}
 		$this->outputWithStyle[] = array($output, $options);
 		return parent::out($output, $options);
 	}
@@ -26,15 +28,19 @@ class MockQuality extends \li3_quality\extensions\command\Quality {
 		$this->stops[] = array($status, $message);
 	}
 
-	protected function _testables($options = array()) {
-		if ($this->mockTestables === false) {
-			return parent::_testables($options);
+	protected function _subjects($options = array()) {
+		if ($this->mockSubjects === false) {
+			return parent::_subjects($options);
 		}
-		return $this->mockTestables;
+		return $this->mockSubjects;
 	}
 
 	protected function _path($path) {
 		return $this->pathResponse;
+	}
+
+	public function subjects($options = array()) {
+		return $this->_subjects($options);
 	}
 }
 

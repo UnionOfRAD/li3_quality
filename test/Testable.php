@@ -5,9 +5,10 @@
  * @copyright     Copyright 2011, Union of RAD (http://union-of-rad.org)
  * @license       http://opensource.org/licenses/bsd-license.php The BSD License
  */
+
 namespace li3_quality\test;
 
-use lithium\core\Libraries;
+use Exception;
 use li3_quality\analysis\Parser;
 
 class Testable extends \lithium\core\Object {
@@ -60,10 +61,13 @@ class Testable extends \lithium\core\Object {
 	public function __construct(array $config = array()) {
 		$this->_config = $config + array(
 			'wrap' => false,
+			'path' => null
 		);
-		$path = Libraries::path($config['path']);
-		$this->_config['path'] = $path;
-		$this->_source = file_get_contents($path);
+
+		if (!file_exists($this->_config['path'])) {
+			throw new Exception("File `{$this->_config['path']}` does not exist.");
+		}
+		$this->_source = file_get_contents($this->_config['path']);
 	}
 
 	/**

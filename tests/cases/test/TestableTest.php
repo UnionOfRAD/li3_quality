@@ -390,7 +390,7 @@ EOD;
 
 	public function testConstructorAutosetWrap() {
 		$config = array(
-			'path' => 'li3_quality\tests\cases\test\TestableTest',
+			'path' => __FILE__,
 		);
 		$testable = new RealTestable($config);
 

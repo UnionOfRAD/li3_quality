@@ -8,82 +8,99 @@
 
 namespace li3_quality\extensions\command;
 
+use SplFileInfo;
+use RecursiveCallbackFilterIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use lithium\core\Libraries;
+use li3_quality\test\Rules;
 use li3_quality\analysis\ParserException;
+use li3_quality\test\Testable;
 
 /**
  * The Syntax command helps you to run static code analysis on your codebase and
  * detect common coding standard violations.
+ *
+ * Supports multiple paths/files and already expanded wildcards
+ * passed through the shell.
+ * ```
+ * li3 syntax app/controllers/HelloWorldController.php
+ * li3 syntax app/controllers
+ * li3 syntax app/{controllers,models}
+ * li3 syntax app/controllers app/models
+ * ```
+ *
+ * You should use dedicated syntax rule sets for class files, templates and
+ * procedural files.
+ * ```
+ * li3 syntax --config=classSyntax.json app/controllers/HelloWorldController.php
+ * li3 syntax --config=viewSyntax.json app/views
+ * li3 syntax --config=configSyntax.json app/config
+ * ```
  */
-class Syntax extends \lithium\console\command\Test {
+class Syntax extends \lithium\console\Command {
 
 	/**
-	 * The library to run the quality checks on.
-	 */
-	public $library = true;
-
-	/**
-	 * If `--silent NUM` is used, only classes below this coverage are shown.
-	 */
-	public $threshold = 100;
-
-	/**
-	 * A regular expression to filter testable files.
-	 */
-	public $exclude = 'resources|webroot|vendor|libraries';
-
-	/**
-	 * This is the minimum threshold for core tests to be green.
-	 */
-	protected $_greenThreshold = 85;
-
-	/**
-	 * Dynamic dependencies.
+	 * Path to syntax rules configuration file.
 	 *
-	 * @var array
+	 * @var string
 	 */
-	protected $_classes = array(
-		'response' => 'lithium\console\Response',
-		'libraries' => 'lithium\core\Libraries',
-		'dispatcher' => 'lithium\test\Dispatcher',
-		'group' => 'lithium\test\Group',
-		'rules' => 'li3_quality\test\Rules',
-		'testable' => 'li3_quality\test\Testable'
-	);
+	public $config;
 
 	/**
-	 * Checks the syntax of your class files through static code analysis.
-	 * if GIT_DIR env variable is set, then use plain and silent.
+	 * Enable verbose output.
+	 *
+	 * @var boolean
 	 */
-	public function run($path = null) {
-		if ($this->request->env('GIT_DIR')) {
-			$this->plain = true;
-			$this->silent = true;
-		}
-		$rules = $this->_classes['rules'];
-		$ruleOptions = array();
-		$testables = $this->_testables(compact('path'));
-		$this->header('Lithium Syntax Check');
+	public $verbose = false;
 
-		$filters = $this->_syntaxFilters();
-		$ruleCount = count($rules::filterByName($filters));
-		$classCount = count($testables);
-		$this->out("Performing {$ruleCount} rules on {$classCount} classes.");
+	/**
+	 * Runs the syntax checker on given path/s.
+	 *
+	 * @param string $path Absolute or relative path to a directory
+	 *        to search recursively for files to check. By default will not descend
+	 *        into known library directories (i.e. `libraries`, `vendors`). If ommitted
+	 *        will use current working directory. Also works on single files.
+	 * @return boolean Will (indirectly) exit with status `1` if one or more rules
+	 *         failed otherwise with `0`.
+	 */
+	public function run($path = null /* , ... */) {
+		$this->header('Syntax Check');
+
+		$rules = $this->_rules();
+		$subjects = array();
 		$success = true;
-		foreach ($testables as $count => $path) {
+
+		foreach (func_get_args() ?: array(getcwd()) as $path) {
+			$subjects = array_merge($subjects, $this->_subjects($path));
+		}
+
+		$this->out(sprintf(
+			'Performing %d rules on path `%s`...',
+			count($rules),
+			$path
+		));
+
+		foreach ($subjects as $path) {
+			$testable = new Testable(array('path' => $path->getPathname()));
+
 			try {
-				$testable = $this->_instance('testable', compact('path'));
-				$result = $rules::apply($testable, $filters, $ruleOptions);
+				$result = Rules::apply($testable, $rules);
 			} catch (ParserException $e) {
 				$this->error("[FAIL] $path", "red");
 				$this->error("Parse error: " . $e->getMessage(), "red");
+
 				if ($this->verbose) {
 					$this->error(print_r($e->parserData, true), "red");
 				}
+
 				$success = false;
 				continue;
 			}
 			if ($result['success']) {
-				$this->out("[OK  ] $path", "green");
+				if ($this->verbose) {
+					$this->out("[OK  ] $path", "green");
+				}
 			} else {
 				$this->error("[FAIL] $path", "red");
 				$output = array(
@@ -125,76 +142,62 @@ class Syntax extends \lithium\console\command\Test {
 	}
 
 	/**
-	 * Returns a list of testable classes according to the given library.
-	 */
-	protected function _testables($options = array()) {
-		$defaults = array(
-			'recursive' => true, 'path' => null, 'exclude' => null
-		);
-		$options += $defaults;
-
-		$exclude = array($this->exclude, $options['exclude']);
-		if ($exclude = array_filter($exclude)) {
-			$options['exclude'] = '/' . join('|', $exclude) . '/';
-		} else {
-			unset($options['exclude']);
-		}
-
-		if ($path = $this->_path($options['path'])) {
-			if (pathinfo($options['path'], PATHINFO_EXTENSION) === 'php') {
-				return array($path);
-			}
-			$parts = explode('\\', $path) + array($this->library);
-			$this->library = array_shift($parts);
-			$options['path'] = join('/', $parts);
-		}
-		$libraries = $this->_classes['libraries'];
-		$testables = $libraries::find($this->library, $options);
-
-		if (!$testables) {
-			$library = $path ? $path : $this->library;
-			$this->stop(0, "Could not find any files in {$library}.");
-		}
-		return $testables;
-	}
-
-	/**
-	 * Will get the filters either from the filter option or the json ruleset
+	 * Retrieves subject to test. Will return only PHP files.
 	 *
-	 * @return array
+	 * @param string $path
+	 * @return array Returns an array of SplFieldInfo objects.
 	 */
-	protected function _syntaxFilters() {
-		if (!is_array($this->filters)) {
-			$filters = array();
-			if ($this->filters) {
-				$filters = array_map('trim', explode(',', $this->filters));
-			}
-			if (count($filters) === 0) {
-				$libraries = $this->_classes['libraries'];
-				$config = $libraries::get($this->library);
-
-				$files = array(
-					$config['path'] . '/config/syntax.json',
-					$libraries::get('li3_quality') . '/config/syntax.json'
-				);
-				foreach ($files as $file) {
-					if (file_exists($file)) {
-						$ruleConfig = json_decode(file_get_contents($file), true);
-						break;
-					}
-				}
-
-				$filters = $ruleConfig['rules'];
-				if (isset($ruleConfig['variables'])) {
-					$rules = $this->_classes['rules'];
-					$rules::ruleOptions($ruleConfig['variables']);
-				}
-			}
-			$this->filters = $filters;
+	protected function _subjects($path) {
+		if (is_file($path)) {
+			$current = new SplFileInfo($path);
+			return $current->getExtension() === 'php' ? array($current) : array();
 		}
-		return $this->filters;
+		$files = new RecursiveCallbackFilterIterator(
+			new RecursiveDirectoryIterator($path),
+			function($current, $key, $iterator) {
+				$noDescend = array(
+					'.git',
+					'libraries',
+					'vendor'
+				);
+				if ($iterator->hasChildren()) {
+					if ($current->isDir() && in_array($current->getBasename(), $noDescend)) {
+						return false;
+					}
+					return true;
+				}
+				if ($current->isFile()) {
+					return $current->getExtension() === 'php';
+				}
+				return false;
+			}
+		);
+		return iterator_to_array(new RecursiveIteratorIterator($files));
 	}
 
+	protected function _rules() {
+		$rules = array();
+
+		$files = array(
+			$this->config,
+			Libraries::get('li3_quality', 'path') . '/config/syntax.json'
+		);
+		foreach ($files as $file) {
+			if (file_exists($file)) {
+				$this->out("Loading configuration file `{$file}`...");
+				$config = json_decode(file_get_contents($file), true) + array(
+					'rules' => array(),
+					'variables' => array()
+				);
+				break;
+			}
+		}
+
+		if ($config['variables']) {
+			Rules::ruleOptions($config['variables']);
+		}
+		return $config['rules'];
+	}
 }
 
 ?>

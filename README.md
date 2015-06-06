@@ -35,7 +35,7 @@ have an additional `Syntax` button to check the files directly in your browser.
 If you just run it with `li3 syntax`, it will run all rules against your `app` library.
 
 ```bash
-$ li3 syntax
+$ li3 syntax --verbose path/to/code
 --------------------
 Lithium Syntax Check
 --------------------
@@ -61,20 +61,22 @@ Line    Position        Violation
 33      -               Protected Method "foobar" does not start with "_"
 ```
 
-If you have lots of files to check (for example if you test against the lithium core), you can pass the `--silent` option to only show errors. The `--library` param allows you to run the checks against a different library:
-
-```bash
-$ li3 syntax --silent --library=lithium
-```
-
 ### Custom rules set
 
-By default, `li3 syntax` command looks for a set of rules to apply, defined in `{checked-library}/config/syntax.json`. Otherwise it uses [the default syntax rules set](https://github.com/UnionOfRAD/li3_quality/blob/master/config/syntax.json).
-You can customize this configuration file to suit your own quality standards, by removing unwanted rules, or by adding your own rules classes at `{:library}/extensions/test/rules/YourCustomRule.php`.
+By default, `li3 syntax` command looks for a set of rules to apply, defined in
+`{checked-library}/config/syntax.json`. Otherwise it uses [the default syntax rules
+set](https://github.com/UnionOfRAD/li3_quality/blob/master/config/syntax.json).
+
+You can customize this configuration file to suit your own quality standards,
+by removing unwanted rules, or by adding your own rules classes at
+`{:library}/extensions/test/rules/YourCustomRule.php`.
 
 ### GIT Pre Commit Hook
 
-This pre commit hook is based upon the example found in `.git/hooks/pre-commit.sample`. Copy the sample script to `/path/to/project/.git/hooks/pre-commit` and make it executable. Then, replace the code in the script with the code shown below and adjust the paths to Lithium QA and the li3 command.
+This pre commit hook is based upon the example found in `.git/hooks/pre-commit.sample`. Copy
+the sample script to `/path/to/project/.git/hooks/pre-commit` and make it executable. Then,
+replace the code in the script with the code shown below and adjust the paths to the plugin and
+the li3 command.
 
 ```
 cd /path/to/project
@@ -131,15 +133,6 @@ Checking coverage on 6 classes.
 ```
 
 You can also reuse the `--library` argument as well. In addition, this command provides an optional `--threshold` argument that only displays coverage below the given amount. This defaults to 100, so all classes will be shown. If you have coloring on your shell (likely not on windows), then the classes are colored to reflect the coverage policy of the Lithium framework (0% or no test is red, 85% or higher is green and the rest is yellow).
-
-## Troubleshooting: Can't find files
-
-Please make sure you are supplying the library parameter to 
-match the root namespace of your project, e.g.:
-
-```bash
-libraries/lithium/console/li3 quality syntax --library=myapp
-```
 
 ## Copyright & License
 
