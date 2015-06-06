@@ -99,9 +99,6 @@ class Testable extends \lithium\core\Object {
 	 * which increases performance in cases where you only need to
 	 * apply regex checks on the file. The result is cached afterwards.
 	 *
-	 * The PHP version check is in there, because on 5.3.6 (and maybe until 5.3.9),
-	 * when using an SplFixed array (which is faster), the app segfaults.
-	 *
 	 * @return  array
 	 */
 	public function tokens() {
