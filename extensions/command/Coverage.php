@@ -48,7 +48,7 @@ class Coverage extends \lithium\console\command\Test {
 	/**
 	 * Lists code coverage for a given threshold (100 by default).
 	 */
-	public function run() {
+	public function run($path = null) {
 		$this->header('Lithium Code Coverage');
 
 		$exclude = 'tests|index$|^app\\\\config|^app\\\\views|Exception$';
