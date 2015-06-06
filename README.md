@@ -1,10 +1,7 @@
-Improve the code quality of your Lithium applications
-=====================================================
-This project is a 100% Lithium based replacement for the [li3_qa](https://github.com/UnionOfRAD/li3_qa) library, which in turn depends on [phpca](https://github.com/UnionOfRAD/phpca).
+# Quality
+### Plugin to improve the quality of your li₃ libraries and applications. 
 
-[![Build Status](https://secure.travis-ci.org/UnionOfRAD/li3_quality.png?branch=master)](http://travis-ci.org/UnionOfRAD/li3_quality)
-
-Here are some of the key features:
+## Key Features
 
 - Detect coding-standard violations.
 - Find weak- or untested classes/methods.
@@ -14,52 +11,31 @@ Here are some of the key features:
 - Runs on Windows without hassle.
 - Cool shortcuts to ease your workflow.
 
-Installation
-------------
-Clone the repository in your libraries path and then add this line to the `config/bootstrap/libraries.php` file:
+## Installation
+
+The preferred installation method is via composer. You can add
+the library as a dependency via:
+
+```
+composer require unionofrad/li3_quality
+```
+
+li₃ libraries must be registered within your application bootstrap phase 
+as they use a different (faster) autoloader. 
 
 ```php
-/**
- * Add some plugins:
- */
-Libraries::add('li3_quality');
-```
-If you open the test dashboard (under `/test` in your browser), you can should have an additional `Syntax` button to check the files directly in your browser.
-
-Usage
------
-If you run the `li3` command from your console, you'll now find the `syntax` command with its various params:
-
-```bash
-$ li3 quality
-Lithium console started in the development environment. Use the --env=environment key to alter this.
-USAGE
-    li3 quality syntax
-    li3 quality documented
-    li3 quality coverage
-DESCRIPTION
-    The Quality command helps you to run static code analysis on your codebase.
-OPTIONS
-    syntax
-        Checks the syntax of your class files through static code analysis.
-    documented
-        Checks for undocumented classes or methods inside the library.
-    coverage
-        Lists code coverage for a given threshold (100 by default).
-    --library=<>
-        The library to run the quality checks on.
-    --silent=<>
-        If `--silent` is used, only failures are shown.
-    --threshold=<>
-        If `--slient NUM` is used, only classes below this coverage are shown.
+Libraries::add('li3_quality')
 ```
 
-The "syntax" command
---------------------
-If you just run it with `li3 quality syntax`, it will run all rules against your `app` library.
+If you open the test dashboard (under `/test` in your browser), you should 
+have an additional `Syntax` button to check the files directly in your browser.
+
+## Usage: The "syntax" command
+
+If you just run it with `li3 syntax`, it will run all rules against your `app` library.
 
 ```bash
-$ li3 quality syntax
+$ li3 syntax
 --------------------
 Lithium Syntax Check
 --------------------
@@ -88,37 +64,15 @@ Line    Position        Violation
 If you have lots of files to check (for example if you test against the lithium core), you can pass the `--silent` option to only show errors. The `--library` param allows you to run the checks against a different library:
 
 ```bash
-$ li3 quality syntax --silent --library=lithium
---------------------
-Lithium Syntax Check
---------------------
-Performing 16 rules on 375 classes.
-[FAIL] lithium\tests\cases\net\http\RouteTest
-Line    Position        Violation
-----    --------        ---------
-383     103             Maximum line length exceeded
-[FAIL] lithium\tests\cases\console\command\LibraryTest
-Line    Position        Violation
-----    --------        ---------
-241     101             Maximum line length exceeded
-[FAIL] lithium\test\Unit
-Line    Position        Violation
-----    --------        ---------
-1017    102             Maximum line length exceeded
-[FAIL] lithium\data\Entity
-Line    Position        Violation
-----    --------        ---------
-379     111             Maximum line length exceeded
-381     110             Maximum line length exceeded
+$ li3 syntax --silent --library=lithium
 ```
 
-#### Custom rules set
+### Custom rules set
 
-By default, `li3 quality syntax` command looks for a set of rules to apply, defined in `{checked-library}/test/rules.json`. Otherwise it uses [the default rules set](https://github.com/UnionOfRAD/li3_quality/blob/master/test/defaultRules.json).
+By default, `li3 syntax` command looks for a set of rules to apply, defined in `{checked-library}/test/rules.json`. Otherwise it uses [the default rules set](https://github.com/UnionOfRAD/li3_quality/blob/master/test/defaultRules.json).
 You can customize this configuration file to suit your own quality standards, by removing unwanted rules, or by adding your own rules classes at `{:library}/extensions/test/rules/YourCustomRule.php`.
 
-GIT Pre Commit Hook
---------------------
+### GIT Pre Commit Hook
 
 This pre commit hook is based upon the example found in `.git/hooks/pre-commit.sample`. Copy the sample script to `/path/to/project/.git/hooks/pre-commit` and make it executable. Then, replace the code in the script with the code shown below and adjust the paths to Lithium QA and the li3 command.
 
@@ -149,7 +103,7 @@ PROJECT=`pwd`
 
 for FILE in `git diff-index --cached --name-only --diff-filter=AM ${AGAINST}`
 do
-    cd ${APP} && ${LI3} quality syntax ${PROJECT}/${FILE}
+    cd ${APP} && ${LI3} syntax ${PROJECT}/${FILE}
     test $? != 0 && EXIT_STATUS=1
 done
 
@@ -158,9 +112,9 @@ exit ${EXIT_STATUS}
 
 Now when committing each file the syntax is checked. The commit is aborted if a check failed. If you don't want to have the hook run on commit pass the `--no-verify` option to git commit.
 
-The "coverage" command
-----------------------
-With `li3 quality coverage` you can get a summary of how well your classes are covered with tests. This makes use of some `xdebug` functions, so make sure to have it installed.
+## Usage: The "coverage" command
+
+With `li3 coverage` you can get a summary of how well your classes are covered with tests. This makes use of some `xdebug` functions, so make sure to have it installed.
 
 ```bash
 $ li3 quality coverage
@@ -178,22 +132,17 @@ Checking coverage on 6 classes.
 
 You can also reuse the `--library` argument as well. In addition, this command provides an optional `--threshold` argument that only displays coverage below the given amount. This defaults to 100, so all classes will be shown. If you have coloring on your shell (likely not on windows), then the classes are colored to reflect the coverage policy of the Lithium framework (0% or no test is red, 85% or higher is green and the rest is yellow).
 
-The "documented" command
-------------------------
-This command needs to be implemented.
+## Troubleshooting: Can't find files
 
-Planned
--------
-See the issue tracker for all tickets that are currently marked as "enhancement".
-
-Troubleshooting
-===============
-
-Can't find files
-----------------
-
-Please make sure you are supplying the library parameter to match the root namespace of your project, e.g.:
+Please make sure you are supplying the library parameter to 
+match the root namespace of your project, e.g.:
 
 ```bash
 libraries/lithium/console/li3 quality syntax --library=myapp
 ```
+
+## Copyright & License
+
+Copyright 2011 Union of RAD. All rights reserved. This library
+is distributed under the terms of the BSD 3-Clause License. The
+full license text can be found in the LICENSE.txt file.
