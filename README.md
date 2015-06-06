@@ -1,5 +1,5 @@
 # Quality
-### This li₃ plugin adds code quality assurance to your toolbelt.
+**This li₃ plugin adds code quality assurance to your toolbelt.**
 
 ## Key Features
 
