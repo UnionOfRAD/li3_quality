@@ -83,13 +83,25 @@ class Testable extends \lithium\core\Object {
 		return isset($this->_config[$param]) ? $this->_config[$param] : null;
 	}
 
+	public function save() {
+		return file_put_contents($this->_config['path'], $this->_source);
+	}
+
 	/**
 	 * Accessor method for the source code.
 	 *
 	 * @return  string
 	 */
-	public function source() {
-		return $this->_source;
+	public function source($contents = null) {
+		if ($contents === null) {
+			return $this->_source;
+		}
+		if ($contents === $this->_source) {
+			return true;
+		}
+		$this->_source = $contents;
+		$this->_tokens = null;
+		$this->_lines = null;
 	}
 
 	/**

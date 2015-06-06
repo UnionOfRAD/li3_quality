@@ -61,17 +61,28 @@ Line    Position        Violation
 33      -               Protected Method "foobar" does not start with "_"
 ```
 
-### Custom rules set
+## Usage: The "fix" command
 
-By default, `li3 syntax` command looks for a set of rules to apply, defined in
-`{checked-library}/config/syntax.json`. Otherwise it uses [the default syntax rules
-set](https://github.com/UnionOfRAD/li3_quality/blob/master/config/syntax.json).
+The fix command helps in migrating code to newer versions. It'll rewrite 
+existing source code files and update them in place. Please note that
+you should use a version control system when using this command, as 
+the results may not always be 100% what you'd expect.
 
-You can customize this configuration file to suit your own quality standards,
-by removing unwanted rules, or by adding your own rules classes at
-`{:library}/extensions/qa/rules/syntax/YourCustomRule.php`.
+```
+$ li3 fix --verbose path/to/code
+```
 
-### GIT Pre Commit Hook
+## Custom Rules & Rule Sets
+
+Rule based commands (syntax and fix) will work only with a rule set configuration file.
+If none is provided through the `--config=<FILE>` option, these commands fall back 
+to use the default configuration files in `config/syntax.json` and `config/fix.json` 
+respectively.  
+
+Custom rules must be create as i.e. 
+`<your library>/extensions/qa/rules/{syntax,fix}/YourCustomRule.php`.
+
+## GIT Pre Commit Hook
 
 This pre commit hook is based upon the example found in `.git/hooks/pre-commit.sample`. Copy
 the sample script to `/path/to/project/.git/hooks/pre-commit` and make it executable. Then,
@@ -133,6 +144,7 @@ Checking coverage on 6 classes.
 ```
 
 You can also reuse the `--library` argument as well. In addition, this command provides an optional `--threshold` argument that only displays coverage below the given amount. This defaults to 100, so all classes will be shown. If you have coloring on your shell (likely not on windows), then the classes are colored to reflect the coverage policy of the Lithium framework (0% or no test is red, 85% or higher is green and the rest is yellow).
+
 
 ## Copyright & License
 
