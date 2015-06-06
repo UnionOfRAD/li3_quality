@@ -19,6 +19,13 @@ abstract class Rule extends \lithium\core\Object {
 	 */
 	protected $_warnings = array();
 
+	public function name() {
+		$class = get_class($this);
+		$sep = strrpos($class, '\\');
+
+		return ($sep !== false) ? substr($class, $sep + 1) : $class;
+	}
+
 	/**
 	 * This method will need to addViolations if one is found
 	 *

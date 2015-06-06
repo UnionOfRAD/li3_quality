@@ -29,7 +29,7 @@
 		"UnusedUseStatements",
 		"MultipleBlankLines"
 	],
-	"variables": {
+	"options": {
 		"DoesntExceedMaxLineLength": {
 			"softLimit": false,
 			"hardLimit": 100,

@@ -14,8 +14,8 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use lithium\core\Libraries;
 use li3_quality\qa\Rules;
-use li3_quality\analysis\ParserException;
 use li3_quality\qa\Testable;
+use li3_quality\analysis\ParserException;
 
 /**
  * The Syntax command helps you to run static code analysis on your codebase and
@@ -41,7 +41,7 @@ use li3_quality\qa\Testable;
 class Syntax extends \lithium\console\Command {
 
 	/**
-	 * Path to syntax rules configuration file.
+	 * Path to rules configuration file.
 	 *
 	 * @var string
 	 */
@@ -85,7 +85,7 @@ class Syntax extends \lithium\console\Command {
 			$testable = new Testable(array('path' => $path->getPathname()));
 
 			try {
-				$result = Rules::apply($testable, $rules);
+				$result = $rules->apply($testable);
 			} catch (ParserException $e) {
 				$this->error("[FAIL] $path", "red");
 				$this->error("Parse error: " . $e->getMessage(), "red");
@@ -142,7 +142,7 @@ class Syntax extends \lithium\console\Command {
 	}
 
 	/**
-	 * Retrieves subject to test. Will return only PHP files.
+	 * Retrieves subjects. Will return only PHP files.
 	 *
 	 * @param string $path
 	 * @return array Returns an array of SplFieldInfo objects.
@@ -175,8 +175,13 @@ class Syntax extends \lithium\console\Command {
 		return iterator_to_array(new RecursiveIteratorIterator($files));
 	}
 
+	/**
+	 * Loads rules configuration.
+	 *
+	 * @return object
+	 */
 	protected function _rules() {
-		$rules = array();
+		$rules = new Rules();
 
 		$files = array(
 			$this->config,
@@ -186,17 +191,22 @@ class Syntax extends \lithium\console\Command {
 			if (file_exists($file)) {
 				$this->out("Loading configuration file `{$file}`...");
 				$config = json_decode(file_get_contents($file), true) + array(
+					'name' => null,
 					'rules' => array(),
-					'variables' => array()
+					'options' => array()
 				);
 				break;
 			}
 		}
 
-		if ($config['variables']) {
-			Rules::ruleOptions($config['variables']);
+		foreach ($config['rules'] as $ruleName) {
+			$class = Libraries::locate('rules.syntax', $ruleName);
+			$rules->add(new $class());
 		}
-		return $config['rules'];
+		if ($config['options']) {
+			$rules->options($config['options']);
+		}
+		return $rules;
 	}
 }
 

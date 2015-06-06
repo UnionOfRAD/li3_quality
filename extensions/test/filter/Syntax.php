@@ -15,20 +15,26 @@ use li3_quality\qa\Testable;
 class Syntax extends \lithium\test\Filter {
 
 	public static function apply($report, $tests, array $options = array()) {
-		$config = Libraries::get('li3_quality');
+		$rules = new Rules();
 
-		$ruleConfig = $config['path'] . '/config/syntax.json';
-		$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
+		$file = Libraries::get('li3_quality', 'path') . '/config/syntax.json';
+		$config = json_decode(file_get_contents($file), true) + array(
+			'name' => null,
+			'rules' => array(),
+			'options' => array()
+		);
 
-		$filters = $ruleConfig['rules'];
-
-		if (isset($ruleConfig['variables'])) {
-			Rules::ruleOptions($ruleConfig['variables']);
+		foreach ($config['rules'] as $ruleName) {
+			$class = Libraries::locate('rules.syntax', $ruleName);
+			$rules->add(new $class());
+		}
+		if ($config['options']) {
+			$rules->options($config['options']);
 		}
 
 		foreach ($tests->invoke('subject') as $class) {
 			$report->collect(__CLASS__, array(
-				$class => Rules::apply(new Testable(array('path' => Libraries::path($class))), $filters)
+				$class => $rules->apply(new Testable(array('path' => Libraries::path($class))))
 			));
 		}
 		return $tests;
