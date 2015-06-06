@@ -69,7 +69,7 @@ $ li3 syntax --silent --library=lithium
 
 ### Custom rules set
 
-By default, `li3 syntax` command looks for a set of rules to apply, defined in `{checked-library}/test/rules.json`. Otherwise it uses [the default rules set](https://github.com/UnionOfRAD/li3_quality/blob/master/test/defaultRules.json).
+By default, `li3 syntax` command looks for a set of rules to apply, defined in `{checked-library}/config/syntax.json`. Otherwise it uses [the default syntax rules set](https://github.com/UnionOfRAD/li3_quality/blob/master/config/syntax.json).
 You can customize this configuration file to suit your own quality standards, by removing unwanted rules, or by adding your own rules classes at `{:library}/extensions/test/rules/YourCustomRule.php`.
 
 ### GIT Pre Commit Hook

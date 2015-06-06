@@ -172,12 +172,18 @@ class Syntax extends \lithium\console\command\Test {
 			if (count($filters) === 0) {
 				$libraries = $this->_classes['libraries'];
 				$config = $libraries::get($this->library);
-				$ruleConfig = $config['path'] . '/test/rules.json';
-				if (!file_exists($ruleConfig)) {
-					$config = $libraries::get('li3_quality');
-					$ruleConfig = $config['path'] . '/test/defaultRules.json';
+
+				$files = array(
+					$config['path'] . '/config/syntax.json',
+					$libraries::get('li3_quality') . '/config/syntax.json'
+				);
+				foreach ($files as $file) {
+					if (file_exists($file)) {
+						$ruleConfig = json_decode(file_get_contents($file), true);
+						break;
+					}
 				}
-				$ruleConfig = json_decode(file_get_contents($ruleConfig), true);
+
 				$filters = $ruleConfig['rules'];
 				if (isset($ruleConfig['variables'])) {
 					$rules = $this->_classes['rules'];
