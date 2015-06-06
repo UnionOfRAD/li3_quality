@@ -11,9 +11,10 @@ namespace li3_quality\extensions\command;
 use li3_quality\analysis\ParserException;
 
 /**
- * The Quality command helps you to run static code analysis on your codebase.
+ * The Syntax command helps you to run static code analysis on your codebase and
+ * detect common coding standard violations.
  */
-class Quality extends \lithium\console\command\Test {
+class Syntax extends \lithium\console\command\Test {
 
 	/**
 	 * The library to run the quality checks on.
@@ -50,18 +51,10 @@ class Quality extends \lithium\console\command\Test {
 	);
 
 	/**
-	 * Show help on run.
-	 *
-	 */
-	public function run($path = null) {
-		return $this->_help();
-	}
-
-	/**
 	 * Checks the syntax of your class files through static code analysis.
 	 * if GIT_DIR env variable is set, then use plain and silent.
 	 */
-	public function syntax($path = null) {
+	public function run($path = null) {
 		if ($this->request->env('GIT_DIR')) {
 			$this->plain = true;
 			$this->silent = true;
@@ -129,75 +122,6 @@ class Quality extends \lithium\console\command\Test {
 			}
 		}
 		return $success;
-	}
-
-	/**
-	 * Checks for undocumented classes or methods inside the library.
-	 */
-	public function documented() {
-		$this->header('Lithium Documentation Check');
-
-		$testables = $this->_testables();
-		$count = count($testables);
-		$this->out("Checking documentation on {$count} classes.");
-
-		foreach ($testables as $count => $path) {
-		}
-	}
-
-	/**
-	 * Lists code coverage for a given threshold (100 by default).
-	 */
-	public function coverage() {
-		$this->header('Lithium Code Coverage');
-
-		$exclude = 'tests|index$|^app\\\\config|^app\\\\views|Exception$';
-		$testables = $this->_testables(compact('exclude'));
-
-		$this->out("Checking coverage on " . count($testables) . " classes.");
-
-		$tests = array();
-		$group = $this->_classes['group'];
-		foreach ($group::all() as $test) {
-			$class = preg_replace('/(tests\\\[a-z]+\\\|Test$)/', null, $test);
-			$tests[$class] = $test;
-		}
-
-		$dispatcher = $this->_classes['dispatcher'];
-		foreach ($testables as $count => $path) {
-			$coverage = null;
-
-			if ($hasTest = isset($tests[$path])) {
-				$report = $dispatcher::run($tests[$path], array(
-					'format' => 'txt',
-					'filters' => array('Coverage')
-				));
-				$filter = 'lithium\test\filter\Coverage';
-				$collected = $report->results['filters'][$filter];
-				if (isset($collected[$path])) {
-					$coverage = $collected[$path]['percentage'];
-				}
-			}
-
-			if ($coverage >= $this->_greenThreshold) {
-				$color = 'green';
-			} elseif ($coverage === null || $coverage === 0) {
-				$color = 'red';
-			} else {
-				$color = 'yellow';
-			}
-
-			if ($coverage === null || $coverage <= $this->threshold) {
-				$label = $hasTest ? 'has test' : 'no test';
-				$cov = 'n/a';
-				if (is_numeric($coverage)) {
-					$cov = sprintf('%.2f%%', $coverage);
-				}
-				$output = sprintf('%10s | %7s | %s', $label, $cov, $path);
-				$this->out($output, $color);
-			}
-		}
-
 	}
 
 	/**
