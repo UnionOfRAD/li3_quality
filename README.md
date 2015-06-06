@@ -1,5 +1,5 @@
 # Quality
-### Plugin to improve the quality of your li₃ libraries and applications. 
+### This li₃ plugin adds code quality assurance to your toolbelt.
 
 ## Key Features
 
