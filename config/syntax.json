@@ -1,5 +1,5 @@
 {
-	"name": "Default RuleSet",
+	"name": "Default Rule Set",
 	"rules": [
 		"BeginsWithOpenTag",
 		"ClassesDoNotUseSuperglobalsDirectly",
