@@ -24,7 +24,7 @@ class Rules extends \lithium\core\StaticObject {
 	 * @return  void
 	 */
 	public static function init() {
-		$rulePaths = Libraries::locate('rules');
+		$rulePaths = Libraries::locate('rules.syntax');
 		foreach ($rulePaths as $rulePath) {
 			$rule = new $rulePath();
 			if ($rule->enabled()) {
