@@ -2,13 +2,15 @@
 
 namespace li3_quality\tests\mocks\test;
 
-/**
- * A mock of the Rule object
- */
 class MockRule extends \li3_quality\test\Rule {
 
-	public function apply($testable, array $config = array()) {
+	protected function _rule($rule, array $options = array()) {
+		if (isset($this->rule)) {
+			return $this->rule;
+		}
+		return parent::_rule($rule, $options);
 	}
+
 }
 
 ?>

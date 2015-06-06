@@ -13,9 +13,9 @@ use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use lithium\core\Libraries;
-use li3_quality\test\Rules;
+use li3_quality\qa\Rules;
 use li3_quality\analysis\ParserException;
-use li3_quality\test\Testable;
+use li3_quality\qa\Testable;
 
 /**
  * The Syntax command helps you to run static code analysis on your codebase and

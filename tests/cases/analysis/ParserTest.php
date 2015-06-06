@@ -4,7 +4,7 @@ namespace li3_quality\tests\cases\analysis;
 
 use li3_quality\analysis\Parser;
 
-class ParserTest extends \li3_quality\test\Unit {
+class ParserTest extends \li3_quality\test\Rule {
 
 	public function testTokenCount() {
 		$code = <<<EOD

@@ -2,136 +2,126 @@
 
 namespace li3_quality\tests\cases\test;
 
-use li3_quality\tests\mocks\test\MockRule as Rule;
+use li3_quality\tests\mocks\test\MockRule;
+use li3_quality\test\Rule;
 
-class RuleTest extends \li3_quality\test\Unit {
+class RuleTest extends \li3_quality\test\Rule {
 
-	public function testAddAndRetrieveViolation() {
-		$rule = new Rule();
-		$violation = array(
-			'message' => 'Foobar',
-			'line' => 0,
-			'position' => '-',
-		);
-		$rule->addViolation($violation);
-		$violations = $rule->violations();
+	protected $_rule = 'li3_quality\tests\mocks\qa\MockRule';
 
-		$this->assertIdentical(array($violation), $violations);
+	public function testAssertRulePassPassing() {
+		$code = <<<EOD
+class foobar {
+	public function bar() {
+		return false;
+	}
+}
+EOD;
+		$unit = new Rule();
+
+		$expected = true;
+		$result = $unit->assertRulePass($code, $this->_rule);
+
+		$this->assertIdentical($expected, $result);
 	}
 
-	public function testResetViolation() {
-		$rule = new Rule();
-		$violation = array(
-			'message' => 'Foobar',
-			'line' => 0,
-		);
-		$rule->addViolation($violation);
-		$rule->reset();
-		$violations = $rule->violations();
-
-		$this->assertIdentical(array(), $violations);
+	public function testAssertRulePassFailing() {
+		$code = <<<EOD
+class foobar {
+	public function bar() {
+		return false;
 	}
-
-	public function testSuccessWithViolations() {
-		$rule = new Rule();
-		$violation = array(
-			'message' => 'Foobar',
+}
+EOD;
+		$unit = new MockRule();
+		$unit->rule = new $this->_rule();
+		$unit->rule->addViolation(array(
+			'message' => 'foobar',
 			'line' => 0,
-		);
-		$rule->addViolation($violation);
-		$success = $rule->success();
-
-		$this->assertIdentical(false, $success);
-	}
-
-	public function testAddAndRetrieveWarnings() {
-		$rule = new Rule();
-		$warning = array(
-			'message' => 'Foobar',
-			'line' => 0,
-			'position' => '-',
-		);
-		$rule->addWarning($warning);
-		$warnings = $rule->warnings();
-
-		$this->assertIdentical(array($warning), $warnings);
-	}
-
-	public function testResetWarnings() {
-		$rule = new Rule();
-		$warning = array(
-			'message' => 'Foobar',
-			'line' => 0,
-		);
-		$rule->addViolation($warning);
-		$rule->reset();
-		$warnings = $rule->warnings();
-
-		$this->assertIdentical(array(), $warnings);
-	}
-
-	public function testSuccessWithWarnings() {
-		$rule = new Rule();
-		$warning = array(
-			'message' => 'Foobar',
-			'line' => 0,
-		);
-		$rule->addWarning($warning);
-		$success = $rule->success();
-
-		$this->assertIdentical(true, $success);
-	}
-
-	public function testSuccessWithoutViolations() {
-		$rule = new Rule();;
-		$success = $rule->success();
-
-		$this->assertIdentical(true, $success);
-	}
-
-	public function testResetJustWarnings() {
-		$rule = new Rule();
-		$rule->addWarning(array(
-			'message' => 'Warning',
-			'line' => 0,
+			'position' => 0,
 		));
-		$rule->addViolation(array(
-			'message' => 'Violation',
-			'line' => 0,
-		));
-		$rule->reset('warnings');
-		$this->assertIdentical(0, count($rule->warnings()));
-		$this->assertIdentical(1, count($rule->violations()));
+
+		$expected = false;
+		$result = $unit->assertRulePass($code, $this->_rule);
+
+		$this->assertIdentical($expected, $result);
 	}
 
-	public function testResetJustViolations() {
-		$rule = new Rule();
-		$rule->addWarning(array(
-			'message' => 'Warning',
+	public function testAssertRuleFailPassing() {
+		$code = <<<EOD
+class foobar {
+	public function bar() {
+		return false;
+	}
+}
+EOD;
+		$unit = new MockRule();
+		$unit->rule = new $this->_rule();
+		$unit->rule->addViolation(array(
+			'message' => 'foobar',
 			'line' => 0,
+			'position' => 0,
 		));
-		$rule->addViolation(array(
-			'message' => 'Violation',
-			'line' => 0,
-		));
-		$rule->reset('violations');
-		$this->assertIdentical(1, count($rule->warnings()));
-		$this->assertIdentical(0, count($rule->violations()));
+
+		$expected = true;
+		$result = $unit->assertRuleFail($code, $this->_rule);
+
+		$this->assertIdentical($expected, $result);
 	}
 
-	public function testResetBoth() {
-		$rule = new Rule();
-		$rule->addWarning(array(
-			'message' => 'Warning',
+	public function testAssertRuleFailFailing() {
+		$code = <<<EOD
+class foobar {
+	public function bar() {
+		return false;
+	}
+}
+EOD;
+		$unit = new Rule();
+
+		$expected = false;
+		$result = $unit->assertRuleFail($code, $this->_rule);
+
+		$this->assertIdentical($expected, $result);
+	}
+
+	public function testAssertHasWarnings() {
+		$code = <<<EOD
+class foobar {
+	public function bar() {
+		return false;
+	}
+}
+EOD;
+		$unit = new MockRule();
+		$unit->rule = new $this->_rule();
+		$unit->rule->addWarning(array(
+			'message' => 'foobar',
 			'line' => 0,
+			'position' => 0,
 		));
-		$rule->addViolation(array(
-			'message' => 'Violation',
-			'line' => 0,
-		));
-		$rule->reset();
-		$this->assertIdentical(0, count($rule->warnings()));
-		$this->assertIdentical(0, count($rule->violations()));
+
+		$expected = true;
+		$result = $unit->assertRuleWarning($code, $this->_rule);
+
+		$this->assertIdentical($expected, $result);
+	}
+
+	public function testAssertHasNoWarnings() {
+		$code = <<<EOD
+class foobar {
+	public function bar() {
+		return false;
+	}
+}
+EOD;
+		$unit = new MockRule();
+		$unit->rule = new $this->_rule();
+
+		$expected = true;
+		$result = $unit->assertRuleNoWarning($code, $this->_rule);
+
+		$this->assertIdentical($expected, $result);
 	}
 
 }

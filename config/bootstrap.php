@@ -8,12 +8,12 @@
 
 use lithium\core\Libraries;
 use lithium\g11n\Multibyte;
-use li3_quality\test\Rules;
+use li3_quality\qa\Rules;
 
 Libraries::paths(array(
 	'rules' => array(
-		'{:library}\extensions\test\rules\{:class}\{:name}',
-		'{:library}\test\rules\{:class}\{:name}' => array('libraries' => 'li3_quality')
+		'{:library}\extensions\qa\rules\{:class}\{:name}',
+		'{:library}\qa\rules\{:class}\{:name}' => array('libraries' => 'li3_quality')
 	)
 ));
 

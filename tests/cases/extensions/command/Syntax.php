@@ -7,7 +7,7 @@ use li3_quality\tests\mocks\extensions\command\MockSyntax;
 use lithium\console\Request;
 use li3_quality\analysis\ParserException;
 
-class SyntaxTest extends \li3_quality\test\Unit {
+class SyntaxTest extends \li3_quality\test\Rule {
 
 	protected $_backup = array();
 

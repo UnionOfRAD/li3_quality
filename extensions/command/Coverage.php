@@ -42,7 +42,7 @@ class Coverage extends \lithium\console\command\Test {
 		'libraries' => 'lithium\core\Libraries',
 		'dispatcher' => 'lithium\test\Dispatcher',
 		'group' => 'lithium\test\Group',
-		'testable' => 'li3_quality\test\Testable'
+		'testable' => 'li3_quality\qa\Testable'
 	);
 
 	/**

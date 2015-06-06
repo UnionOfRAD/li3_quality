@@ -9,8 +9,8 @@
 namespace li3_quality\extensions\test\filter;
 
 use lithium\core\Libraries;
-use li3_quality\test\Rules;
-use li3_quality\test\Testable;
+use li3_quality\qa\Rules;
+use li3_quality\qa\Testable;
 
 class Syntax extends \lithium\test\Filter {
 

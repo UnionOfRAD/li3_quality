@@ -69,7 +69,7 @@ set](https://github.com/UnionOfRAD/li3_quality/blob/master/config/syntax.json).
 
 You can customize this configuration file to suit your own quality standards,
 by removing unwanted rules, or by adding your own rules classes at
-`{:library}/extensions/test/rules/syntax/YourCustomRule.php`.
+`{:library}/extensions/qa/rules/syntax/YourCustomRule.php`.
 
 ### GIT Pre Commit Hook
 
