@@ -29,8 +29,9 @@ abstract class Rule extends \lithium\core\Object {
 	/**
 	 * This method will need to addViolations if one is found
 	 *
-	 * @param   object $testable The testable object
-	 * @return  void
+	 * @param object $testable The testable object
+	 * @param  array $config
+	 * @return void
 	 */
 	abstract public function apply($testable, array $config = array());
 
@@ -108,8 +109,12 @@ abstract class Rule extends \lithium\core\Object {
 	/**
 	 * A switch to check if this rule should be applied to the current
 	 * tests or not
+	 *
+	 * @param object $testable The testable object
+	 * @param  array $config
+	 * @return boolean
 	 */
-	public function enabled() {
+	public function enabled($testable, array $config = array()) {
 		return true;
 	}
 }

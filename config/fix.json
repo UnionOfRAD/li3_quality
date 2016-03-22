@@ -1,8 +1,12 @@
 {
 	"name": "Default Rule Set",
 	"rules": [
-		"StringTextRename"
+		"StringTextRename",
+        "Header"
 	],
 	"options": {
+        "Header": {
+            "template": "{:library}/template/docs/header.txt.php"
+        }
 	}
 }

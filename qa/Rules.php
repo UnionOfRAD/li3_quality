@@ -45,12 +45,21 @@ class Rules {
 		foreach ($this->_rules as $ruleSet) {
 			$rule = $ruleSet['rule'];
 			$options = $ruleSet['options'];
-			$rule->apply($testable, $options);
-			$warnings = array_merge($warnings, $rule->warnings());
 
-			if (!$rule->success()) {
-				$success = false;
-				$violations = array_merge($violations, $rule->violations());
+			if ($rule->enabled($testable, $options)) {
+				$rule->apply($testable, $options);
+				$warnings = array_merge($warnings, $rule->warnings());
+
+				if (!$rule->success()) {
+					$success = false;
+					$violations = array_merge($violations, $rule->violations());
+				}
+			} else {
+				$warnings = array_merge($warnings, array(
+					'line' => '-',
+					'position' => '-',
+					'message' => 'Rule `' . $rule->name() . '`not enabled.',
+				));
 			}
 			$rule->reset();
 		}
