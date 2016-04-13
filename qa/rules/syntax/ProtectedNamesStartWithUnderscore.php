@@ -8,7 +8,7 @@
 
 namespace li3_quality\qa\rules\syntax;
 
-use lithium\util\String;
+use lithium\util\Text;
 use li3_quality\analysis\Parser;
 
 class ProtectedNamesStartWithUnderscore extends \li3_quality\qa\Rule {
@@ -41,7 +41,7 @@ class ProtectedNamesStartWithUnderscore extends \li3_quality\qa\Rule {
 				$classTokenId = $testable->findNext(array(T_STRING), $token['parent']);
 				$classname = $tokens[$classTokenId]['content'];
 				$params = array(
-					'message' => String::insert($message, array(
+					'message' => Text::insert($message, array(
 						'name' => $parentLabel,
 					)),
 					'line' => $token['line']

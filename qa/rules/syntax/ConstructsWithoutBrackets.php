@@ -8,7 +8,7 @@
 
 namespace li3_quality\qa\rules\syntax;
 
-use lithium\util\String;
+use lithium\util\Text;
 
 class ConstructsWithoutBrackets extends \li3_quality\qa\Rule {
 
@@ -72,7 +72,7 @@ class ConstructsWithoutBrackets extends \li3_quality\qa\Rule {
 				}
 				if (preg_match($pattern, $line) === 0) {
 					$this->addViolation(array(
-						'message' => String::insert($message, array(
+						'message' => Text::insert($message, array(
 							'name' => $token['name'],
 						)),
 						'line' => $token['line'],

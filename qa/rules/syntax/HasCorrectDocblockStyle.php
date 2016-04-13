@@ -8,7 +8,7 @@
 
 namespace li3_quality\qa\rules\syntax;
 
-use lithium\util\String;
+use lithium\util\Text;
 
 class HasCorrectDocblockStyle extends \li3_quality\qa\Rule {
 
@@ -131,7 +131,7 @@ class HasCorrectDocblockStyle extends \li3_quality\qa\Rule {
 		if (is_array($items)) {
 			$items = implode(null, $items);
 		}
-		return String::insert($items, $this->regexInject);
+		return Text::insert($items, $this->regexInject);
 	}
 
 }

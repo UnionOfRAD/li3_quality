@@ -8,7 +8,7 @@
 
 namespace li3_quality\qa\rules\syntax;
 
-use lithium\util\String;
+use lithium\util\Text;
 
 /**
  * Tab indention is a tricky subject. Often the next line is based on the
@@ -52,7 +52,7 @@ class HasCorrectTabIndention extends \li3_quality\qa\Rule {
 				$predicted = $this->_getPredictedIndent($lineIndex, $testable);
 				if ($predicted['tab'] !== null && $actual['tab'] !== $predicted['tab']) {
 					$this->addViolation(array(
-						'message' => String::insert($tabMessage, array(
+						'message' => Text::insert($tabMessage, array(
 							'predicted' => $predicted['tab'],
 							'actual' => $actual['tab'],
 						)),
@@ -61,7 +61,7 @@ class HasCorrectTabIndention extends \li3_quality\qa\Rule {
 				}
 				if ($predicted['minSpace'] !== null && $actual['space'] < $predicted['minSpace']) {
 					$this->addViolation(array(
-						'message' => String::insert($spaceMessage, array(
+						'message' => Text::insert($spaceMessage, array(
 							'predicted' => $predicted['minSpace'],
 							'actual' => $actual['space'],
 						)),
