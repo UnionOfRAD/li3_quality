@@ -8,7 +8,7 @@
 
 namespace li3_quality\qa\rules\syntax;
 
-use lithium\util\String;
+use lithium\util\Text;
 
 class WeakComparisonOperators extends \li3_quality\qa\Rule {
 
@@ -37,7 +37,7 @@ class WeakComparisonOperators extends \li3_quality\qa\Rule {
 		foreach ($filtered as $id) {
 			$token = $tokens[$id];
 			$this->addWarning(array(
-				'message' => String::insert($message, array(
+				'message' => Text::insert($message, array(
 					'key' => token_name($token['id']),
 					'value' => $this->inspectableTokens[$token['id']],
 				)),
