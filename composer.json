@@ -3,7 +3,7 @@
 	"type": "lithium-library",
 	"description": "This li₃ plugin adds code quality assurance to your toolbelt.",
 	"keywords": ["lithium", "li3", "plugin", "quality", "syntax", "coverage"],
-    "homepage": "http://li3.me",
+  "homepage": "http://li3.me",
 	"license": "BSD-3-clause",
     "authors": [
         {"name": "Union of RAD"},
