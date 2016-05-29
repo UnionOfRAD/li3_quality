@@ -19,7 +19,8 @@ class HasCorrectEncoding extends \li3_quality\qa\Rule {
 		}
 	}
 
-	public function enabled() {
+	public function enabled($testable, array $config = [])
+	{
 		return function_exists('mb_detect_encoding');
 	}
 
