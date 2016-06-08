@@ -8,7 +8,8 @@ php:
 before_install:
   - cd ../
   - composer create-project --keep-vcs unionofrad/framework framework 1.1.*@dev
-  - mv li3_quality framework/app/libraries/li3_quality
   - cd framework
+  - mv ../li3_quality app/libraries/li3_quality
+  - sed -i -e 's/?>/Libraries::add("li3_quality"); ?>/g' app/config/bootstrap/libraries.php
 
 script: libraries/lithium/console/li3 test libraries/li3_quality/tests
