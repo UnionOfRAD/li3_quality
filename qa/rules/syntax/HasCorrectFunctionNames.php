@@ -52,7 +52,7 @@ class HasCorrectFunctionNames extends \li3_quality\qa\Rule {
 			if (!$isClosure && $label !== Inflector::camelize($label, false)) {
 				$this->addViolation(array(
 					'message' => 'Function "' . $label . '" is not in camelBack style',
-					'line' => $tokens[$tokens[$key]['parent']]['line'],
+					'line' => $token[$tokens[$key]['parent']]['line'],
 				));
 			}
 		}
