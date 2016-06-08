@@ -14,4 +14,4 @@ before_install:
   - cd libraries/lithium && git pull --rebase origin master
   - cd ../../app/libraries/li3_quality
 
-script: ../../../libraries/lithium/console/li3 test tests && ../../../libraries/lithium/console/li3 quality syntax --library=li3_quality
+script: ../../../libraries/lithium/console/li3 test tests
