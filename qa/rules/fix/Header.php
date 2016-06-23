@@ -26,9 +26,12 @@ class Header extends \li3_quality\qa\Rule {
 		$template = Text::insert($config['template'], array(
 			'library' => Libraries::get(true, 'path')
 		));
+		$template = Text::insert(file_get_contents($template), array(
+			'year' => date('Y')
+		));
 
 		if (strpos($contents[1], '*') === false) {
-			$header = explode("\n", file_get_contents($template));
+			$header = explode("\n", $template);
 
 			$one = array_shift($contents);
 			$contents = array_merge($header, $contents);
