@@ -9,12 +9,12 @@
 namespace li3_quality\qa\rules\fix;
 
 use lithium\core\Libraries;
-use lithium\util\String;
+use lithium\util\Text;
 
 class Header extends \li3_quality\qa\Rule {
 
 	public function enabled($testable, array $config = array()) {
-		return file_exists(String::insert($config['template'], array(
+		return file_exists(Text::insert($config['template'], array(
 			'library' => Libraries::get(true, 'path')
 		)));
 	}
@@ -23,7 +23,7 @@ class Header extends \li3_quality\qa\Rule {
 		$contents = $testable->source();
 		$contents = explode("\n", $contents);
 
-		$template = String::insert($config['template'], array(
+		$template = Text::insert($config['template'], array(
 			'library' => Libraries::get(true, 'path')
 		));
 
