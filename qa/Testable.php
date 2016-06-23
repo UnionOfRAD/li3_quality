@@ -395,12 +395,15 @@ class Testable extends \lithium\core\Object {
 	}
 
 	/**
-	 * Will determine if the given line is PHP or HTML code.
+	 * Will determine if the current source or given line is PHP or HTML code.
 	 *
 	 * @param  integer $line Line to inspect.
 	 * @return boolean
 	 */
-	public function isPHP($line) {
+	public function isPHP($line = null) {
+		if (!$line) {
+			return pathinfo($this->_config['path'], PATHINFO_EXTENSION) === 'php';
+		}
 		$lineCache = $this->lineCache();
 		$tokens = $this->tokens();
 		$lineTokens = $lineCache[$this->findTokensByLine($line)];

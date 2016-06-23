@@ -10,6 +10,10 @@ namespace li3_quality\qa\rules\fix;
 
 class StringTextRename extends \li3_quality\qa\Rule {
 
+	public function enabled($testable, array $config = array()) {
+		return $testable->isPHP();
+	}
+
 	public function apply($testable, array $config = array()) {
 		$contents = $testable->source();
 
