@@ -6,7 +6,7 @@
 	],
 	"options": {
         "Header": {
-            "template": "{:library}/template/docs/header.txt.php"
+            "template": "{:cwd}/header.txt.php"
         }
 	}
 }
